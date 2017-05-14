@@ -1,0 +1,18 @@
+FrMaya
+|	# create 1 file to fire up the FrMaya, then userSetup only need to fire this 1 file
+|
+|---App
+|		# build menubar in maya or other modification to maya
+|		# example = menubar, callback, etc
+|
+|---Config
+|		# place all necessary configuration file here(default config at least)
+|
+|---Core
+|		# core library for frmaya, dont create tool here, only library
+|
+|---Lib
+|		# 3rd party library placed here
+|
+|---Tools
+|		# using Core of FrMaya, we create tool with ui icon etc in here
