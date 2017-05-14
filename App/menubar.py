@@ -19,30 +19,45 @@ import pymel.core.windows as pywin
 import maya.mel as mel
  
 class Menubar(pmui.SubMenuItem):
-    def __new__(cls, rootFolder, name, parent = None):
-#         menuId = cls.generateMenuId("test")
-#         print name
-#         print rootFolder
-#         if pywin.menu( menuId, ex = 1 ):
-#             pywin.deleteUI(menuId)
-        print 2
-#         self = pywin.menu( menuId, l = "test", aob = 1, tearOff = 1, p = parent )
-#         pmui.SubMenuItem.__new__(cls, self)
+    def __new__(cls, menubarPath, parent = None):
+        menubarName = os.path.basename( menubarPath )
+        menuId = cls.getMenuId( menubarName.replace( "_", " " ) )
+        
+        if pywin.menu( menuId, ex = 1 ):
+            pywin.deleteUI(menuId)
+            
+        self = pywin.menu( menuId, l = menuId, aob = 1, tearOff = 1, p = parent )
+        return pmui.SubMenuItem.__new__(cls, self)
+    
+    @staticmethod
+    def getMenuId(name):
+        menuName = ""
+        for char in name:
+            if char.isalpha() or char.isdigit() or char.isspace():
+                menuName += char
+        return menuName
  
-    def __init__(self, rootFolder, name=None, parent=None):
-        menubarName = os.path.basename(rootFolder)
-        print 1
-        super( Menubar, self ).__init__( name = menubarName, parent = parent )
-        print 3
+    def __init__(self, menubarPath, name=None, parent=None):
+        self.menubarPath = menubarPath
+        
+        self.buildSubMenu( self )
+    
+    def buildSubMenu(self, parent):
+        # get all subfolder
+        subfolder = os.listdir( parent.menubarPath )
+        
+        for o in subfolder:
+#             Menubar( os.path.join( parent.menubarPath, o ), parent = self )
+            pywin.subMenuItem( label = o, subMenu = 1, p = self, tearOff = 1, postMenuCommandOnce = 1 )
 
 def buildMenubar():
     # get menubar item
     menubarItemPath = os.path.join( os.path.dirname(__file__), 'menubarItem' )
-    rootMenubar = os.path.join( menubarItemPath, os.listdir( menubarItemPath )[0] )
+    rootMenubarPath = os.path.join( menubarItemPath, os.listdir( menubarItemPath )[0] )
     # get maya main window
     mainWindow = mel.eval( "$temp=$gMainWindow" )
     
     # try build the menu
-    Menubar( rootMenubar, name = "Asu", parent = mainWindow )
+    Menubar( rootMenubarPath, parent = mainWindow )
     
     print "Fucking Asshole"
