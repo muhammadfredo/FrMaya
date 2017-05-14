@@ -15,9 +15,18 @@
 ####################################################################################
 '''
 import os
-import pymel.core as pm
 
 # TODO bikin menubar di maya
 def setup():
-    print os.path.dirname(__file__)
-    print __file__
+    import App.menubar as menubar
+    
+    menubar.buildMenubar()
+
+def startup():
+#     import maya.cmds as cmds
+#     import maya.mel as mel
+    import pymel.core as pm
+    
+    pm.evalDeferred( setup )
+
+# pm.evalDeferred( setup )

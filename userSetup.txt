@@ -1,6 +1,6 @@
 import sys
 
-sys.path.append('C:\Users\fredo\Documents\EclipseProject')
+sys.path.append('P:\GitHub')
 
 import FrMaya
 
