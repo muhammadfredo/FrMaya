@@ -25,3 +25,4 @@ class Menubar(pmui.SubMenuItem):
 
 def createMenubar():
     print os.path.dirname(__file__)
+    print "Fucking Asshole"
