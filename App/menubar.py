@@ -51,6 +51,8 @@ class Menubar(pmui.SubMenuItem):
             pywin.subMenuItem( label = o, subMenu = 1, p = self, tearOff = 1, postMenuCommandOnce = 1 )
 
 def buildMenubar():
+# TODO : - Make it possible to create multiple menubarItem root
+# TODO : - Next create .ini which makes different between submenu and toolmenu
     # get menubar item
     menubarItemPath = os.path.join( os.path.dirname(__file__), 'menubarItem' )
     rootMenubarPath = os.path.join( menubarItemPath, os.listdir( menubarItemPath )[0] )

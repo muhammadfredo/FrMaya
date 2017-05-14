@@ -4,4 +4,4 @@ sys.path.append('P:\GitHub')
 
 import FrMaya
 
-FrMaya.setup()
+FrMaya.startup()
