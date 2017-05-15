@@ -20,9 +20,11 @@ import maya.mel as mel
  
 class Menubar(pmui.SubMenuItem):
     def __new__(cls, menubarPath, parent = None):
+        # give menubar proper name which is basename instead fullpath name
         menubarName = os.path.basename( menubarPath )
         menuId = cls.getMenuId( menubarName.replace( "_", " " ) )
         
+        # delete existing menu if the menu already exist
         if pywin.menu( menuId, ex = 1 ):
             pywin.deleteUI(menuId)
             
@@ -31,6 +33,7 @@ class Menubar(pmui.SubMenuItem):
     
     @staticmethod
     def getMenuId(name):
+        # get menu name and use it for menu identifier
         menuName = ""
         for char in name:
             if char.isalpha() or char.isdigit() or char.isspace():
@@ -51,15 +54,15 @@ class Menubar(pmui.SubMenuItem):
             pywin.subMenuItem( label = o, subMenu = 1, p = self, tearOff = 1, postMenuCommandOnce = 1 )
 
 def buildMenubar():
-# TODO : - Make it possible to create multiple menubarItem root
-# TODO : - Next create .ini which makes different between submenu and toolmenu
-    # get menubar item
+# TODO: Next create .ini which makes different between submenu and toolmenu
+    # get all menubar root item
     menubarItemPath = os.path.join( os.path.dirname(__file__), 'menubarItem' )
-    rootMenubarPath = os.path.join( menubarItemPath, os.listdir( menubarItemPath )[0] )
+    menubarList = os.listdir( menubarItemPath )
     # get maya main window
     mainWindow = mel.eval( "$temp=$gMainWindow" )
     
-    # try build the menu
-    Menubar( rootMenubarPath, parent = mainWindow )
+    # build all menubar root item
+    for o in menubarList:
+        Menubar( os.path.join( menubarItemPath, o ), parent = mainWindow )
     
     print "Fucking Asshole"
