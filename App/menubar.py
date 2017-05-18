@@ -39,22 +39,36 @@ class Menubar(pmui.SubMenuItem):
             if char.isalpha() or char.isdigit() or char.isspace():
                 menuName += char
         return menuName
- 
+
     def __init__(self, menubarPath, name=None, parent=None):
         self.menubarPath = menubarPath
         
-        self.buildSubMenu( self )
+        self.buildSubMenu( self.menubarPath, self )
     
-    def buildSubMenu(self, parent):
-        # get all subfolder
-        subfolder = os.listdir( parent.menubarPath )
-        
-        for o in subfolder:
-#             Menubar( os.path.join( parent.menubarPath, o ), parent = self )
-            pywin.subMenuItem( label = o, subMenu = 1, p = self, tearOff = 1, postMenuCommandOnce = 1 )
+    def buildSubMenu(self, fullpath, parent):
+        # list all folder, file on current path(fullpath)
+        for o in os.listdir( fullpath ):
+            # fullpath of each file/folder inside current path(fullpath)
+            thePath = os.path.join( fullpath, o )
+            # separated filename and extension
+            fileName, ext = os.path.splitext( o )
+            
+            # check if the path is file or folder
+            if os.path.isdir( thePath ):
+                # create submenu
+                submenu = pywin.subMenuItem( label = o, subMenu = 1, p = parent, tearOff = 1, postMenuCommandOnce = 1 )
+                # recursive buildSubMenu
+                self.buildSubMenu( thePath, submenu )
+            # if file is python
+            elif ext == '.py':
+                # get nice name for menu label
+                menuId = self.getMenuId( fileName.replace( "_", " " ) )
+                # command of menuitem
+                commandScript = 'execfile(r"{0}")'.format( thePath )
+                # create menuitem
+                pywin.menuItem( label = menuId, p = parent, tearOff = 1, command = commandScript )
 
 def buildMenubar():
-# TODO: Next create .ini which makes different between submenu and toolmenu
     # get all menubar root item
     menubarItemPath = os.path.join( os.path.dirname(__file__), 'menubarItem' )
     menubarList = os.listdir( menubarItemPath )
@@ -64,5 +78,3 @@ def buildMenubar():
     # build all menubar root item
     for o in menubarList:
         Menubar( os.path.join( menubarItemPath, o ), parent = mainWindow )
-    
-    print "Fucking Asshole"
