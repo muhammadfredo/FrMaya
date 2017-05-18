@@ -49,7 +49,7 @@ class Menubar(pmui.SubMenuItem):
         # list all folder, file on current path(fullpath)
         for o in os.listdir( fullpath ):
             # fullpath of each file/folder inside current path(fullpath)
-            thePath = os.path.join( fullpath, o )
+            thePath = os.path.join( fullpath, o ).replace("\\","/")
             # separated filename and extension
             fileName, ext = os.path.splitext( o )
             
@@ -64,7 +64,14 @@ class Menubar(pmui.SubMenuItem):
                 # get nice name for menu label
                 menuId = self.getMenuId( fileName.replace( "_", " " ) )
                 # command of menuitem
-                commandScript = 'execfile(r"{0}")'.format( thePath )
+                commandScript = 'execfile("{0}")'.format( thePath )
+                # create menuitem
+                pywin.menuItem( label = menuId, p = parent, tearOff = 1, command = commandScript )
+            elif ext == '.mel':
+                # get nice name for menu label
+                menuId = self.getMenuId( fileName.replace( "_", " " ) )
+                # command of menuitem
+                commandScript = 'import maya.mel as mel\nmel.eval( "source \\"{0}\\"" )'.format( thePath )
                 # create menuitem
                 pywin.menuItem( label = menuId, p = parent, tearOff = 1, command = commandScript )
 
