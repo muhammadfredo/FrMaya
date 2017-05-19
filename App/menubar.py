@@ -5,7 +5,7 @@
 # Created By             : Muhammad Fredo Syahrul Alam
 # Email                      : muhammadfredo@gmail.com
 # Start Date               : 12 May, 2017
-
+#
 # Purpose: create menubar in maya
 # Bugs: 
 # History: 
@@ -22,17 +22,17 @@ class Menubar(pmui.SubMenuItem):
     def __new__(cls, menubarPath, parent = None):
         # give menubar proper name which is basename instead fullpath name
         menubarName = os.path.basename( menubarPath )
-        menuId = cls.getMenuId( menubarName.replace( "_", " " ) )
+        menuName = cls.getMenuName( menubarName.replace( "_", " " ) )
         
         # delete existing menu if the menu already exist
-        if pywin.menu( menuId, ex = 1 ):
-            pywin.deleteUI(menuId)
+        if pywin.menu( menuName, ex = 1 ):
+            pywin.deleteUI(menuName)
             
-        self = pywin.menu( menuId, l = menuId, aob = 1, tearOff = 1, p = parent )
+        self = pywin.menu( menuName, l = menuName, aob = True, tearOff = True, p = parent )
         return pmui.SubMenuItem.__new__(cls, self)
     
     @staticmethod
-    def getMenuId(name):
+    def getMenuName(name):
         # get menu name and use it for menu identifier
         menuName = ""
         for char in name:
@@ -56,24 +56,24 @@ class Menubar(pmui.SubMenuItem):
             # check if the path is file or folder
             if os.path.isdir( thePath ):
                 # create submenu
-                submenu = pywin.subMenuItem( label = o, subMenu = 1, p = parent, tearOff = 1, postMenuCommandOnce = 1 )
+                submenu = pywin.subMenuItem( label = o, subMenu = True, p = parent, tearOff = True, postMenuCommandOnce = 1 )
                 # recursive buildSubMenu
                 self.buildSubMenu( thePath, submenu )
             # if file is python
             elif ext == '.py':
                 # get nice name for menu label
-                menuId = self.getMenuId( fileName.replace( "_", " " ) )
+                menuName = self.getMenuName( fileName.replace( "_", " " ) )
                 # command of menuitem
                 commandScript = 'execfile("{0}")'.format( thePath )
                 # create menuitem
-                pywin.menuItem( label = menuId, p = parent, tearOff = 1, command = commandScript )
+                pywin.menuItem( label = menuName, p = parent, tearOff = True, command = commandScript )
             elif ext == '.mel':
                 # get nice name for menu label
-                menuId = self.getMenuId( fileName.replace( "_", " " ) )
+                menuName = self.getMenuName( fileName.replace( "_", " " ) )
                 # command of menuitem
                 commandScript = 'import maya.mel as mel\nmel.eval( "source \\"{0}\\"" )'.format( thePath )
                 # create menuitem
-                pywin.menuItem( label = menuId, p = parent, tearOff = 1, command = commandScript )
+                pywin.menuItem( label = menuName, p = parent, tearOff = True, command = commandScript )
 
 def buildMenubar():
     # get all menubar root item
