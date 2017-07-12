@@ -13,7 +13,7 @@
 ####################################################################################
 ####################################################################################
 '''
-# import maya.cmds as mc
+
 import pymel.core as pm
 # import FRtools.rigging.general as riggen
 # import FRtools.rigging.modules.general as rigmod
@@ -23,8 +23,7 @@ from FrMaya.Core.FrFile import BaseFile
 from FrMaya.Core.FrUtilities import UndoRepeat
 import os, glob
 
-# from functools import partial
-# from FRlibs.UndoRepeat import UndoContext
+from functools import partial
 
 # reload(riggen)
 # reload(frui)
@@ -39,6 +38,7 @@ class MainGUI( BaseInterface.BasePsWindow ):
         Constructor of main GUI for FR_RiggingTool
         '''
         
+        # Convert ui path file as FrFile Object
         UIfile = BaseFile.BasePath( os.path.join( os.path.dirname( __file__ ), 'FR_RiggingTool.ui' ) )
         super( MainGUI, self ).__init__( UIfile, *args )
         
@@ -49,44 +49,51 @@ class MainGUI( BaseInterface.BasePsWindow ):
         Connect event handler from UI to method
         '''
         
-        # Display
-        self.ui.dis_ref_btn.pressed.connect( self.display_pressed )
-        self.ui.dis_norm_btn.pressed.connect( self.display_pressed )
-        self.ui.dis_none_btn.pressed.connect( self.display_pressed )
-        self.ui.dis_jnt_btn.pressed.connect( self.display_pressed )
+        # Display group ui list
+        DispalyGrp = [ self.ui.dis_over_btn, self.ui.dis_ref_btn, self.ui.dis_norm_btn,
+                      self.ui.dis_none_btn, self.ui.dis_jnt_btn ]
+        
+        # Loop through ui list and connect it to method 
+        for o in DispalyGrp:
+            o.pressed.connect( partial( self.display_pressed, o ) )
     
     @UndoRepeat.Undoable
-    def display_pressed(self, *args):
-        print 'yohooo'
-        sender = self.sender()
-        print sender
+    def display_pressed(self, sender, *args):
+        '''
+        Slot for pressed signal form display grup widget
+        
+        :param sender: one of display grup widget
+        '''
+        
+        # Check and compare sender to Display group ui
+        overBool = sender == self.ui.dis_over_btn
         refBool = sender == self.ui.dis_ref_btn
         normBool = sender == self.ui.dis_norm_btn
         noneBool = sender == self.ui.dis_none_btn
         jntBool = sender == self.ui.dis_jnt_btn
         
-        # referance or normal display type
+        selection = pm.ls( os = True )
+        
+        # Change node display type to reference or normal
         if refBool or normBool:
-            selection = pm.ls( os = True )
-            
-            attrType = ".overrideDisplayType"
-            
             if refBool:
                 disDraw = 2
             elif normBool:
                 disDraw = 0
-        # none or joint draw style
+            
+            for o in selection:
+                o.overrideEnabled.set( True )
+                o.overrideDisplayType.set( disDraw )
+        # Turn off overrideEnabled attribute
+        elif overBool:
+            for o in selection: o.overrideEnabled.set( False )
+        # Change joint draw style to None or Joint
         elif noneBool or jntBool:
             selection = pm.ls( os = True, type = "joint" )
-            
-            attrType = ".drawStyle"
             
             if noneBool:
                 disDraw = 2
             elif jntBool:
                 disDraw = 0
-        
-        for o in selection:
-            if refBool or normBool:
-                pm.setAttr( o + ".overrideEnabled", 1 )
-            pm.setAttr( o + attrType, disDraw )
+
+            for o in selection: o.drawStyle.set( disDraw )

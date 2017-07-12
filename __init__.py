@@ -18,6 +18,7 @@ import os
 
 def setup():
     import App.menubar as menubar
+    reload( menubar )
     
     menubar.buildMenubar()
 

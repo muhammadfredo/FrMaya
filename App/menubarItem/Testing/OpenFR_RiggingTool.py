@@ -1,3 +1,3 @@
-import FrMaya.Tools.FR_riggingTool as rigTool
+import FrMaya.Tools.FR_RiggingTool as rigTool
 reload(rigTool)
 rigTool.show()
