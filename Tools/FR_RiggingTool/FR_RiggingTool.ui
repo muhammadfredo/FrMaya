@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>251</width>
+    <width>255</width>
     <height>588</height>
    </rect>
   </property>
@@ -164,7 +164,7 @@
        </widget>
       </item>
       <item>
-       <spacer name="horizontalSpacer_9">
+       <spacer name="pgroup_space_separator">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
         </property>
@@ -173,24 +173,44 @@
         </property>
         <property name="sizeHint" stdset="0">
          <size>
-          <width>10</width>
+          <width>4</width>
           <height>20</height>
          </size>
         </property>
        </spacer>
       </item>
       <item>
-       <widget class="QLabel" name="label">
+       <widget class="QLabel" name="pgroup_re_label">
+        <property name="text">
+         <string>Re : </string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QTextEdit" name="pgroup_rename_txt">
+        <property name="maximumSize">
+         <size>
+          <width>35</width>
+          <height>26</height>
+         </size>
+        </property>
+        <property name="acceptRichText">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="pgroup_suffix_label">
         <property name="text">
          <string>Suffix : </string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QTextEdit" name="textEdit">
+       <widget class="QTextEdit" name="pgroup_suffix_txt">
         <property name="maximumSize">
          <size>
-          <width>50</width>
+          <width>35</width>
           <height>26</height>
          </size>
         </property>
@@ -235,7 +255,7 @@ p, li { white-space: pre-wrap; }
        <number>2</number>
       </property>
       <item>
-       <widget class="QPushButton" name="align_t_btn">
+       <widget class="QPushButton" name="align_translate_btn">
         <property name="maximumSize">
          <size>
           <width>70</width>
@@ -251,7 +271,7 @@ p, li { white-space: pre-wrap; }
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="align_r_btn">
+       <widget class="QPushButton" name="align_rotate_btn">
         <property name="maximumSize">
          <size>
           <width>70</width>
@@ -284,6 +304,9 @@ p, li { white-space: pre-wrap; }
       </item>
       <item>
        <widget class="QCheckBox" name="checkBox_2">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
         <property name="text">
          <string>Cons</string>
         </property>

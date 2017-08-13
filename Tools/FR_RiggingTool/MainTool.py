@@ -21,6 +21,7 @@ import pymel.core as pm
 from FrMaya.Core.FrInterface import BaseInterface
 from FrMaya.Core.FrFile import BaseFile
 from FrMaya.Core.FrUtilities import UndoRepeat
+from FrMaya.Core.FrRigging import BaseRigging
 import os, glob
 
 from functools import partial
@@ -46,23 +47,45 @@ class MainGUI( BaseInterface.BasePsWindow ):
     
     def Connect_EventHandlers(self):
         '''
-        Connect event handler from UI to method
+        Connect event handler/sender from UI to slot
         '''
         
         # Display group ui list
         DispalyGrp = [ self.ui.dis_over_btn, self.ui.dis_ref_btn, self.ui.dis_norm_btn,
                       self.ui.dis_none_btn, self.ui.dis_jnt_btn ]
         
-        # Loop through ui list and connect it to method 
+        # Loop through ui list and connect it to display_pressed slot 
         for o in DispalyGrp:
             o.pressed.connect( partial( self.display_pressed, o ) )
+        
+        # Pgroup group ui list
+        PgroupGrp = { 'all' : self.ui.pgroup_all_check, 'button' : self.ui.pgroup_btn,
+                     'rename' : self.ui.pgroup_rename_txt, 'suffix' : self.ui.pgroup_suffix_txt }
+        
+        # Connect pgroup_btn to the pgroup slot
+        PgroupGrp['button'].pressed.connect( partial( self.pgroup_pressed, PgroupGrp ) )
+        
+        # Align group ui list
+        AlignGrp = [ self.ui.align_translate_btn, self.ui.align_rotate_btn ]
+        
+        # Loop through ui list and connect it to align_pressed slot
+        for o in AlignGrp:
+            o.pressed.connect( partial( self.align_pressed, o ) )
+        
+        # Freeze transform group ui list
+        FreezeTMGrp = [ self.ui.ft_all_btn, self.ui.ft_translate_btn,
+                       self.ui.ft_rotate_btn, self.ui.ft_scale_btn ]
+        
+        # Loop through ui list and connect it to freezeTM_pressed slot
+        for o in FreezeTMGrp:
+            o.pressed.connect( partial( self.freezeTM_pressed, o ) )
     
     @UndoRepeat.Undoable
     def display_pressed(self, sender, *args):
         '''
         Slot for pressed signal form display grup widget
         
-        :param sender: one of display grup widget
+        :param sender: One of display grup widget
         '''
         
         # Check and compare sender to Display group ui
@@ -97,3 +120,61 @@ class MainGUI( BaseInterface.BasePsWindow ):
                 disDraw = 0
 
             for o in selection: o.drawStyle.set( disDraw )
+    
+    @UndoRepeat.Undoable
+    def pgroup_pressed(self, sender, *args):
+        '''
+        Slot for pressed signal form pgroup_btn widget
+        
+        :param sender: Dictionary of pgroup widgets
+        '''
+        
+        # Collect selection
+        selection = pm.ls( os = True )
+        
+        # Perform pgroup operation on the selection
+        BaseRigging.pgroup( selection, world = sender['all'].isChecked(),
+                            re = sender['rename'].toPlainText(),
+                            suffix = sender['suffix'].toPlainText() )
+    
+    @UndoRepeat.Undoable
+    def align_pressed(self, sender, *args):
+        '''
+        Slot for pressed signal form align grup widget
+         
+        :param sender: One of align group widget
+        '''
+        
+        # Collect selection
+        selection = pm.ls( os = True )
+        
+        # Align translate mode on selection
+        if sender == self.ui.align_translate_btn:
+            BaseRigging.align( selection, mode = 'translate' )
+        # Align rotate mode on selection
+        elif sender == self.ui.align_rotate_btn:
+            BaseRigging.align( selection, mode = 'rotate' )
+    
+    @UndoRepeat.Undoable
+    def freezeTM_pressed(self, sender, *args):
+        '''
+        Slot for pressed signal from freeze transform group widget
+        
+        :param sender: One of freeze transform group widget
+        '''
+        
+        # Collect selection
+        selection = pm.ls( os = True )
+        
+        # Freeze transform on selection
+        if sender == self.ui.ft_all_btn:
+            BaseRigging.freezeTransform( selection )
+        # Freeze translate on selection
+        elif sender == self.ui.ft_translate_btn:
+            BaseRigging.freezeTransform( selection, mode = 'translate' )
+        # Freeze rotation on selection
+        elif sender == self.ui.ft_rotate_btn:
+            BaseRigging.freezeTransform( selection, mode = 'rotate' )
+        # Freeze scale on selection
+        elif sender == self.ui.ft_scale_btn:
+            BaseRigging.freezeTransform( selection, mode = 'scale' )
