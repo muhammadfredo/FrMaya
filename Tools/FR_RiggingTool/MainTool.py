@@ -15,9 +15,6 @@
 '''
 
 import pymel.core as pm
-# import FRtools.rigging.general as riggen
-# import FRtools.rigging.modules.general as rigmod
-# import FRtools.ui.FR_BaseQWidget as frui
 from FrMaya.Core.FrInterface import BaseInterface
 from FrMaya.Core.FrFile import BaseFile
 from FrMaya.Core.FrUtilities import UndoRepeat
@@ -50,6 +47,7 @@ class MainGUI( BaseInterface.BasePsWindow ):
         Connect event handler/sender from UI to slot
         '''
         
+        ## MAIN TOOL ##
         # Display group ui list
         DispalyGrp = [ self.ui.dis_over_btn, self.ui.dis_ref_btn, self.ui.dis_norm_btn,
                       self.ui.dis_none_btn, self.ui.dis_jnt_btn ]
@@ -79,6 +77,36 @@ class MainGUI( BaseInterface.BasePsWindow ):
         # Loop through ui list and connect it to freezeTM_pressed slot
         for o in FreezeTMGrp:
             o.pressed.connect( partial( self.freezeTM_pressed, o ) )
+        
+        ## SRT TAB ##
+        # Reset srt ui list
+        ResetSRTGrp = [ self.ui.r_translate_btn, self.ui.r_rotate_btn, self.ui.r_scale_btn,
+                       self.ui.r_visibility_btn, self.ui.r_rotateorder_btn ]
+        
+        # Loop through ui list and connect it to resetSRT_pressed slot
+        for o in ResetSRTGrp:
+            o.pressed.connect( partial( self.resetSRT_pressed, o ) )
+        
+        # Lock hide checkbox ui Dictionary
+        LockHideCheckGrp = { 'translateX' : self.ui.lh_tx_check, 'translateY' : self.ui.lh_ty_check, 'translateZ' : self.ui.lh_tz_check,
+                            'rotateX' : self.ui.lh_rx_check, 'rotateY' : self.ui.lh_ry_check, 'rotateZ' : self.ui.lh_rz_check,
+                            'scaleX' : self.ui.lh_sx_check, 'scaleY' : self.ui.lh_sy_check, 'scaleZ' : self.ui.lh_sz_check,
+                            'visibility' : self.ui.lh_vis_check, 'rotateorder' : self.ui.lh_rotateorder_check }
+        
+        # Lock hide check all ui list
+        LockHideAllGrp = [ self.ui.lh_tall_check, self.ui.lh_rall_check, self.ui.lh_sall_check ]
+        
+        # Loop through check all ui list and connect it to lockHide_stateChanged slot
+        for o in LockHideAllGrp:
+            o.stateChanged.connect( partial( self.lockHide_stateChanged, o, LockHideCheckGrp ) )
+        
+        # Lock hide button group ui list
+        LockHideBtnGrp = [ self.ui.lh_k_btn, self.ui.lh_l_btn, self.ui.lh_h_btn,
+                       self.ui.lh_uk_btn, self.ui.lh_ul_btn, self.ui.lh_uh_btn ]
+        
+        # Loop through ui list and connect it to lockHide_pressed slot
+        for o in LockHideBtnGrp:
+            o.pressed.connect( partial( self.lockHide_pressed, o, LockHideCheckGrp ) )
     
     @UndoRepeat.Undoable
     def display_pressed(self, sender, *args):
@@ -178,3 +206,76 @@ class MainGUI( BaseInterface.BasePsWindow ):
         # Freeze scale on selection
         elif sender == self.ui.ft_scale_btn:
             BaseRigging.freezeTransform( selection, mode = 'scale' )
+    
+    @UndoRepeat.Undoable
+    def resetSRT_pressed(self, sender, *args):
+        '''
+        Slot for pressed signal from reset transform group widget
+        
+        :param sender: One of reset transform group widget
+        '''
+        
+        # Collect selection
+        selection = pm.ls( os = True )
+        
+        # Zero out translate
+        if sender == self.ui.r_translate_btn:
+            BaseRigging.zerooutTransform( selection, mode = 'translate' )
+        # Zero out rotate
+        elif sender == self.ui.r_rotate_btn:
+            BaseRigging.zerooutTransform( selection, mode = 'rotate' )
+        # Zero out scale
+        elif sender == self.ui.r_scale_btn:
+            BaseRigging.zerooutTransform( selection, mode = 'scale' )
+        # Normalize visibility
+        elif sender == self.ui.r_visibility_btn:
+            BaseRigging.zerooutTransform( selection, mode = 'visibility' )
+        # Normalize rotate order
+        elif sender == self.ui.r_rotateorder_btn:
+            BaseRigging.zerooutTransform( selection, mode = 'rotateorder' )
+    
+    def lockHide_stateChanged(self, sender, checkbox, *args):
+        '''
+        Slot for state changed signal from lock hide check all group widget
+        
+        :param sender: One of check all group widget
+        :param checkbox: collection of lock hide checkbox widget
+        '''
+        
+        # Declare variable
+        srt = ''
+        xyz = ['X','Y','Z']
+        checkState = self.ui.lh_tall_check.checkState()
+        
+        # Which of the check all group supplied to this slot
+        if sender == self.ui.lh_tall_check:
+            srt = 'translate'
+        if sender == self.ui.lh_rall_check:
+            srt = 'rotate'
+        if sender == self.ui.lh_sall_check:
+            srt = 'scale'
+        
+        # Change checkbox widget based on check all widget
+        for o in xyz:
+            checkbox[srt + o].setCheckState( checkState )
+
+    def lockHide_pressed(self, sender, checkbox, *args):
+        '''
+        
+        :param sender:
+        '''
+        
+        selection = pm.ls( os = True )
+        
+        if sender == self.ui.lh_k_btn:
+            print 'well'
+        if sender == self.ui.lh_l_btn:
+            print 'well'
+        if sender == self.ui.lh_h_btn:
+            print 'well'
+        if sender == self.ui.lh_uk_btn:
+            print 'well'
+        if sender == self.ui.lh_ul_btn:
+            print 'well'
+        if sender == self.ui.lh_uh_btn:
+            print 'well'

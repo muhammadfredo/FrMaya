@@ -140,3 +140,39 @@ def freezeTransform( pynodes, mode = 'transform' ):
     # Freeze transform command
     for o in pynodes:
         pm.makeIdentity( o, apply = True, translate = t, rotate = r, scale = s )
+
+def zerooutTransform( pynodes, mode = 'transform' ):
+    '''
+    Zero out transform, visibility, and rotate order
+    
+    :param pynodes: list of pynode
+    :param mode: transform, translate, rotate, scale, visibility, rotateorder
+    '''
+    
+    # Filter supplied pynodes, if equal to 0 then return false
+    if len(pynodes) == 0:
+        return False
+    
+    for o in pynodes:
+        # Translate mode
+        if mode == 'translate' or mode == 'transform':
+            o.translateX.set(0)
+            o.translateY.set(0)
+            o.translateZ.set(0)
+        # Rotate mode
+        if mode == 'rotate' or mode == 'transform':
+            o.rotateX.set(0)
+            o.rotateY.set(0)
+            o.rotateZ.set(0)
+        # Scale mode
+        if mode == 'scale' or mode == 'transform':
+            o.scaleX.set(1)
+            o.scaleY.set(1)
+            o.scaleZ.set(1)
+        # Visibility
+        if mode == 'visibility':
+            o.visibility.set(1)
+        # Rotate order
+        if mode == 'rotateorder':
+            o.rotateOrder.set(0)
+
