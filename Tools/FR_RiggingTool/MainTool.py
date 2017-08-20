@@ -23,7 +23,7 @@ import os, glob
 
 from functools import partial
 
-# reload(riggen)
+# reload(BaseRigging)
 # reload(frui)
 
 class MainGUI( BaseInterface.BasePsWindow ):
@@ -239,13 +239,12 @@ class MainGUI( BaseInterface.BasePsWindow ):
         Slot for state changed signal from lock hide check all group widget
         
         :param sender: One of check all group widget
-        :param checkbox: collection of lock hide checkbox widget
+        :param checkbox: Collection of lock hide checkbox widget
         '''
         
         # Declare variable
         srt = ''
         xyz = ['X','Y','Z']
-        checkState = self.ui.lh_tall_check.checkState()
         
         # Which of the check all group supplied to this slot
         if sender == self.ui.lh_tall_check:
@@ -257,25 +256,39 @@ class MainGUI( BaseInterface.BasePsWindow ):
         
         # Change checkbox widget based on check all widget
         for o in xyz:
-            checkbox[srt + o].setCheckState( checkState )
-
+            checkbox[srt + o].setCheckState( sender.checkState() )
+    
+    @UndoRepeat.Undoable
     def lockHide_pressed(self, sender, checkbox, *args):
         '''
+        Slot for pressed signal from lock hide button group widget
         
-        :param sender:
+        :param sender: One of lock hide button group widget
+        :param checkbox: Collection of lock hide checkbox widget
         '''
         
+        # Collect which attribute that will lock, hide, or make keyable
+        attrubuteList = [ o for o in checkbox if checkbox[o].isChecked() == True ]
+        
+        # Collect selection
         selection = pm.ls( os = True )
         
+        # Make keyable
         if sender == self.ui.lh_k_btn:
-            print 'well'
+            BaseRigging.keylockhideAttribute( selection, attrubuteList, keyable = True )
+        # Lock attribute
         if sender == self.ui.lh_l_btn:
-            print 'well'
+            BaseRigging.keylockhideAttribute( selection, attrubuteList, lock = True )
+        # Hide attribute
         if sender == self.ui.lh_h_btn:
-            print 'well'
+            BaseRigging.keylockhideAttribute( selection, attrubuteList, hide = True )
+        # Make unkeyable
         if sender == self.ui.lh_uk_btn:
-            print 'well'
+            BaseRigging.keylockhideAttribute( selection, attrubuteList, keyable = False )
+        # Unlock attribute
         if sender == self.ui.lh_ul_btn:
-            print 'well'
+            BaseRigging.keylockhideAttribute( selection, attrubuteList, lock = False )
+        # Unhide attribute
         if sender == self.ui.lh_uh_btn:
-            print 'well'
+            BaseRigging.keylockhideAttribute( selection, attrubuteList, hide = False )
+

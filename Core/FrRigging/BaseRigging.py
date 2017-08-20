@@ -176,3 +176,47 @@ def zerooutTransform( pynodes, mode = 'transform' ):
         if mode == 'rotateorder':
             o.rotateOrder.set(0)
 
+def keylockhideAttribute( pynodes, attributesString, keyable = None, lock = None, hide = None ):
+    '''
+    Make attribute keyable or not, lock or unlock, and hide or unhide
+    
+    :param pynodes: list of pynode
+    :param attributesString: List of attribute as string, ex => [ 'translateX', 'scaleZ' ]
+    :param keyable: None = Ignore; True or False
+    :param lock: None = Ignore; True or False
+    :param hide: None = Ignore; True or False
+    '''
+    
+    # Filter supplied pynodes, if equal to 0 then return false
+    if len(pynodes) == 0:
+        return False
+    
+    # Loop through list of attribute string
+    for o in attributesString:
+        # Loop through list of pynode
+        for x in pynodes:
+            # Set attribute as PyNode object 
+            attNode = pm.PyNode( '{0}.{1}'.format( x.nodeName(), o ) )
+            
+            # Keyable or non keyable operation
+            if not keyable == None:
+                attNode.setKeyable( keyable )
+                
+                # Make sure attribute still showed in channelbox
+                if not keyable:
+                    attNode.showInChannelBox( True )
+            
+            # Lock or unlock operation
+            if not lock == None:
+                attNode.setLocked( lock )
+            
+            # Hide or unhide operation
+            if not hide == None:
+                # Attribute still showed in channelbox if it still keyable
+                if hide:
+                    attNode.setKeyable( False )
+                    attNode.showInChannelBox( False )
+                # Set keyable to true will show the attribute in channelbox
+                elif not hide:
+                    attNode.setKeyable( True )
+
