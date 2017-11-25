@@ -13,12 +13,14 @@
 ####################################################################################
 ####################################################################################
 '''
-import PySide.QtGui as qtgui
+import os
+import shiboken
+
 import PySide.QtCore as qtcore
+import PySide.QtGui as qtgui
 import PySide.QtUiTools as qtuit
 import maya.OpenMayaUI as omui
-import shiboken
-import os
+
 
 class BasePsWindow(qtgui.QWidget):
     '''
@@ -70,7 +72,7 @@ class BasePsWindow(qtgui.QWidget):
         # Close the UI file
         theFile.close()
 
-    def __init__(self, UIfile, *args, **kwargs):
+    def __init__(self, UIfile, Title = '', *args, **kwargs):
         '''
         Pyside base class for dialog window inside maya
         
@@ -90,7 +92,9 @@ class BasePsWindow(qtgui.QWidget):
             # like title, min, and max bar 
             self.setWindowFlags( qtcore.Qt.Window )
             # Set current window tool name
-            self.setWindowTitle( UIfile.getFilename() )
+            if not Title:
+                Title = UIfile.getFilename()
+            self.setWindowTitle( Title )
             # Build UI tool from UI file
             self.BuildUi(UIfile)
 

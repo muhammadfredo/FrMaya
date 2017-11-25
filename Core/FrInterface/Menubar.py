@@ -14,11 +14,13 @@
 ####################################################################################
 '''
 import os
+
+import maya.mel as mel
 import pymel.core as pm
 import pymel.core.uitypes as pmui
 import pymel.core.windows as pywin
-import maya.mel as mel
- 
+
+
 class Menubar(pmui.SubMenuItem):
     def __new__(cls, menubarPath, parent = None):
         '''
@@ -38,16 +40,17 @@ class Menubar(pmui.SubMenuItem):
         # delete existing menu if the menu already exist
         if pywin.menu( menuName, ex = 1 ):
             pywin.deleteUI(menuName)
-            
+        
+        # TODO: need comment here
         self = pywin.menu( menuName, l = menuName, aob = True, tearOff = True, p = parent )
         return pmui.SubMenuItem.__new__(cls, self)
     
     @staticmethod
     def getMenuName(name):
         '''
-        TODO: write docstring documentation here
         :param name:
         '''
+        # TODO: write docstring documentation here
         
         # get menu name and use it for menu identifier
         menuName = ""
@@ -99,6 +102,14 @@ class Menubar(pmui.SubMenuItem):
             
             # check if the path is file or folder
             if os.path.isdir( thePath ):
+                # remove number and underline
+                # number and underline in folder for sorting purpose :))
+                try:
+                    int(o[:1])
+                    o = o[3:]
+                    o = o.replace( "_", " " )
+                except ValueError:
+                    pass
                 # create submenu
                 submenu = pywin.subMenuItem( label = o, subMenu = True, p = parent, tearOff = True, postMenuCommandOnce = 1 )
                 # recursive buildSubMenu
@@ -124,8 +135,12 @@ def buildMenubar():
     Build menubar function
     '''
     
+    # TODO: change BasePath to abstract class
+    import FrMaya.App as app
+    
+    menubarItemPath = os.path.join( os.path.dirname(app.__file__), 'menubarItem' )
     # get all menubar root item
-    menubarItemPath = os.path.join( os.path.dirname(__file__), 'menubarItem' )
+#     menubarItemPath = os.path.join( os.path.dirname(__file__), 'menubarItem' )
     menubarList = os.listdir( menubarItemPath )
     # get maya main window
     mainWindow = mel.eval( "$temp=$gMainWindow" )

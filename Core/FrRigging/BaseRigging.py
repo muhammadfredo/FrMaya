@@ -1,19 +1,15 @@
 '''
-####################################################################################
-####################################################################################
 ## SCRIPT HEADER ##
-# Created By             : Muhammad Fredo Syahrul Alam
-# Email                      : muhammadfredo@gmail.com
-# Start Date               : 22 July, 2017
-#
-# Purpose: 
-# Bugs: 
-# History: 
-# Note: 
-####################################################################################
-####################################################################################
+
+Created By   : Muhammad Fredo Syahrul Alam
+Email        : muhammadfredo@gmail.com
+Start Date   : 22 Jul 2017
+Purpose      : 
+
 '''
 
+from FrMaya.Core.FrMath import Rotation
+from FrMaya.Core import FrMath as frmath
 import pymel.core as pm
 
 def pgroup( pynodes, world = False, re = "", suffix = "" ):
@@ -41,13 +37,15 @@ def pgroup( pynodes, world = False, re = "", suffix = "" ):
             
             # Replace object name if any
             if re != "":
-                theName.replace( re, suffix )
+                theName = theName.replace( re, suffix )
+            else:
+                theName = theName + suffix
             
             # Create group for each supplied object
-            grp = pm.group( empty = True, name = theName + suffix )
+            grp = pm.group( empty = True, name = theName )
             
             # Snap the group to each object transformation
-            grp.setTransformation( o.getTransformation() )
+            alignMath( grp, o, mode = 'transform' )
             
             # Get object parent
             parent = o.getParent()
@@ -68,10 +66,12 @@ def pgroup( pynodes, world = False, re = "", suffix = "" ):
         
         # Replace object name if any
         if re != "":
-            theName.replace( re, suffix )
+            theName = theName.replace( re, suffix )
+        else:
+            theName = theName + suffix
         
         # Create single group
-        grp = pm.group( empty = True, name = theName + suffix )
+        grp = pm.group( empty = True, name = theName )
         
         # Collect group to output
         output.append( grp )
@@ -82,32 +82,25 @@ def pgroup( pynodes, world = False, re = "", suffix = "" ):
         
     return output
 
-def align( pynodes, mode = 'transform' ):
+def align( orig, target, mode = 'transform' ):
     '''
-    Align from first pynode to second pynode
+    Align from orig pynode to target pynode using contraint method
     
     :param pynodes: List of pynode, count total 2
     :param mode: transform, translate, rotate
     '''
     
-    # Filter supplied pynodes, if less than 2 then return false
-    if len(pynodes) < 2:
-        return False
-    
-    # Assign supplied pynodes to local variable
-    first, second = pynodes[0], pynodes[1]
-    
     # Snap position
     if mode == 'translate' or mode == 'transform':
-        # Snap position of first node to second node using constraint
-        cons = pm.pointConstraint( second, first, maintainOffset = False )
+        # Snap position of orig node to target node using constraint
+        cons = pm.pointConstraint( target, orig, maintainOffset = False )
         # Delete the constraint
         pm.delete( cons )
     
     # Snap rotation
     if mode == 'rotate' or mode == 'transform':
-        # Snap rotation of first node to second node using constraint
-        cons = pm.orientConstraint( second, first, maintainOffset = False )
+        # Snap rotation of orig node to target node using constraint
+        cons = pm.orientConstraint( target, orig, maintainOffset = False )
         # Delete the constraint
         pm.delete( cons )
 
@@ -191,6 +184,7 @@ def keylockhideAttribute( pynodes, attributesString, keyable = None, lock = None
     if len(pynodes) == 0:
         return False
     
+    # TODO: change this to more 'PyNode' way
     # Loop through list of attribute string
     for o in attributesString:
         # Loop through list of pynode
@@ -219,4 +213,70 @@ def keylockhideAttribute( pynodes, attributesString, keyable = None, lock = None
                 # Set keyable to true will show the attribute in channelbox
                 elif not hide:
                     attNode.setKeyable( True )
+
+def alignMath( orig, target, mode = 'transform' ):
+    '''
+    Align from orig pynode to target pynode using math element ( matrix, quaternion, vector, etc)
+
+    :param orig: PyNode which will get transform applied
+    :param target: The destination of alignMath operation
+    :param mode: transform, translate, rotate
+    '''
+    
+    # I got this align translate and some rotation algoritm
+    # from Red9 SnapRuntime plugin
+    
+    # Align translate
+    if mode == 'translate' or mode == 'transform':
+        rotPivA = target.getRotatePivot( space = 'world' )
+        rotPivB = orig.getRotatePivot( space = 'world' )
+        origTrans = orig.getTranslation( space = 'world' )
+        # We subtract the destinations translation from it's rotPivot, before adding it
+        # to the source rotPiv. This compensates for offsets in the 2 nodes pivots
+        targetTrans = rotPivA + ( origTrans - rotPivB )
+        
+        # Translate align operation
+        orig.setTranslation( targetTrans, space = 'world' )
+    
+    # Align rotation
+    if mode == 'rotate' or mode == 'transform':
+        # Create Quaternion object from target PyNode
+        Quat = frmath.Quaternion( target.getRotation( space = 'world', quaternion = True ) )
+        # orig.setRotation( Quat, space = 'world' )
+
+        # Maybe we should use MyMatrix object in the future for the sake of math XD
+        pm.xform( orig, ro = Quat.toEulerian().asList(), eu = True, ws = True )
+
+def jointSplit( pynode, split = 2 ):
+    # TODO: joint orientation not yet implement, naming?, return?, replace?
+    # check if there is any selection
+    sel = pm.ls( os = True )
+    # make sure this is joint
+    if isinstance( pynode, pm.nodetypes.Joint ) and len( pynode.getChildren() ) > 0 and split > 1:
+        # clear selection
+        pm.select( clear = True )
+        # get first child
+        firstChild = pynode.getChildren()[0]
+        # get vector
+        vecA = frmath.Vector( pynode.getTranslation( space = 'world' ) )
+        vecB = frmath.Vector( firstChild.getTranslation( space = 'world' ) )
+
+        parent = pynode
+        factor = (vecB - vecA) / split
+        for i in range(split-1):
+            jnt = pm.createNode('joint')
+            pos = factor * ( i + 1 ) + vecA
+            jnt.setTranslation( pos.asList() )
+
+            jnt.setParent( parent )
+            parent = jnt
+        firstChild.setParent( parent )
+
+        # reselect selection if any
+        pm.select( sel )
+
+def jointOrient( pynodes ):
+    pass
+
+
 

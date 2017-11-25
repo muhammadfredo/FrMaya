@@ -1,6 +1,4 @@
 '''
-####################################################################################
-####################################################################################
 ## SCRIPT HEADER ##
 # Created By             : Muhammad Fredo Syahrul Alam
 # Email                      : muhammadfredo@gmail.com
@@ -10,9 +8,8 @@
 # Bugs: 
 # History: 
 # Note: 
-####################################################################################
-####################################################################################
 '''
+# TODO: add __add__ and __str__
 import os
 
 class BasePath:
@@ -29,8 +26,7 @@ class BasePath:
         
         self._fullpath = pathfile
         self._filepath = os.path.split( pathfile )
-        self._name = os.path.basename( pathfile )
-        self._extention = os.path.splitext( pathfile )
+        self._name, self._extention = os.path.splitext( os.path.basename( pathfile ) )
     
     def getFullpath(self):
         '''
@@ -73,4 +69,11 @@ class BasePath:
         '''
         
         return not os.path.isdir( self._fullpath )
+
+class Folder(BasePath):
+    '''
+    Some shit
+    '''
     
+    def __init__(self):
+        pass

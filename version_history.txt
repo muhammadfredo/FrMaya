@@ -1,0 +1,12 @@
+1, first version of menubar in FrMaya
+2, support multiple menubar root, and multiple submenu
+3, add support mel as menuitem
+4, add undo decorator
+5, add callback to menubar for dynamic update
+   port old script and tool from old system to FrMaya
+	- FR Rigging Tool update it to ver 2.0
+	- FR Incremental save
+6, add About FrMaya tool, cometJointOrient
+   update FrMaya, add euclid, matrix, Rotation, Vector
+   update BaseRigging, add alignMath, add jointSplit
+   add TestDump package, add deleteAnimCurve, add rebaseConnectGeo

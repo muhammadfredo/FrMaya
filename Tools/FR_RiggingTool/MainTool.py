@@ -1,31 +1,29 @@
 '''
-####################################################################################
-####################################################################################
 ## SCRIPT HEADER ##
-# Created By             : Muhammad Fredo Syahrul Alam
-# Email                      : muhammadfredo@gmail.com
-# Start Date               : 23 Feb, 2016
-# Last Modified Date       : 18 May, 2017
-# Purpose: 
-# Bugs: 
-# History: 
-# Note: 
-####################################################################################
-####################################################################################
+
+Created By   : Muhammad Fredo Syahrul Alam
+Email        : muhammadfredo@gmail.com
+Start Date   : 23 Feb 2016
+Purpose      : 
+
 '''
 
-import pymel.core as pm
-from FrMaya.Core.FrInterface import BaseInterface
-from FrMaya.Core.FrFile import BaseFile
-from FrMaya.Core.FrUtilities import UndoRepeat
-from FrMaya.Core.FrRigging import BaseRigging
-import os, glob
+# TODO: add transform button in align group section
+# TODO: add repeatable decorator
 
 from functools import partial
+import os
+
+from FrMaya.Core.FrFile import BaseFile
+from FrMaya.Core.FrInterface import BaseInterface
+from FrMaya.Core.FrRigging import BaseRigging
+from FrMaya.Core.FrUtilities import UndoRepeat
+
+import pymel.core as pm
+
 
 # reload(BaseRigging)
 # reload(frui)
-
 class MainGUI( BaseInterface.BasePsWindow ):
     '''
     Main GUI for FR_RiggingTool
@@ -64,7 +62,7 @@ class MainGUI( BaseInterface.BasePsWindow ):
         PgroupGrp['button'].pressed.connect( partial( self.pgroup_pressed, PgroupGrp ) )
         
         # Align group ui list
-        AlignGrp = [ self.ui.align_translate_btn, self.ui.align_rotate_btn ]
+        AlignGrp = [ self.ui.align_transform_btn, self.ui.align_translate_btn, self.ui.align_rotate_btn ]
         
         # Loop through ui list and connect it to align_pressed slot
         for o in AlignGrp:
@@ -107,6 +105,16 @@ class MainGUI( BaseInterface.BasePsWindow ):
         # Loop through ui list and connect it to lockHide_pressed slot
         for o in LockHideBtnGrp:
             o.pressed.connect( partial( self.lockHide_pressed, o, LockHideCheckGrp ) )
+        
+        ## SRT TAB ##
+        # Joint creation button group ui list
+        JointCreationBtnGrp = [ self.ui.jc_create_btn, self.ui.jc_insert_btn, self.ui.jc_reroot_btn,
+                               self.ui.jc_split_btn ]
+        JointCreationOptGrp = { 'splitCount' : self.ui.jc_splitCount_dsb, 'replace' : self.ui.jc_replace_check }
+        
+        # Loop through ui list and connect it to jointCreation_pressed slot
+        for o in JointCreationBtnGrp:
+            o.pressed.connect( partial( self.jointCreation_pressed, o, JointCreationOptGrp ) )
     
     @UndoRepeat.Undoable
     def display_pressed(self, sender, *args):
@@ -176,12 +184,15 @@ class MainGUI( BaseInterface.BasePsWindow ):
         # Collect selection
         selection = pm.ls( os = True )
         
+        # Align transform mode on selection
+        if sender == self.ui.align_transform_btn:
+            BaseRigging.alignMath( selection[0], selection[1], mode = 'transform' )
         # Align translate mode on selection
-        if sender == self.ui.align_translate_btn:
-            BaseRigging.align( selection, mode = 'translate' )
+        elif sender == self.ui.align_translate_btn:
+            BaseRigging.alignMath( selection[0], selection[1], mode = 'translate' )
         # Align rotate mode on selection
         elif sender == self.ui.align_rotate_btn:
-            BaseRigging.align( selection, mode = 'rotate' )
+            BaseRigging.alignMath( selection[0], selection[1], mode = 'rotate' )
     
     @UndoRepeat.Undoable
     def freezeTM_pressed(self, sender, *args):
@@ -291,4 +302,21 @@ class MainGUI( BaseInterface.BasePsWindow ):
         # Unhide attribute
         if sender == self.ui.lh_uh_btn:
             BaseRigging.keylockhideAttribute( selection, attrubuteList, hide = False )
-
+    
+    @UndoRepeat.Undoable
+    def jointCreation_pressed(self, sender, option, *args):
+        '''
+        Slot for pressed signal from joint creation button group widget
+        
+        :param sender: One of joint creation button group widget
+        '''
+        
+        # Active joint tool
+        if sender == self.ui.jc_create_btn:
+            pm.mel.JointTool()
+        # Active insert joint tool
+        if sender == self.ui.jc_insert_btn:
+            pm.mel.InsertJointTool()
+        # Active reroot joint function
+        if sender == self.ui.jc_reroot_btn:
+            pm.mel.RerootSkeleton()
