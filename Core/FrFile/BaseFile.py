@@ -12,7 +12,7 @@
 # TODO: add __add__ and __str__
 import os
 
-class BasePath:
+class BasePath(object):
     '''
     Base class for handle external file
     '''

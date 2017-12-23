@@ -289,7 +289,7 @@ global proc cJO_orient(string $joints[], float $aimAxis[], float $upAxis[],
     for ($i=0; $i < $nJnt; ++$i)
         {
         
-	// First we need to unparent everything and then store that,
+	// First we need to unparent everything and then store that, 
 	string $childs[] = `listRelatives -children -type "transform" -type "joint" $joints[$i]` ;
 	if (size($childs) > 0)
 	    $childs = `parent -w $childs` ;		// unparent and get NEW names in case they changed...

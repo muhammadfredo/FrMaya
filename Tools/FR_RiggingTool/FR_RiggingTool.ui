@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>255</width>
+    <width>265</width>
     <height>525</height>
    </rect>
   </property>
@@ -31,14 +31,14 @@
      <property name="title">
       <string>Display</string>
      </property>
-     <layout class="QHBoxLayout" name="horizontalLayout_2">
-      <property name="spacing">
-       <number>2</number>
-      </property>
+     <layout class="QGridLayout" name="gridLayout_2">
       <property name="margin">
        <number>2</number>
       </property>
-      <item>
+      <property name="spacing">
+       <number>2</number>
+      </property>
+      <item row="0" column="0">
        <widget class="QPushButton" name="dis_over_btn">
         <property name="maximumSize">
          <size>
@@ -51,7 +51,7 @@
         </property>
        </widget>
       </item>
-      <item>
+      <item row="0" column="1">
        <widget class="QPushButton" name="dis_ref_btn">
         <property name="maximumSize">
          <size>
@@ -64,46 +64,7 @@
         </property>
        </widget>
       </item>
-      <item>
-       <widget class="QPushButton" name="dis_norm_btn">
-        <property name="maximumSize">
-         <size>
-          <width>45</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>Normal</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="dis_none_btn">
-        <property name="maximumSize">
-         <size>
-          <width>45</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>None</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="dis_jnt_btn">
-        <property name="maximumSize">
-         <size>
-          <width>45</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>Joint</string>
-        </property>
-       </widget>
-      </item>
-      <item>
+      <item row="0" column="5">
        <spacer name="dis_space_end">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -118,6 +79,71 @@
          </size>
         </property>
        </spacer>
+      </item>
+      <item row="0" column="2">
+       <widget class="QPushButton" name="dis_norm_btn">
+        <property name="maximumSize">
+         <size>
+          <width>45</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>Normal</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QPushButton" name="dis_none_btn">
+        <property name="maximumSize">
+         <size>
+          <width>45</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>None</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QPushButton" name="dis_jnt_btn">
+        <property name="maximumSize">
+         <size>
+          <width>45</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>Joint</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2">
+       <widget class="QPushButton" name="dis_axis_btn">
+        <property name="maximumSize">
+         <size>
+          <width>45</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>Axis</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="3">
+       <widget class="QPushButton" name="dis_noaxis_btn">
+        <property name="maximumSize">
+         <size>
+          <width>45</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>no Axis</string>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>
@@ -255,8 +281,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>239</width>
-            <height>396</height>
+            <width>244</width>
+            <height>371</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_8">
@@ -872,8 +898,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>239</width>
-            <height>396</height>
+            <width>249</width>
+            <height>371</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_9">
@@ -936,7 +962,11 @@
                </widget>
               </item>
               <item row="1" column="0" colspan="2">
-               <widget class="QSpinBox" name="jc_splitCount_dsb"/>
+               <widget class="QSpinBox" name="jc_splitCount_dsb">
+                <property name="value">
+                 <number>2</number>
+                </property>
+               </widget>
               </item>
               <item row="0" column="2">
                <widget class="QPushButton" name="jc_reroot_btn">
@@ -1391,7 +1421,7 @@
                       <string>XY</string>
                      </property>
                      <property name="checked">
-                      <bool>true</bool>
+                      <bool>false</bool>
                      </property>
                     </widget>
                    </item>
@@ -1399,6 +1429,9 @@
                     <widget class="QRadioButton" name="mj_YZ_rdbtn">
                      <property name="text">
                       <string>YZ</string>
+                     </property>
+                     <property name="checked">
+                      <bool>true</bool>
                      </property>
                     </widget>
                    </item>
@@ -1625,7 +1658,7 @@
             <x>0</x>
             <y>0</y>
             <width>245</width>
-            <height>379</height>
+            <height>354</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_10">

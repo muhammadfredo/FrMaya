@@ -8,9 +8,9 @@ Purpose      :
 
 '''
 
-from FrMaya.Core.FrMath import Rotation
 from FrMaya.Core import FrMath as frmath
 import pymel.core as pm
+import copy
 
 def pgroup( pynodes, world = False, re = "", suffix = "" ):
     '''
@@ -25,7 +25,7 @@ def pgroup( pynodes, world = False, re = "", suffix = "" ):
     # Filter supplied pynodes, if equal to 0 then return false
     if len(pynodes) == 0:
         return False
-    
+
     # Initiate return variable
     output = []
     
@@ -247,12 +247,24 @@ def alignMath( orig, target, mode = 'transform' ):
         # Maybe we should use MyMatrix object in the future for the sake of math XD
         pm.xform( orig, ro = Quat.toEulerian().asList(), eu = True, ws = True )
 
-def jointSplit( pynode, split = 2 ):
-    # TODO: joint orientation not yet implement, naming?, return?, replace?
-    # check if there is any selection
+def jointSplit( pynode, split = 2, replace = True ):
+    '''
+    Split joint from given parameter
+
+    :param pynode: A single joint PyNode
+    :param split: Number, how many split the joint will be splited
+    :param replace: Bool value, new chain of splited joint or replace the input joint
+    :return: list of splited joint
+    '''
+
+    # TODO: naming not yet implement, wait until we build modular auto rigging
+    # init output data
+    output = []
+    # check if there is any selection, and store it
     sel = pm.ls( os = True )
     # make sure this is joint
-    if isinstance( pynode, pm.nodetypes.Joint ) and len( pynode.getChildren() ) > 0 and split > 1:
+    # if isinstance( pynode, pm.nodetypes.Joint ) and pynode.type() == 'joint' and len( pynode.getChildren() ) > 0 and split > 1:
+    if pynode.type() == 'joint' and len( pynode.getChildren() ) > 0 and split > 1:
         # clear selection
         pm.select( clear = True )
         # get first child
@@ -262,21 +274,152 @@ def jointSplit( pynode, split = 2 ):
         vecB = frmath.Vector( firstChild.getTranslation( space = 'world' ) )
 
         parent = pynode
+        if not replace:
+            jnt = pm.createNode('joint')
+            alignMath(jnt, pynode)
+            parent = jnt
+            output.append(parent)
+
         factor = (vecB - vecA) / split
         for i in range(split-1):
             jnt = pm.createNode('joint')
             pos = factor * ( i + 1 ) + vecA
-            jnt.setTranslation( pos.asList() )
 
+            # set splited joint translate
+            jnt.setTranslation( pos.asList() )
+            # set splited joint rotation
+            alignMath( jnt, pynode, mode = 'rotate' )
+
+            # set parent splited joint
             jnt.setParent( parent )
+            # clean transformation on joint
+            freezeTransform( [jnt] )
+
+            # append newly created split joint to output
+            output.append( jnt )
+            # set new variable parent
             parent = jnt
-        firstChild.setParent( parent )
+
+        if not replace:
+            jnt = pm.createNode('joint')
+            alignMath(jnt, firstChild)
+            jnt.setParent( parent )
+            output.append(jnt)
+        else:
+            firstChild.setParent( parent )
 
         # reselect selection if any
         pm.select( sel )
 
-def jointOrient( pynodes ):
+    return output
+
+def cometJoint_orient( pynodes, aimAxis = [ 1, 0, 0 ], upAxis = [ 0, 0, 1 ], upDir = [ 1, 0, 0 ], doAuto = False ):
+    # Filter supplied pynodes, if equal to 0 then return false
+    if len( pynodes ) == 0:
+        return False
+
+    # make sure only joint get passed through here
+    pynodes = pm.ls( pynodes, type = 'joint' )
+
+    # init variable prevUp for later use
+    prevUp = frmath.Vector()
+
+    for i, o in enumerate(pynodes):
+        # first we need to unparent everthing and then store that,
+        childs = o.getChildren()
+        for x in childs:
+            x.setParent(None)
+
+        # find parent for later in case we need it
+        parent = o.getParent()
+
+        # Now if we have a child joint... aim to that
+        try:
+            aimTgt = pm.ls( childs, type='joint' )[0]
+        except:
+            aimTgt = None
+
+        if aimTgt:
+            # init variable upVec using upDir variable
+            upVec = frmath.Vector( upDir )
+
+            # first off... if doAuto is on, we need to guess the cross axis dir
+            if doAuto:
+                # now since the first joint we want to match the second orientation
+                # we kind of hack the things passed in if it is the first joint
+                # ie: if the joint doesnt have a parent... or if the parent it has
+                # has the 'same' position as itself... then we use the 'next' joints
+                # as the up cross calculations
+                jntVec = frmath.Vector( o.getRotatePivot( space = 'world' ) )
+                if parent:
+                    parentVec.setValue( parent.getRotatePivot( space = 'world' ) )
+                else:
+                    parentVec = copy.copy( jntVec )
+                aimTgtVec = frmath.Vector( aimTgt.getRotatePivot( space = 'world' ) )
+
+                # how close to we consider 'same'?
+                tol = 0.0001
+
+                vecCond = jntVec - parentVec
+                posCond = [ abs(x) for x in vecCond.asList() ]
+                if parent == None or posCond[0] <= tol and posCond[1] <= tol and posCond[2] <= tol:
+                    # get aimChild
+                    aimChilds = aimTgt.getChildren()
+                    try:
+                        aimChild = pm.ls( aimChilds, type = 'joint' )[0]
+                    except:
+                        aimChild = None
+
+                    # get aimChild vector
+                    if aimChild:
+                        aimChildVec = frmath.Vector( aimChild.getRotatePivot( space = 'world' ) )
+                    else:
+                        aimChildVec = frmath.Vector()
+
+                    # find the up vector using child vector of aim target
+                    upVec = ( jntVec - aimTgtVec ).cross( aimChildVec - aimTgtVec )
+                else:
+                    # find the up vector using the parent vector
+                    upVec = ( parentVec - jntVec ).cross( aimTgtVec - jntVec )
+
+            # reorient the current joint
+            aCons = pm.aimConstraint( aimTgt, o, aimVector = aimAxis, upVector = upAxis, worldUpVector = upVec.asList(), worldUpType = 'vector', weight = 1 )
+            pm.delete(aCons)
+
+            # now compare the up we used to the prev one
+            curUp = frmath.Vector( upVec.asList() ).normal()
+            # dot product for angle between... store for later
+            dot = curUp.dot(prevUp)
+            prevUp = frmath.Vector( upVec.asList() )
+
+            if i > 0 and dot <= 0:
+                # adjust the rotation axis 180 if it looks like we have flopped the wrong way!
+                # TODO: fix here
+                # pm.xform( o, relative = True, objectSpace = True, rotateAxis = True )
+                o.rotateX.set( o.rotateX.get() + ( aimAxis[0] * 180 ) )
+                o.rotateY.set( o.rotateY.get() + ( aimAxis[1] * 180 ) )
+                o.rotateZ.set( o.rotateZ.get() + ( aimAxis[2] * 180 ) )
+
+                prevUp *= -1
+        elif parent:
+            # otherwise if there is no target, just dup orientation of parent...
+            alignMath( o, parent, mode = 'rotate' )
+
+        # and now finish clearing out joint axis ...
+        pm.joint( o, e = True, zeroScaleOrient = True )
+        freezeTransform( [ o ] )
+
+        # now that we are done ... reparent
+        if len(childs) > 0:
+            for x in childs:
+                x.setParent(o)
+
+    return True
+# return list of controller, and other data to use
+def getControls():
     pass
 
-
+# att plan for below function, type of control, name, transform, color, group count
+def createControl():
+    pass
 

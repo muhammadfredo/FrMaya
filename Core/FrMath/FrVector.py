@@ -16,15 +16,18 @@ class Vector(object):
     Vector class
     '''
     
-    def __init__(self, VectorList = [ 0, 0, 0 ]):
+    # def __init__(self, VectorList = [ 0, 0, 0 ]):
+    def __init__(self, VectorList = []):
         '''
         Vector class
         
         :param VectorList: List of 3 numbers, [ x, y, z ]
         '''
-        
+
         if len(VectorList) == 3:
             self.__values__ = VectorList
+        elif len(VectorList) == 0:
+            self.__values__ = [0,0,0]
         else:
             raise ValueError('Input should be 3 index list of numbers')
     
@@ -50,7 +53,16 @@ class Vector(object):
             return Vector( [ x, y, z ] )
         else:
             raise ValueError('Vector can only be add by another Vector object')
-    
+
+    def __copy__(self):
+        '''
+        Copy this object
+
+        :return: New vector object with same value as this object
+        '''
+
+        return Vector( self.__values__ )
+
     def __div__(self, Val):
         '''
         Divide operator for Vector
@@ -467,7 +479,21 @@ class Vector(object):
 
         return self.__values__
 
-    # TODO: here
+    def setValue(self, value):
+        '''
+        Set all x, y, z value of this Vector
+
+        self.setValue( [x, y, ,z] ) <==> self - Vec
+
+        :param value: list of 3 number
+        '''
+
+        if len(value) == 3:
+            self.__values__ = value
+
+            return self
+        else:
+            raise ValueError( 'Value should be list of 3 number' )
     
     def x(self):
         '''
