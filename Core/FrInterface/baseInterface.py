@@ -13,6 +13,7 @@
 ####################################################################################
 ####################################################################################
 '''
+
 import os
 import shiboken
 
@@ -50,7 +51,7 @@ class BasePsWindow(qtgui.QWidget):
         '''
         
         # Open ui file, and prepare for reading the file
-        theFile = qtcore.QFile( UIfile.getFullpath() )
+        theFile = qtcore.QFile( UIfile.fullpath )
         theFile.open( qtcore.QFile.ReadOnly )
         
         # Set main layout of the window
@@ -93,7 +94,7 @@ class BasePsWindow(qtgui.QWidget):
             self.setWindowFlags( qtcore.Qt.Window )
             # Set current window tool name
             if not Title:
-                Title = UIfile.getFilename()
+                Title = UIfile.name
             self.setWindowTitle( Title )
             # Build UI tool from UI file
             self.BuildUi(UIfile)

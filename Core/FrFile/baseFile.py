@@ -9,8 +9,10 @@
 # History: 
 # Note: 
 '''
-# TODO: add __add__ and __str__
+
 import os
+import factories
+
 
 class BasePath(object):
     '''
@@ -70,10 +72,48 @@ class BasePath(object):
         
         return not os.path.isdir( self._fullpath )
 
-class Folder(BasePath):
-    '''
-    Some shit
-    '''
-    
-    def __init__(self):
-        pass
+def isClass(theNode, classString):
+    return theNode == factories.__classLookup__(classString)
+
+class PathNode(object):
+
+    def __new__(cls, *args, **kwargs):
+        if args:
+            # get the input path
+            thePath = args[0]
+
+            # if input more than 1, add the other to the path
+            if len(args) > 1:
+                for o in args[1:]:
+                    thePath = cls.join(thePath, o)
+
+            # find appropriate class based on input path,
+            # and setup instance of the new class according to what needed
+            # return new instance of appropriate class
+            self = factories.__factory__(thePath, PathNode, cls)
+
+            return self
+        else:
+            # in case of failure of factory creation, return pathnode class
+            return super( PathNode, cls ).__new__( cls )
+
+    def __init__(self, *args, **kwargs):
+        # instance variabele
+        self.__fullpath__ = ''
+
+    def __repr__(self):
+        return 'PathNode( {0} )'.format( self.__fullpath__ )
+
+    @staticmethod
+    def join(headPPath, tailPath):
+        return os.path.abspath( os.path.join( headPPath, tailPath ) )
+
+    @property
+    def fullpath(self):
+        return  self.__fullpath__
+
+    @property
+    def exists(self):
+        return os.path.exists( self.__fullpath__ )
+
+

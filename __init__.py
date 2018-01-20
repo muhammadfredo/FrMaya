@@ -34,3 +34,6 @@ def startup():
     import pymel.core as pm
     
     pm.evalDeferred( setup )
+
+
+

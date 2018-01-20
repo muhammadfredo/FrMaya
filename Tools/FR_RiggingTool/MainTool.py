@@ -11,20 +11,21 @@ Purpose      :
 # TODO: add repeatable decorator
 # TODO: createControl is for basic create control
 # TODO: while createFrControl is for control with tag and can be init with control FrNode
+# TODO: clean this shit
+# TODO: crete joint on selection only work on vertex
 
 from functools import partial
-import os
+import copy
 
-from FrMaya.Core.FrFile import BaseFile
-from FrMaya.Core.FrInterface import BaseInterface
-from FrMaya.Core.FrRigging import BaseRigging
+from FrMaya.Core import FrFile as frfile
+from FrMaya.Core import FrRigging as frrig
+from FrMaya.Core.FrInterface import baseInterface
 from FrMaya.Core.FrUtilities import UndoRepeat
 
 import pymel.core as pm
 
-reload(BaseRigging)
-# reload(frui)
-class MainGUI( BaseInterface.BasePsWindow ):
+
+class MainGUI( baseInterface.BasePsWindow ):
     '''
     Main GUI for FR_RiggingTool
     '''
@@ -35,9 +36,9 @@ class MainGUI( BaseInterface.BasePsWindow ):
         '''
         
         # Convert ui path file as FrFile Object
-        UIfile = BaseFile.BasePath( os.path.join( os.path.dirname( __file__ ), 'FR_RiggingTool.ui' ) )
+        UIfile = frfile.PathNode(__file__).parent.getChildren('FR_RiggingTool.ui')
         super( MainGUI, self ).__init__( UIfile, *args )
-        
+
         self.Connect_EventHandlers()
     
     def Connect_EventHandlers(self):
@@ -54,13 +55,6 @@ class MainGUI( BaseInterface.BasePsWindow ):
         # Loop through ui list and connect it to display_pressed slot 
         for o in DispalyGrp:
             o.pressed.connect( partial( self.display_pressed, o ) )
-
-        # Pgroup group ui list
-        PgroupGrp = { 'all' : self.ui.pgroup_all_check, 'button' : self.ui.pgroup_btn,
-                      'rename' : self.ui.pgroup_rename_txt, 'suffix' : self.ui.pgroup_suffix_txt }
-
-        # Connect pgroup_btn to the pgroup slot
-        PgroupGrp['button'].pressed.connect( partial( self.pgroup_pressed, PgroupGrp ) )
 
         # Align group ui list
         AlignGrp = [ self.ui.align_transform_btn, self.ui.align_translate_btn, self.ui.align_rotate_btn ]
@@ -110,7 +104,7 @@ class MainGUI( BaseInterface.BasePsWindow ):
         ## Joint TAB ##
         # Joint creation button group ui list
         JointCreationBtnGrp = [ self.ui.jc_create_btn, self.ui.jc_insert_btn, self.ui.jc_reroot_btn,
-                                self.ui.jc_split_btn ]
+                                self.ui.jc_split_btn, self.ui.jc_createonsel_btn ]
         JointCreationOptGrp = { 'splitCount' : self.ui.jc_splitCount_dsb, 'replace' : self.ui.jc_replace_check }
 
         # Loop through ui list and connect it to jointCreation_pressed slot
@@ -136,6 +130,33 @@ class MainGUI( BaseInterface.BasePsWindow ):
 
         for o in MirrorJointBtnGrp:
             o.pressed.connect( partial( self.mirrorJoint_pressed, o, MirrorJointOptGrp ) )
+
+        ## Control TAB ##
+        # Color overide group ui list
+        ColorOverideBtnGrp = [ self.ui.color_06_btn, self.ui.color_09_btn, self.ui.color_13_btn, self.ui.color_14_btn, self.ui.color_17_btn ]
+
+        for o in ColorOverideBtnGrp:
+            o.pressed.connect( partial( self.colorOveride_pressed, o ) )
+
+        # Control creation setting group ui list
+        ControlSettingGrp = { 'suffix' : self.ui.cc_suffix_txt, 'group' : self.ui.cc_group_txt,
+                              'posrot' : self.ui.cc_posrot_check, 'scale' : self.ui.cc_scale_check,
+                              'controllist' : self.ui.cc_clist_cb }
+
+        # Populate control list combo box
+        controlFiles = frrig.getControlFiles()
+        for o in controlFiles:
+            ControlSettingGrp['controllist'].addItem( o.name, o )
+
+        self.ui.cc_create_btn.pressed.connect( partial( self.createControl_pressed, self.ui.cc_create_btn, ControlSettingGrp ) )
+
+
+        # Pgroup group ui list
+        PgroupGrp = { 'world' : self.ui.pgroup_world_check, 'button' : self.ui.pgroup_btn,
+                      'search' : self.ui.pgroup_search_txt, 'replace' : self.ui.pgroup_replace_txt }
+
+        # Connect pgroup_btn to the pgroup slot
+        PgroupGrp['button'].pressed.connect( partial( self.pgroup_pressed, PgroupGrp ) )
 
     @UndoRepeat.Undoable
     def display_pressed(self, sender, *args):
@@ -211,9 +232,9 @@ class MainGUI( BaseInterface.BasePsWindow ):
         selection = pm.ls( os = True )
         
         # Perform pgroup operation on the selection
-        BaseRigging.pgroup( selection, world = sender['all'].isChecked(),
-                            re = sender['rename'].toPlainText(),
-                            suffix = sender['suffix'].toPlainText() )
+        frrig.pgroup( selection, world = sender['world'].isChecked(),
+                            re = sender['search'].text(),
+                            suffix = sender['replace'].text() )
     
     @UndoRepeat.Undoable
     def align_pressed(self, sender, *args):
@@ -228,13 +249,13 @@ class MainGUI( BaseInterface.BasePsWindow ):
         
         # Align transform mode on selection
         if sender == self.ui.align_transform_btn:
-            BaseRigging.alignMath( selection[0], selection[1], mode = 'transform' )
+            frrig.alignMath( selection[0], selection[1], mode = 'transform' )
         # Align translate mode on selection
         elif sender == self.ui.align_translate_btn:
-            BaseRigging.alignMath( selection[0], selection[1], mode = 'translate' )
+            frrig.alignMath( selection[0], selection[1], mode = 'translate' )
         # Align rotate mode on selection
         elif sender == self.ui.align_rotate_btn:
-            BaseRigging.alignMath( selection[0], selection[1], mode = 'rotate' )
+            frrig.alignMath( selection[0], selection[1], mode = 'rotate' )
     
     @UndoRepeat.Undoable
     def freezeTM_pressed(self, sender, *args):
@@ -249,16 +270,16 @@ class MainGUI( BaseInterface.BasePsWindow ):
         
         # Freeze transform on selection
         if sender == self.ui.ft_all_btn:
-            BaseRigging.freezeTransform( selection )
+            frrig.freezeTransform( selection )
         # Freeze translate on selection
         elif sender == self.ui.ft_translate_btn:
-            BaseRigging.freezeTransform( selection, mode = 'translate' )
+            frrig.freezeTransform( selection, mode = 'translate' )
         # Freeze rotation on selection
         elif sender == self.ui.ft_rotate_btn:
-            BaseRigging.freezeTransform( selection, mode = 'rotate' )
+            frrig.freezeTransform( selection, mode = 'rotate' )
         # Freeze scale on selection
         elif sender == self.ui.ft_scale_btn:
-            BaseRigging.freezeTransform( selection, mode = 'scale' )
+            frrig.freezeTransform( selection, mode = 'scale' )
     
     @UndoRepeat.Undoable
     def resetSRT_pressed(self, sender, *args):
@@ -273,19 +294,19 @@ class MainGUI( BaseInterface.BasePsWindow ):
         
         # Zero out translate
         if sender == self.ui.r_translate_btn:
-            BaseRigging.zerooutTransform( selection, mode = 'translate' )
+            frrig.zerooutTransform( selection, mode = 'translate' )
         # Zero out rotate
         elif sender == self.ui.r_rotate_btn:
-            BaseRigging.zerooutTransform( selection, mode = 'rotate' )
+            frrig.zerooutTransform( selection, mode = 'rotate' )
         # Zero out scale
         elif sender == self.ui.r_scale_btn:
-            BaseRigging.zerooutTransform( selection, mode = 'scale' )
+            frrig.zerooutTransform( selection, mode = 'scale' )
         # Normalize visibility
         elif sender == self.ui.r_visibility_btn:
-            BaseRigging.zerooutTransform( selection, mode = 'visibility' )
+            frrig.zerooutTransform( selection, mode = 'visibility' )
         # Normalize rotate order
         elif sender == self.ui.r_rotateorder_btn:
-            BaseRigging.zerooutTransform( selection, mode = 'rotateorder' )
+            frrig.zerooutTransform( selection, mode = 'rotateorder' )
     
     def lockHide_stateChanged(self, sender, checkbox, *args):
         '''
@@ -328,22 +349,22 @@ class MainGUI( BaseInterface.BasePsWindow ):
         
         # Make keyable
         if sender == self.ui.lh_k_btn:
-            BaseRigging.keylockhideAttribute( selection, attrubuteList, keyable = True )
+            frrig.keylockhideAttribute( selection, attrubuteList, keyable = True )
         # Lock attribute
         if sender == self.ui.lh_l_btn:
-            BaseRigging.keylockhideAttribute( selection, attrubuteList, lock = True )
+            frrig.keylockhideAttribute( selection, attrubuteList, lock = True )
         # Hide attribute
         if sender == self.ui.lh_h_btn:
-            BaseRigging.keylockhideAttribute( selection, attrubuteList, hide = True )
+            frrig.keylockhideAttribute( selection, attrubuteList, hide = True )
         # Make unkeyable
         if sender == self.ui.lh_uk_btn:
-            BaseRigging.keylockhideAttribute( selection, attrubuteList, keyable = False )
+            frrig.keylockhideAttribute( selection, attrubuteList, keyable = False )
         # Unlock attribute
         if sender == self.ui.lh_ul_btn:
-            BaseRigging.keylockhideAttribute( selection, attrubuteList, lock = False )
+            frrig.keylockhideAttribute( selection, attrubuteList, lock = False )
         # Unhide attribute
         if sender == self.ui.lh_uh_btn:
-            BaseRigging.keylockhideAttribute( selection, attrubuteList, hide = False )
+            frrig.keylockhideAttribute( selection, attrubuteList, hide = False )
     
     @UndoRepeat.Undoable
     def jointCreation_pressed(self, sender, option, *args):
@@ -366,7 +387,31 @@ class MainGUI( BaseInterface.BasePsWindow ):
         if sender == self.ui.jc_split_btn:
             sel = pm.ls( os = True, type = 'joint' )
             if len(sel) > 0:
-                BaseRigging.jointSplit( sel[0], option['splitCount'].value(), option['replace'].isChecked() )
+                frrig.jointSplit( sel[0], option['splitCount'].value(), option['replace'].isChecked() )
+        # Created joint on selected
+        if sender == self.ui.jc_createonsel_btn:
+            sel = pm.ls(os = True)
+            # clear selection
+            pm.select()
+            # first loop check if there is a component
+            newSel = []
+            for i, o in enumerate(sel):
+                if type( o ) == pm.MeshVertex:
+                    if o.count > 1:
+                        newSel += [x for x in o]
+                    else:
+                        newSel.append(o)
+                else:
+                    newSel = copy.deepcopy(sel)
+            resJnt = []
+            for o in newSel:
+                jnt = pm.createNode('joint')
+                frrig.alignMath(jnt, o, mode = 'translate')
+                resJnt.append(jnt)
+
+            # reselect the selection
+            # pm.select(sel)
+            pm.select(resJnt)
 
     # TODO: below is not yet documented
     def boolToNumber(self, value, flip):
@@ -424,7 +469,7 @@ class MainGUI( BaseInterface.BasePsWindow ):
             upAxis = self.getVecOptionOrient( 'upAxis', option )
             upDir = self.getVecOptionOrient( 'upDir', option )
 
-            BaseRigging.cometJoint_orient( sel, aimAxis = aimAxis, upAxis = upAxis, upDir = upDir,
+            frrig.cometJoint_orient( sel, aimAxis = aimAxis, upAxis = upAxis, upDir = upDir,
                                            doAuto = option[ 'worldupAuto' ].checkState() )
 
             pm.select( sel )
@@ -447,5 +492,43 @@ class MainGUI( BaseInterface.BasePsWindow ):
                             mirrorYZ = option['acrossYZ'].isChecked(),
                             searchReplace = ( src, re ) )
 
+    @UndoRepeat.Undoable
+    def colorOveride_pressed(self, sender):
+        sel = pm.ls(os = True)
+        colorVal = int(sender.objectName().split('_')[1])
+
+        for o in sel:
+            for x in o.getShapes():
+                x.overrideEnabled.set(True)
+                x.overrideColor.set(colorVal)
+
+    @UndoRepeat.Undoable
+    def createControl_pressed(self, sender, setting):
+        controllist = setting['controllist']
+        sel = pm.ls(os = True)
+        suffixtext = setting['suffix'].text()
+        grouptext = setting['group'].text()
+        posrotCons = setting['posrot'].isChecked()
+        scaleCons = setting['scale'].isChecked()
+
+        itemData = controllist.itemData(controllist.currentIndex())
+        tmList = [(o.getMatrix(worldSpace = True), o) for o in sel]
+        grouplist = [o for o in grouptext.split(';') if o]
+        print 'yooo', tmList
+        if not tmList:
+            tmList.append((pm.dt.Matrix(), None))
+
+        for tm, o in tmList:
+            # createControl(filenode, name = '', suffix = 'Ctl', transform = None, color = None, group = ['Grp'])
+            result = frrig.createControl( itemData, transform = tm, suffix = suffixtext, group = grouplist )
+
+            # parent cons
+            if posrotCons and o:
+                test = pm.parentConstraint(result.control, o, mo = True)
+                print test
+
+            # scale cons
+            if scaleCons and o:
+                pm.scaleConstraint( result.control, o, mo = True )
 
 

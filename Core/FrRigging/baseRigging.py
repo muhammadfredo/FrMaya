@@ -9,8 +9,11 @@ Purpose      :
 '''
 
 from FrMaya.Core import FrMath as frmath
+from FrMaya.Core import FrFile as frfile
+
 import pymel.core as pm
 import copy
+import collections
 
 def pgroup( pynodes, world = False, re = "", suffix = "" ):
     '''
@@ -228,12 +231,16 @@ def alignMath( orig, target, mode = 'transform' ):
     
     # Align translate
     if mode == 'translate' or mode == 'transform':
-        rotPivA = target.getRotatePivot( space = 'world' )
-        rotPivB = orig.getRotatePivot( space = 'world' )
-        origTrans = orig.getTranslation( space = 'world' )
-        # We subtract the destinations translation from it's rotPivot, before adding it
-        # to the source rotPiv. This compensates for offsets in the 2 nodes pivots
-        targetTrans = rotPivA + ( origTrans - rotPivB )
+        try:
+            rotPivA = target.getRotatePivot( space = 'world' )
+            rotPivB = orig.getRotatePivot( space = 'world' )
+            origTrans = orig.getTranslation( space = 'world' )
+            # We subtract the destinations translation from it's rotPivot, before adding it
+            # to the source rotPiv. This compensates for offsets in the 2 nodes pivots
+            targetTrans = rotPivA + ( origTrans - rotPivB )
+        except:
+            if type(target) == pm.MeshVertex:
+                targetTrans = target.getPosition(space = 'world')
         
         # Translate align operation
         orig.setTranslation( targetTrans, space = 'world' )
@@ -416,10 +423,81 @@ def cometJoint_orient( pynodes, aimAxis = [ 1, 0, 0 ], upAxis = [ 0, 0, 1 ], upD
 
     return True
 # return list of controller, and other data to use
-def getControls():
-    pass
+def getControlFiles(name = ''):
+    '''
+    Get available control on control folder
+
+    :return: list of all control file in PathNode object
+    '''
+
+    # get FrRigging folder PathNode
+    FrRiggingFolder = frfile.PathNode(__file__).parent
+    # get control folder PathNode
+    controlFolder = FrRiggingFolder.getChildren('control')
+
+    controlFiles = controlFolder.getChildrens(filters = '*.json')
+    if name:
+        controlFiles = [o for o in controlFiles if o.filename == name]
+
+    # return list of .mel file PathNode
+    return controlFiles
+
+def buildCurve(data):
+    for key, value in data.iteritems():
+        degree = value.get('degree')
+        periodic = value.get('periodic')
+        point = value.get('point')
+        knot = value.get('knot')
+
+        # convert list to tupple
+        point = [(o[0], o[1], o[2]) for o in point]
+
+        curve = pm.curve(d = degree, per = periodic, p = point, k = knot)
+    return curve
 
 # att plan for below function, type of control, name, transform, color, group count
-def createControl():
-    pass
+def createControl(filenode, transform = None, name = '', suffix = 'Ctl', color = None, group = ['Grp']):
+    # check function attribute, and modify it if its on default mode
+    # fill fullpath variable from filenode,
+    # if filenode is name of control grab it from getControl
+    try:
+        controlpath = filenode.data
+    except:
+        try:
+            controlfile = getControlFiles(filenode)[0]
+            controlpath = controlfile.data
+        except:
+            return None
+    # modify if name att on default
+    if not name:
+        name = 'FrControl'
+    # add suffix to name
+    name += '_' + suffix
+    # modify if transform is None
+    if not transform:
+        transform = pm.dt.Matrix()
+
+    # import control
+    curveControl = buildCurve(controlpath)
+    # grab transform of imported control
+    # ctl = pm.ls(impNodes, type = 'transform')[0]
+
+    # rename control
+    curveControl.rename(name)
+    # retransform control
+    curveControl.setMatrix(transform, worldSpace = True)
+    # pgroup the control
+    resgrp = {}
+    inputGrp = curveControl
+    for o in group:
+        resgrp[o] = pgroup([inputGrp], re = suffix, suffix = o)[0]
+        inputGrp = resgrp[o]
+        suffix = o
+
+    # create control tuple class
+    ControlTuple = collections.namedtuple('ControlTuple', 'control groupDict')
+    # create instance of control tuple and assign the value
+    result = ControlTuple(control = curveControl, groupDict = resgrp)
+
+    return result
 
