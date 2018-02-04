@@ -20,10 +20,15 @@ __authors__ = ['Muhammad Fredo']
 import sys
 assert sys.version_info > (2, 7), ( "FrMaya version {0} is compatible with Maya2014/python2.7 or later".format(__version__) )
 
+def libPackage():
+    sys.path.append( os.path.join( os.path.dirname( __file__ ), 'Lib' ) )
+
 def setup():
     # old way
 #     import App.menubar as menubar
 #     reload( menubar )
+    # add third party package
+    libPackage()
     # the new way, more consistent with the other
     from Core.FrInterface import Menubar
     reload( Menubar )

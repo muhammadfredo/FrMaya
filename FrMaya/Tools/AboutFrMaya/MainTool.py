@@ -16,7 +16,7 @@
 
 import os
 
-from FrMaya.Core.FrFile import baseFile
+from FrMaya.Core import FrFile as frfile
 from FrMaya.Core.FrInterface import baseInterface
 reload( baseInterface )
 class MainGUI( baseInterface.BasePsWindow ):
@@ -30,7 +30,7 @@ class MainGUI( baseInterface.BasePsWindow ):
         '''
         
         # Convert ui path file as FrFile Object
-        UIfile = baseFile.BasePath( os.path.join( os.path.dirname( __file__ ), 'AboutFrMaya.ui' ) )
+        UIfile = frfile.PathNode( os.path.join( os.path.dirname( __file__ ), 'AboutFrMaya.ui' ) )
         super( MainGUI, self ).__init__( UIfile, Title = 'About FrMaya', *args )
         
 #         self.Connect_EventHandlers()

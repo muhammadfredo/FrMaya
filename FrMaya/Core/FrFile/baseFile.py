@@ -105,8 +105,8 @@ class PathNode(object):
         return 'PathNode( {0} )'.format( self.__fullpath__ )
 
     @staticmethod
-    def join(headPPath, tailPath):
-        return os.path.abspath( os.path.join( headPPath, tailPath ) )
+    def join(headPath, tailPath):
+        return os.path.abspath( os.path.join( headPath, tailPath ) )
 
     @property
     def fullpath(self):

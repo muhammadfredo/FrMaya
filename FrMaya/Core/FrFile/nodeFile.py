@@ -103,7 +103,11 @@ class JsonNode(FileNode):
     
     @property
     def data(self):
-        return json.load( open(self.fullpath) )
+        try:
+            with open(self.fullpath) as jsonfile:
+                return json.load(jsonfile)
+        except ValueError as error:
+            return None
 
 
 
