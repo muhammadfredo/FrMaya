@@ -47,6 +47,6 @@ Temporary Items
 .apdisk
 /__init__.pyc
 *.pyc
-.project
-.pydevproject
-.idea
+#.project
+#.pydevproject
+#.idea
