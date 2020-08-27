@@ -1,3 +1,3 @@
-from FrVector import *
-from FrRotation import *
+from vector import *
+from rotation import *
 

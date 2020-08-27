@@ -104,6 +104,13 @@ class PathNode(object):
     def __repr__(self):
         return 'PathNode( {0} )'.format( self.__fullpath__ )
 
+    def __add__(self, other):
+        try:
+            return PathNode(os.path.join(self.fullpath, other))
+        except Exception, e:
+            print '{0}'.format(e)
+            return None
+
     @staticmethod
     def join(headPath, tailPath):
         return os.path.abspath( os.path.join( headPath, tailPath ) )

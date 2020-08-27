@@ -191,7 +191,7 @@ columnLayout -adjustableColumn 0;
 				button -l "Ltc" -bgc 1 0.65 1 -c "WP_quickSuffix _Ltc";
 				button -l "Clstr" -bgc 1 0.65 1 -c "WP_quickSuffix _Clstr";
 				button -l "Inf" -bgc 1 0.65 1 -c "WP_quickSuffix _Inf";
-				text -l "";
+				button -l "MSH" -bgc 1 0.65 1 -c "WP_quickSuffix _MSH";
 				
 				button -l "Const" -bgc 1 0.65 1 -c "WP_quickSuffix _Const";
 				button -l "OConst" -bgc 1 0.65 1 -c "WP_quickSuffix _OConst";

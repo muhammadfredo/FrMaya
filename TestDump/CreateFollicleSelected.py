@@ -32,7 +32,7 @@ def createFollicleCloseToSelected( sel, mesh, parentCons = True ):
         follShp.outRotate >> follTm.rotate
         follShp.outTranslate >> follTm.translate
          
-        mesh.worldMatrix >> follShp.inputWolrdMatrix
+        mesh.worldMatrix >> follShp.inputWorldMatrix
         mesh.outMesh >> follShp.inputMesh
          
         follShp.simulationMethod.set(0)

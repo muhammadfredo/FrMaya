@@ -13,36 +13,25 @@
 ####################################################################################
 ####################################################################################
 '''
-# the old way
-# import os
-# import shiboken
-
-# import PySide.QtCore as qtcore
-# import PySide.QtGui as qtgui
-# import PySide.QtUiTools as qtuit
-# import maya.OpenMayaUI as omui
-
 # the new way
-import os
 try:
     import shiboken
-except:
+except ImportError:
     import shiboken2 as shiboken
 
-from Qt import QtCore as qtcore
-from Qt import QtGui as qtgui
-from Qt import QtWidgets as qtwidgets
-from Qt import QtCompat as qtcompat
+from Qt import QtCore
+from Qt import QtWidgets
+from Qt import QtCompat
 import maya.OpenMayaUI as omui
 
 
-class BasePsWindow(qtwidgets.QWidget):
+class BasePsWindow(QtWidgets.QWidget):
     '''
     Pyside base class for dialog window inside maya
     '''
     
     @staticmethod
-    def GetMayaWindow():
+    def getMayaWindow():
         '''
         Get maya window
         '''
@@ -52,7 +41,7 @@ class BasePsWindow(qtwidgets.QWidget):
         
         # Wrap maya main window pointer as QWidget
         if mayaWindowPtr is not None:
-            return shiboken.wrapInstance( long( mayaWindowPtr ), qtwidgets.QWidget )
+            return shiboken.wrapInstance( long( mayaWindowPtr ), QtWidgets.QWidget )
         else:
             return False
     @staticmethod
@@ -64,7 +53,7 @@ class BasePsWindow(qtwidgets.QWidget):
         Returns:
             QWidget: the base instance
         """
-        ui = qtcompat.loadUi(uifile)  # Qt.py mapped function
+        ui = QtCompat.loadUi(uifile)  # Qt.py mapped function
         if not base_instance:
             return ui
         else:
@@ -80,21 +69,13 @@ class BasePsWindow(qtwidgets.QWidget):
         
         :param UIfile: UI file as 'BasePath' object
         '''
-        
-        # Open ui file, and prepare for reading the file
-        # theFile = qtcore.QFile( UIfile.fullpath )
-        # theFile.open( qtcore.QFile.ReadOnly )
-        
+
         # Set main layout of the window
-        self.mainLayout = qtwidgets.QVBoxLayout()
+        self.mainLayout = QtWidgets.QVBoxLayout()
         self.mainLayout.setContentsMargins( 4,4,4,4 )
         self.setLayout( self.mainLayout )
         
         # Load the UI file
-        # loader = qtuit.QUiLoader()
-        # self.ui = loader.load( theFile, parentWidget = self )
-        # # self.ui = qtcompat.loadUi( UIfile.fullpath, self)
-        # QtWidgets.QWidget.__init__(self, parent)
         self.ui = self.setup_ui(UIfile.fullpath)
         
         # Add loaded UI to main layout
@@ -103,9 +84,6 @@ class BasePsWindow(qtwidgets.QWidget):
         # Set window size the same as size from UI file 
         size = self.ui.size()
         self.resize( size.width(), size.height() )
-        
-        # Close the UI file
-        # theFile.close()
 
     def __init__(self, UIfile, Title = '', *args, **kwargs):
         '''
@@ -118,7 +96,7 @@ class BasePsWindow(qtwidgets.QWidget):
         super( BasePsWindow, self ).__init__(*args, **kwargs)
         
         # Get maya window to parent for current tool
-        MayaWindow = self.GetMayaWindow()
+        MayaWindow = self.getMayaWindow()
         # qtwidgets.QWidget.__init__(self, MayaWindow)
         
         if MayaWindow != False:
@@ -126,7 +104,7 @@ class BasePsWindow(qtwidgets.QWidget):
             self.setParent( MayaWindow )
             # Set usual window system frame,
             # like title, min, and max bar 
-            self.setWindowFlags( qtcore.Qt.Window )
+            self.setWindowFlags( QtCore.Qt.Window )
             # Set current window tool name
             if not Title:
                 Title = UIfile.name

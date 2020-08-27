@@ -3,8 +3,7 @@
 
 Created By   : Muhammad Fredo Syahrul Alam
 Email        : muhammadfredo@gmail.com
-Start Date   : 23 Feb 2016
-Update       : 18 May, 2017
+Start Date   : 29 Apr 2018
 Purpose      :
 
 '''

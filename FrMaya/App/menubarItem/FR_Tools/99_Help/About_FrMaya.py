@@ -1,3 +1,3 @@
 import FrMaya.Tools.AboutFrMaya as AboutFrMaya
 reload(AboutFrMaya)
-AboutFrMaya.show()
+AboutFrMaya.show(update_btn = True, remove_btn = True)

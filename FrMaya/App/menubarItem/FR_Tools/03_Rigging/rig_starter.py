@@ -3,9 +3,14 @@
 
 Created By   : Muhammad Fredo Syahrul Alam
 Email        : muhammadfredo@gmail.com
-Start Date   : 01 Jul 2017
-Purpose      : 
+Start Date   : 27 Feb 2018
+Purpose      :
 
 '''
 
-from baseInterface import *
+import pymel.core as pm
+
+def rig_starter():
+    pass
+
+
