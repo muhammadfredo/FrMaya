@@ -20,9 +20,7 @@ __basedir__ = os.path.abspath(os.path.dirname(__file__))
 import sys
 assert sys.version_info > (2, 7), ( "FrMaya version {0} is compatible with Maya2014/python2.7 or later".format(__version__) )
 
-from Core import FrSystem
-from Core import FrFile
-from Core import FrInstall
+from .Core import FrSystem
 
 @FrSystem.singelton
 class GlobalData(object):
