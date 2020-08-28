@@ -13,21 +13,20 @@
 ####################################################################################
 ####################################################################################
 '''
-
 import os
 import urllib2
 import re
 import tempfile
 import zipfile
-import yaml
 from functools import partial
 
-from ...Core import FrFile
-from ...Core import FrInterface
-# from ...Core import FrSystem
-from ...Core import FrInstall
-import FrMaya
 import pymel.core as pm
+from FrMaya.vendor import yaml
+from FrMaya.vendor import path
+
+from FrMaya.Core import FrInterface
+from FrMaya.Core import FrInstall
+import FrMaya
 
 class MainGUI( FrInterface.BasePsWindow ):
     '''
@@ -40,7 +39,7 @@ class MainGUI( FrInterface.BasePsWindow ):
         '''
         
         # Convert ui path file as FrFile Object
-        ui_file = FrFile.PathNode( os.path.join( os.path.dirname( __file__ ), 'AboutFrMaya.ui' ) )
+        ui_file = path.Path(__file__).parent / 'AboutFrMaya.ui'
         super( MainGUI, self ).__init__( ui_file, Title = 'About FrMaya', *args )
 
         self.connect_event_handlers()

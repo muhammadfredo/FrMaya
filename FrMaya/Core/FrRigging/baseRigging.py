@@ -7,13 +7,14 @@ Start Date   : 22 Jul 2017
 Purpose      : 
 
 '''
-
-from FrMaya.Core import FrMath as frmath
-from FrMaya.Core import FrFile as frfile
-
-import pymel.core as pm
 import copy
 import collections
+
+import pymel.core as pm
+from FrMaya.vendor import path
+
+from FrMaya.Core import FrMath as frmath
+
 
 def pgroup( pynodes, world = False, re = "", suffix = "" ):
     '''
@@ -431,7 +432,7 @@ def getControlFiles(name = ''):
     '''
 
     # get FrRigging folder PathNode
-    FrRiggingFolder = frfile.PathNode(__file__).parent
+    FrRiggingFolder = path.Path(__file__).parent
     # get control folder PathNode
     controlFolder = FrRiggingFolder.getChildren('control')
 

@@ -5,24 +5,22 @@ Created By   : Muhammad Fredo Syahrul Alam
 Email        : muhammadfredo@gmail.com
 Start Date   : 23 Feb 2016
 Purpose      : 
-
-'''
-
 # TODO: add repeatable decorator
 # TODO: createControl is for basic create control
 # TODO: while createFrControl is for control with tag and can be init with control FrNode
 # TODO: clean this shit
 # TODO: crete joint on selection only work on vertex
 
+'''
 from functools import partial
 import copy
 
-from FrMaya.Core import FrFile
+import pymel.core as pm
+from FrMaya.vendor import path
+
 from FrMaya.Core import FrRigging
 from FrMaya.Core.FrInterface import baseInterface
 from FrMaya.Core import FrSystem
-
-import pymel.core as pm
 
 
 class MainGUI( baseInterface.BasePsWindow ):
@@ -36,7 +34,7 @@ class MainGUI( baseInterface.BasePsWindow ):
         '''
 
         # Convert ui path file as FrFile Object
-        ui_file = FrFile.PathNode(__file__).parent.getChildren('FR_RiggingTool.ui')
+        ui_file = path.Path(__file__).parent / 'FR_RiggingTool.ui'
         super( MainGUI, self ).__init__( ui_file, *args )
 
         self.connect_event_handlers()
