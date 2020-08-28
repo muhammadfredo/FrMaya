@@ -434,9 +434,9 @@ def getControlFiles(name = ''):
     # get FrRigging folder PathNode
     FrRiggingFolder = path.Path(__file__).parent
     # get control folder PathNode
-    controlFolder = FrRiggingFolder.getChildren('control')
+    controlFolder = FrRiggingFolder / 'control'
 
-    controlFiles = controlFolder.getChildrens(filters = '*.json')
+    controlFiles = controlFolder.glob('*.json')
     if name:
         controlFiles = [o for o in controlFiles if o.filename == name]
 

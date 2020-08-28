@@ -19,9 +19,9 @@ try:
 except ImportError:
     import shiboken2 as shiboken
 
-from Qt import QtCore
-from Qt import QtWidgets
-from Qt import QtCompat
+from FrMaya.vendor.Qt import QtCore
+from FrMaya.vendor.Qt import QtWidgets
+from FrMaya.vendor.Qt import QtCompat
 import maya.OpenMayaUI as omui
 
 
@@ -76,7 +76,7 @@ class BasePsWindow(QtWidgets.QWidget):
         self.setLayout( self.mainLayout )
         
         # Load the UI file
-        self.ui = self.setup_ui(UIfile.fullpath)
+        self.ui = self.setup_ui(UIfile.abspath())
         
         # Add loaded UI to main layout
         self.mainLayout.addWidget( self.ui )
