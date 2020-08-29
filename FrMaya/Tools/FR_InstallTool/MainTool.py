@@ -12,7 +12,7 @@ from FrMaya.vendor import path
 from FrMaya.Core.FrInterface import baseInterface
 
 
-class MainGUI( baseInterface.BasePsWindow ):
+class MainGUI(baseInterface.MyQtWindow):
 
     def __init__(self, *args):
         # Convert ui path file as FrFile Object

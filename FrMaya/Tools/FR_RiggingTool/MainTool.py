@@ -23,7 +23,7 @@ from FrMaya.Core.FrInterface import baseInterface
 from FrMaya.Core import FrSystem
 
 
-class MainGUI( baseInterface.BasePsWindow ):
+class MainGUI(baseInterface.MyQtWindow):
     '''
     Main GUI for FR_RiggingTool
     '''
@@ -35,7 +35,7 @@ class MainGUI( baseInterface.BasePsWindow ):
 
         # Convert ui path file as FrFile Object
         ui_file = path.Path(__file__).parent / 'FR_RiggingTool.ui'
-        super( MainGUI, self ).__init__( ui_file, *args )
+        super( MainGUI, self ).__init__(ui_file, title_tool = 'FR_RiggingTool', *args)
 
         self.connect_event_handlers()
 

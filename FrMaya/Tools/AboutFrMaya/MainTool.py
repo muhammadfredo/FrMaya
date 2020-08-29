@@ -28,7 +28,7 @@ from FrMaya.Core import FrInterface
 from FrMaya.Core import FrInstall
 import FrMaya
 
-class MainGUI( FrInterface.BasePsWindow ):
+class MainGUI(FrInterface.MyQtWindow):
     '''
     Main GUI for FrMaya About
     '''
@@ -40,7 +40,7 @@ class MainGUI( FrInterface.BasePsWindow ):
         
         # Convert ui path file as FrFile Object
         ui_file = path.Path(__file__).parent / 'AboutFrMaya.ui'
-        super( MainGUI, self ).__init__( ui_file, Title = 'About FrMaya', *args )
+        super( MainGUI, self ).__init__(ui_file, title_tool = 'About FrMaya', *args)
 
         self.connect_event_handlers()
 

@@ -23,25 +23,26 @@ from FrMaya.vendor.Qt import QtCore
 from FrMaya.vendor.Qt import QtWidgets
 from FrMaya.vendor.Qt import QtCompat
 import maya.OpenMayaUI as omui
+import pymel.core as pm
 
 
-class BasePsWindow(QtWidgets.QWidget):
+class MyQtWindow(QtWidgets.QWidget):
     '''
     Pyside base class for dialog window inside maya
     '''
     
     @staticmethod
-    def getMayaWindow():
+    def get_maya_window():
         '''
         Get maya window
         '''
         
         # Get maya main window pointer
-        mayaWindowPtr = omui.MQtUtil.mainWindow()
+        maya_window_ptr = omui.MQtUtil.mainWindow()
         
         # Wrap maya main window pointer as QWidget
-        if mayaWindowPtr is not None:
-            return shiboken.wrapInstance( long( mayaWindowPtr ), QtWidgets.QWidget )
+        if maya_window_ptr is not None:
+            return shiboken.wrapInstance( long( maya_window_ptr ), QtWidgets.QWidget )
         else:
             return False
     @staticmethod
@@ -63,11 +64,11 @@ class BasePsWindow(QtWidgets.QWidget):
                     setattr(base_instance, member, getattr(ui, member))
             return ui
     
-    def BuildUi(self, UIfile):
+    def build_ui(self, ui_file):
         '''
         Building Pyside UI from UI file
         
-        :param UIfile: UI file as 'BasePath' object
+        :param ui_file: UI file as 'BasePath' object
         '''
 
         # Set main layout of the window
@@ -76,7 +77,7 @@ class BasePsWindow(QtWidgets.QWidget):
         self.setLayout( self.mainLayout )
         
         # Load the UI file
-        self.ui = self.setup_ui(UIfile.abspath())
+        self.ui = self.setup_ui(ui_file.abspath())
         
         # Add loaded UI to main layout
         self.mainLayout.addWidget( self.ui )
@@ -85,31 +86,48 @@ class BasePsWindow(QtWidgets.QWidget):
         size = self.ui.size()
         self.resize( size.width(), size.height() )
 
-    def __init__(self, UIfile, Title = '', *args, **kwargs):
+    def __init__(self, ui_file, title_tool = '', *args, **kwargs):
         '''
         Pyside base class for dialog window inside maya
         
         :param uiFile: UI file as 'BasePath' object
         '''
-        
+        # remove existing tool first
+        try:
+            pm.deleteUI(title_tool)
+        except Exception as e:
+            print e
         # Init parent class
-        super( BasePsWindow, self ).__init__(*args, **kwargs)
-        
+        super(MyQtWindow, self).__init__(*args, **kwargs)
+
+        self.ui = None
+        self.mainLayout = None
+
         # Get maya window to parent for current tool
-        MayaWindow = self.getMayaWindow()
+        maya_window = self.get_maya_window()
         # qtwidgets.QWidget.__init__(self, MayaWindow)
         
-        if MayaWindow != False:
+        if maya_window:
             # Parent current tool to maya window 
-            self.setParent( MayaWindow )
+            self.setParent( maya_window )
             # Set usual window system frame,
             # like title, min, and max bar 
             self.setWindowFlags( QtCore.Qt.Window )
             # Set current window tool name
-            if not Title:
-                Title = UIfile.name
-            self.setWindowTitle( Title )
+            if not title_tool:
+                title_tool = ui_file.name
+            self.setWindowTitle(title_tool)
+            self.setObjectName(title_tool)
             # Build UI tool from UI file
-            self.BuildUi(UIfile)
+            self.build_ui(ui_file)
+
+            pm.dockControl(
+                title_tool,
+                label = title_tool.replace("_", " "),
+                area = 'left',
+                content = title_tool,
+                width = self.ui.size().width(),
+                allowedArea = ['right', 'left']
+            )
 
 
