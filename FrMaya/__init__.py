@@ -1,4 +1,4 @@
-'''
+"""
 *******************************
           FrMaya
 *******************************
@@ -7,9 +7,9 @@ Created By            : Muhammad Fredo Syahrul Alam
 Copyright             : Muhammad Fredo Syahrul Alam
 Email                 : muhammadfredo@gmail.com
 Start Date            : 10 May, 2017
-Purpose               : 
+Purpose               :
 
-'''
+"""
 import os
 
 __versiontuple__ = (0, 6, 0)

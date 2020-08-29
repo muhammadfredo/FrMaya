@@ -27,24 +27,25 @@ import pymel.core as pm
 
 
 class MyQtWindow(QtWidgets.QWidget):
-    '''
+    """
     Pyside base class for dialog window inside maya
-    '''
+    """
     
     @staticmethod
     def get_maya_window():
-        '''
+        """
         Get maya window
-        '''
+        """
         
         # Get maya main window pointer
         maya_window_ptr = omui.MQtUtil.mainWindow()
         
         # Wrap maya main window pointer as QWidget
         if maya_window_ptr is not None:
-            return shiboken.wrapInstance( long( maya_window_ptr ), QtWidgets.QWidget )
+            return shiboken.wrapInstance(long(maya_window_ptr), QtWidgets.QWidget)
         else:
             return False
+
     @staticmethod
     def setup_ui(uifile, base_instance=None):
         """Load a Qt Designer .ui file and returns an instance of the user interface
@@ -65,33 +66,33 @@ class MyQtWindow(QtWidgets.QWidget):
             return ui
     
     def build_ui(self, ui_file):
-        '''
+        """
         Building Pyside UI from UI file
-        
+
         :param ui_file: UI file as 'BasePath' object
-        '''
+        """
 
         # Set main layout of the window
         self.mainLayout = QtWidgets.QVBoxLayout()
-        self.mainLayout.setContentsMargins( 4,4,4,4 )
-        self.setLayout( self.mainLayout )
+        self.mainLayout.setContentsMargins(4, 4, 4, 4)
+        self.setLayout(self.mainLayout)
         
         # Load the UI file
         self.ui = self.setup_ui(ui_file.abspath())
         
         # Add loaded UI to main layout
-        self.mainLayout.addWidget( self.ui )
+        self.mainLayout.addWidget(self.ui)
         
         # Set window size the same as size from UI file 
         size = self.ui.size()
-        self.resize( size.width(), size.height() )
+        self.resize(size.width(), size.height())
 
     def __init__(self, ui_file, title_tool = '', *args, **kwargs):
-        '''
+        """
         Pyside base class for dialog window inside maya
-        
+
         :param uiFile: UI file as 'BasePath' object
-        '''
+        """
         # remove existing tool first
         try:
             pm.deleteUI(title_tool)
@@ -109,10 +110,10 @@ class MyQtWindow(QtWidgets.QWidget):
         
         if maya_window:
             # Parent current tool to maya window 
-            self.setParent( maya_window )
+            self.setParent(maya_window)
             # Set usual window system frame,
             # like title, min, and max bar 
-            self.setWindowFlags( QtCore.Qt.Window )
+            self.setWindowFlags(QtCore.Qt.Window)
             # Set current window tool name
             if not title_tool:
                 title_tool = ui_file.name
