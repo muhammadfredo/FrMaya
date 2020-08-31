@@ -22,11 +22,10 @@ from functools import partial
 
 import pymel.core as pm
 
+import FrMaya.core.install
 import FrMaya.core.uimaya
 from FrMaya.vendor import yaml
 from FrMaya.vendor import path
-
-from FrMaya.core import FrInstall
 import FrMaya
 
 
@@ -64,9 +63,9 @@ class MainGUI(FrMaya.core.uimaya.MyQtWindow):
         result = pm.confirmDialog( t = 'FrMaya Install Option', b = [ 'local', 'remote' ], m = mssg )
         try:
             if result == 'local':
-                FrInstall.install(source = self.source_path, local = True)
+                FrMaya.core.install.install(source = self.source_path, local = True)
             elif result == 'remote':
-                FrInstall.install(source = self.source_path, remote = True)
+                FrMaya.core.install.install(source = self.source_path, remote = True)
 
             message = 'FrMaya succesfuly installed.\nPlease restart maya.'
         except Exception, e:
@@ -109,7 +108,7 @@ class MainGUI(FrMaya.core.uimaya.MyQtWindow):
         result = pm.confirmDialog(t = 'FrMaya', b = ['Yes', 'No'], m = 'Are you sure?')
         try:
             if result == 'Yes':
-                FrInstall.uninstall(frmaya = True)
+                FrMaya.core.install.uninstall(frmaya = True)
                 message = 'FrMaya succesfuly removed.\nPlease restart maya.'
         except Exception, e:
             message = 'FrMaya failed to remove.{0}'.format(e)
