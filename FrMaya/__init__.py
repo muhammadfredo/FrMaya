@@ -13,7 +13,7 @@ Purpose               :
 import os
 import sys
 
-import FrMaya.Core.utility as util
+import FrMaya.core.utility as util
 
 __versiontuple__ = (0, 6, 0)
 __version__ = '.'.join(str(x) for x in __versiontuple__)
@@ -54,20 +54,13 @@ def basedir():
     return __basedir__
 
 
-def __lib_package():
-    sys.path.append(os.path.join(basedir(), 'Lib'))
-
-
 def __setup():
-    # add third party package
-    __lib_package()
-
     # assign frmaya version to global data
     GlobalData.set('version', version())
 
     import pymel.core as pm
     # the new way, more consistent with the other
-    from Core import uimaya
+    from core import uimaya
     reload(uimaya)
 
     if not pm.about(batch = True):
@@ -81,8 +74,5 @@ def startup():
 
 
 def install(source_path):
-    # add third party package
-    __lib_package()
-
-    import FrMaya.Tools.AboutFrMaya as AboutFrMaya
+    import FrMaya.tools.AboutFrMaya as AboutFrMaya
     AboutFrMaya.show(source_path = source_path, install_btn = True)

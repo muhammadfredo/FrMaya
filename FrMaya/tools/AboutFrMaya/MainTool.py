@@ -22,15 +22,15 @@ from functools import partial
 
 import pymel.core as pm
 
-import FrMaya.Core.uimaya
+import FrMaya.core.uimaya
 from FrMaya.vendor import yaml
 from FrMaya.vendor import path
 
-from FrMaya.Core import FrInstall
+from FrMaya.core import FrInstall
 import FrMaya
 
 
-class MainGUI(FrMaya.Core.uimaya.MyQtWindow):
+class MainGUI(FrMaya.core.uimaya.MyQtWindow):
     """
     Main GUI for FrMaya About
     """

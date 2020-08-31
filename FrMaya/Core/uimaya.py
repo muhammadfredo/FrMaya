@@ -21,17 +21,21 @@ from pymel.core import uitypes as pmui
 from pymel.core import windows as pywin
 from FrMaya.vendor.Qt import QtCore, QtCompat, QtWidgets
 
+from FrMaya.core import system
+
 
 def get_menu_name(name):
+    # type: (str) -> str
     """
     :param name:
     """
-    # type: str > str
     # TODO: write docstring documentation here
 
     # get menu name and use it for menu identifier
     menu_name = ""
     for char in name:
+        if char == '_' or char == '-':
+            char = ' '
         if char.isalpha() or char.isdigit() or char.isspace():
             menu_name += char
     return menu_name
@@ -69,6 +73,7 @@ class Menubar(pmui.SubMenuItem):
         :param name: Menubar root name
         :param parent: Parent of menubar root, in this case $gMainWindow
         """
+        super(Menubar, self).__init__()
 
         # Convert input variable to object variable
         self.menubarPath = menubar_path
@@ -80,7 +85,6 @@ class Menubar(pmui.SubMenuItem):
         """
         Refresh the submenu each time cursor hover to this menubar root
         """
-
         # Delete all submenu
         self.deleteAllItems()
         # Rebuild all submenu
@@ -96,38 +100,36 @@ class Menubar(pmui.SubMenuItem):
         """
 
         # list all folder, file on current path(fullpath)
-        for o in os.listdir(fullpath):
+        for dir_name in os.listdir(fullpath):
             # fullpath of each file/folder inside current path(fullpath)
-            the_path = os.path.join(fullpath, o).replace("\\", "/")
+            the_path = os.path.join(fullpath, dir_name).replace("\\", "/")
             # separated filename and extension
-            file_name, ext = os.path.splitext(o)
+            file_name, ext = os.path.splitext(dir_name)
+
+            # remove number and underline
+            # number and underline in folder for sorting purpose :))
+            try:
+                int(file_name[:1])
+                file_name = file_name[3:]
+            except ValueError:
+                pass
+            # get nice name for menu label
+            menu_name = get_menu_name(file_name)
 
             # check if the path is file or folder
             if os.path.isdir(the_path):
-                # remove number and underline
-                # number and underline in folder for sorting purpose :))
-                try:
-                    int(o[:1])
-                    o = o[3:]
-                    o = o.replace("_", " ")
-                except ValueError:
-                    pass
                 # create submenu
-                submenu = pywin.subMenuItem(label = o, subMenu = True, p = parent, tearOff = True,
+                submenu = pywin.subMenuItem(label = menu_name, subMenu = True, p = parent, tearOff = True,
                                             postMenuCommandOnce = 1)
                 # recursive buildSubMenu
                 self.build_sub_menu(the_path, submenu)
             # if file is python
             elif ext == '.py':
-                # get nice name for menu label
-                menu_name = get_menu_name(file_name.replace("_", " "))
                 # command of menuitem
                 command_script = 'execfile("{0}")'.format(the_path)
                 # create menuitem
                 pywin.menuItem(label = menu_name, p = parent, tearOff = True, command = command_script)
             elif ext == '.mel':
-                # get nice name for menu label
-                menu_name = get_menu_name(file_name.replace("_", " "))
                 # command of menuitem
                 command_script = 'import maya.mel as mel\nmel.eval( "source \\"{0}\\"" )'.format(the_path)
                 # create menuitem
@@ -135,21 +137,21 @@ class Menubar(pmui.SubMenuItem):
 
 
 def build_menubar():
-    """
-    Build menubar function
-    """
-    # TODO: change BasePath to abstract class
-
-    menubar_item_path = os.path.join(os.path.dirname(App.__file__), 'menubarItem')
+    """Build menubar function"""
+    menubar_path_list = system.get_menubar_path()
+    print menubar_path_list
     # get all menubar root item
-    #     menubarItemPath = os.path.join( os.path.dirname(__file__), 'menubarItem' )
-    menubar_list = os.listdir(menubar_item_path)
+    menubar_list = []
+    for o in menubar_path_list:
+        menubar_list += o.listdir()
     # get maya main window
     main_window = mel.eval("$temp=$gMainWindow")
 
     # build all menubar root item
-    for o in menubar_list:
-        Menubar(os.path.join(menubar_item_path, o), parent = main_window)
+    for menubar_root in menubar_list:
+        print 'RAPTORIAN'
+        print menubar_root
+        Menubar(menubar_root, parent = main_window)
 
 
 class MyQtWindow(QtWidgets.QWidget):

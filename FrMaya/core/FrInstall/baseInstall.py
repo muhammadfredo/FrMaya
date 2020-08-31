@@ -8,7 +8,7 @@ Purpose      :
 
 '''
 
-# install new FrMaya Core
+# install new FrMaya core
 # install new FrMaya 3rd party lib
 # update FrMaya
 # update custom core or 3rd party lib separately

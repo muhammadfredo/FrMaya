@@ -13,7 +13,7 @@ import collections
 import pymel.core as pm
 from FrMaya.vendor import path
 
-from FrMaya.Core import FrMath as frmath
+from FrMaya.core import FrMath as frmath
 
 
 def pgroup( pynodes, world = False, re = "", suffix = "" ):
