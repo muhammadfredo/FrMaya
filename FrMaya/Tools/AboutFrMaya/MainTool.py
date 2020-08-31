@@ -1,18 +1,18 @@
-'''
+"""
 ####################################################################################
 ####################################################################################
 ## SCRIPT HEADER ##
 # Created By             : Muhammad Fredo Syahrul Alam
 # Email                      : muhammadfredo@gmail.com
 # Start Date               : 12 Sep, 2017
-# Last Modified Date       : 
-# Purpose: 
-# Bugs: 
-# History: 
-# Note: 
+# Last Modified Date       :
+# Purpose:
+# Bugs:
+# History:
+# Note:
 ####################################################################################
 ####################################################################################
-'''
+"""
 import os
 import urllib2
 import re
@@ -21,22 +21,24 @@ import zipfile
 from functools import partial
 
 import pymel.core as pm
+
+import FrMaya.Core.uimaya
 from FrMaya.vendor import yaml
 from FrMaya.vendor import path
 
-from FrMaya.Core import FrInterface
 from FrMaya.Core import FrInstall
 import FrMaya
 
-class MainGUI(FrInterface.MyQtWindow):
-    '''
+
+class MainGUI(FrMaya.Core.uimaya.MyQtWindow):
+    """
     Main GUI for FrMaya About
-    '''
+    """
     
     def __init__(self, *args):
-        '''
+        """
         Constructor of main GUI for FR_RiggingTool
-        '''
+        """
         
         # Convert ui path file as FrFile Object
         ui_file = path.Path(__file__).parent / 'AboutFrMaya.ui'
