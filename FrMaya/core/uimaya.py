@@ -21,7 +21,7 @@ from pymel.core import uitypes as pmui
 from pymel.core import windows as pywin
 from FrMaya.vendor.Qt import QtCore, QtCompat, QtWidgets
 
-from FrMaya.core_hook_refactor import system
+from FrMaya.core import system
 
 
 def get_menu_name(name):

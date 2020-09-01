@@ -7,11 +7,11 @@ Start Date   : 29 Apr 2018
 Purpose      :
 
 """
-import FrMaya.core_hook_refactor.uimaya
+import FrMaya.core.uimaya
 from FrMaya.vendor import path
 
 
-class MainGUI(FrMaya.core_hook_refactor.uimaya.MyQtWindow):
+class MainGUI(FrMaya.core.uimaya.MyQtWindow):
 
     def __init__(self, *args):
         # Convert ui path file as FrFile Object

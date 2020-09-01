@@ -17,14 +17,14 @@ import copy
 
 import pymel.core as pm
 
-import FrMaya.core_hook_refactor.uimaya
-import FrMaya.core_hook_refactor.utility
+import FrMaya.core.uimaya
+import FrMaya.core.utility
 from FrMaya.vendor import path
 
-from FrMaya.core_hook_refactor import FrRigging
+from FrMaya.core import FrRigging
 
 
-class MainGUI(FrMaya.core_hook_refactor.uimaya.MyQtWindow):
+class MainGUI(FrMaya.core.uimaya.MyQtWindow):
     """
     Main GUI for FR_RiggingTool
     """
@@ -162,7 +162,7 @@ class MainGUI(FrMaya.core_hook_refactor.uimaya.MyQtWindow):
         # Connect pgroup_btn to the pgroup slot
         pgroup_grp['button'].pressed.connect(partial(self.pgroup_pressed, pgroup_grp))
 
-    @FrMaya.core_hook_refactor.utility.undoable
+    @FrMaya.core.utility.undoable
     def display_pressed(self, sender):
         """
         Slot for pressed signal form display grup widget
@@ -233,7 +233,7 @@ class MainGUI(FrMaya.core_hook_refactor.uimaya.MyQtWindow):
             for o in selection:
                 o.displayLocalAxis.set(dis_axis)
 
-    @FrMaya.core_hook_refactor.utility.undoable
+    @FrMaya.core.utility.undoable
     def pgroup_pressed(self, sender):
         """
         Slot for pressed signal form pgroup_btn widget
@@ -248,7 +248,7 @@ class MainGUI(FrMaya.core_hook_refactor.uimaya.MyQtWindow):
         FrRigging.pgroup(selection, world = sender['world'].isChecked(), re = sender['search'].text(),
                          suffix = sender['replace'].text())
 
-    @FrMaya.core_hook_refactor.utility.undoable
+    @FrMaya.core.utility.undoable
     def align_pressed(self, sender):
         """
         Slot for pressed signal form align grup widget
@@ -269,7 +269,7 @@ class MainGUI(FrMaya.core_hook_refactor.uimaya.MyQtWindow):
         elif sender == self.ui.align_rotate_btn:
             FrRigging.alignMath(selection[0], selection[1], mode = 'rotate')
 
-    @FrMaya.core_hook_refactor.utility.undoable
+    @FrMaya.core.utility.undoable
     def freeze_tm_pressed(self, sender):
         """
         Slot for pressed signal from freeze transform group widget
@@ -293,7 +293,7 @@ class MainGUI(FrMaya.core_hook_refactor.uimaya.MyQtWindow):
         elif sender == self.ui.ft_scale_btn:
             FrRigging.freezeTransform(selection, mode = 'scale')
 
-    @FrMaya.core_hook_refactor.utility.undoable
+    @FrMaya.core.utility.undoable
     def reset_srt_pressed(self, sender):
         """
         Slot for pressed signal from reset transform group widget
@@ -344,7 +344,7 @@ class MainGUI(FrMaya.core_hook_refactor.uimaya.MyQtWindow):
         for o in xyz:
             checkbox[srt + o].setCheckState(sender.checkState())
 
-    @FrMaya.core_hook_refactor.utility.undoable
+    @FrMaya.core.utility.undoable
     def lockhide_pressed(self, sender, checkbox):
         """
         Slot for pressed signal from lock hide button group widget
@@ -378,7 +378,7 @@ class MainGUI(FrMaya.core_hook_refactor.uimaya.MyQtWindow):
         if sender == self.ui.lh_uh_btn:
             FrRigging.keylockhideAttribute(selection, attrubute_list, hide = False)
 
-    @FrMaya.core_hook_refactor.utility.undoable
+    @FrMaya.core.utility.undoable
     def joint_creation_pressed(self, sender, option):
         """
         Slot for pressed signal from joint creation button group widget
@@ -458,7 +458,7 @@ class MainGUI(FrMaya.core_hook_refactor.uimaya.MyQtWindow):
 
         return output
 
-    @FrMaya.core_hook_refactor.utility.undoable
+    @FrMaya.core.utility.undoable
     def joint_orient_pressed(self, sender, option):
         axis = ['X', 'Y', 'Z']
         axis_val = [0, 0, 0]
@@ -490,7 +490,7 @@ class MainGUI(FrMaya.core_hook_refactor.uimaya.MyQtWindow):
 
             pm.select(sel)
 
-    @FrMaya.core_hook_refactor.utility.undoable
+    @FrMaya.core.utility.undoable
     def mirror_joint_pressed(self, sender, option):
         src = option['search'].text()
         re = option['replace'].text()
@@ -506,7 +506,7 @@ class MainGUI(FrMaya.core_hook_refactor.uimaya.MyQtWindow):
                            mirrorXY = option['acrossXY'].isChecked(), mirrorXZ = option['acrossXZ'].isChecked(),
                            mirrorYZ = option['acrossYZ'].isChecked(), searchReplace = (src, re))
 
-    @FrMaya.core_hook_refactor.utility.undoable
+    @FrMaya.core.utility.undoable
     def coloroveride_pressed(self, sender):
         sel = pm.ls(os = True)
         color_val = int(sender.objectName().split('_')[1])
@@ -516,7 +516,7 @@ class MainGUI(FrMaya.core_hook_refactor.uimaya.MyQtWindow):
                 x.overrideEnabled.set(True)
                 x.overrideColor.set(color_val)
 
-    @FrMaya.core_hook_refactor.utility.undoable
+    @FrMaya.core.utility.undoable
     def create_control_pressed(self, sender, setting):
         controllist = setting['controllist']
         sel = pm.ls(os = True)
