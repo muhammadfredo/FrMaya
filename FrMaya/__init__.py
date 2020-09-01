@@ -13,7 +13,7 @@ Purpose               :
 import os
 import sys
 
-import FrMaya.core.utility as util
+import FrMaya.core_hook_refactor.utility as util
 
 __versiontuple__ = (0, 6, 0)
 __version__ = '.'.join(str(x) for x in __versiontuple__)
@@ -60,7 +60,7 @@ def __setup():
 
     import pymel.core as pm
     # the new way, more consistent with the other
-    from core import uimaya
+    from core_hook_refactor import uimaya
     reload(uimaya)
 
     if not pm.about(batch = True):
