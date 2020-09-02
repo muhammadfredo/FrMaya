@@ -1,6 +1,6 @@
 
 import pymel.core as pm
-from FrMaya.Core import FrFile
+
 topnode = pm.ls(os=1)
 rig_path =  pm.sceneName().replace('_MDL', '_RIG')
 pm.saveAs(rig_path)

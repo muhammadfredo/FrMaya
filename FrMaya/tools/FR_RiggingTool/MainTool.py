@@ -22,6 +22,7 @@ import FrMaya.core.utility
 from FrMaya.vendor import path
 
 from FrMaya.core import FrRigging
+from FrMaya.core import system
 
 
 class MainGUI(FrMaya.core.uimaya.MyQtWindow):
@@ -150,7 +151,7 @@ class MainGUI(FrMaya.core.uimaya.MyQtWindow):
         # Populate control list combo box
         control_files = FrRigging.getControlFiles()
         for o in control_files:
-            control_setting_grp['controllist'].addItem(o.name, o)
+            control_setting_grp['controllist'].addItem(o.stem, o)
 
         self.ui.cc_create_btn.pressed.connect(
             partial(self.create_control_pressed, self.ui.cc_create_btn, control_setting_grp))
