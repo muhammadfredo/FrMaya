@@ -15,41 +15,38 @@
 """
 import os
 import urllib2
-import re
 import tempfile
-import zipfile
 from functools import partial
 
 import pymel.core as pm
-
-import FrMaya.core.install
-import FrMaya.core.uimaya
 from FrMaya.vendor import yaml
 from FrMaya.vendor import path
+
+import FrMaya.core as fmc
 import FrMaya
 
 
-class MainGUI(FrMaya.core.uimaya.MyQtWindow):
+class MainGUI(fmc.MyQtWindow):
     """
     Main GUI for FrMaya About
     """
-    
+
     def __init__(self, *args):
         """
         Constructor of main GUI for FR_RiggingTool
         """
-        
+
         # Convert ui path file as FrFile Object
         ui_file = path.Path(__file__).parent / 'AboutFrMaya.ui'
-        super( MainGUI, self ).__init__(ui_file, title_tool = 'About FrMaya', *args)
+        super(MainGUI, self).__init__(ui_file, title_tool = 'About FrMaya', *args)
 
         self.connect_event_handlers()
 
     def connect_event_handlers(self):
         # show current fr maya version
-        self.ui.versionNum_lbl.setText( FrMaya.version() )
+        self.ui.versionNum_lbl.setText(FrMaya.version())
 
-        button_grp = [ self.ui.install_btn, self.ui.update_btn, self.ui.remove_btn ]
+        button_grp = [self.ui.install_btn, self.ui.update_btn, self.ui.remove_btn]
 
         self.ui.install_btn.released.connect(partial(self.install_released))
         self.ui.update_btn.released.connect(partial(self.update_released))
@@ -60,18 +57,18 @@ class MainGUI(FrMaya.core.uimaya.MyQtWindow):
         mssg += 'Remote install :: FrMaya stay where they are.'
 
         # show install option
-        result = pm.confirmDialog( t = 'FrMaya Install Option', b = [ 'local', 'remote' ], m = mssg )
+        result = pm.confirmDialog(t = 'FrMaya Install Option', b = ['local', 'remote'], m = mssg)
         try:
             if result == 'local':
-                FrMaya.core.install.install(source = self.source_path, local = True)
+                fmc.install(source = self.source_path, local = True)
             elif result == 'remote':
-                FrMaya.core.install.install(source = self.source_path, remote = True)
+                fmc.install(source = self.source_path, remote = True)
 
             message = 'FrMaya succesfuly installed.\nPlease restart maya.'
         except Exception, e:
-            message = 'FrMaya failed to install.{0}'.format( e )
+            message = 'FrMaya failed to install.{0}'.format(e)
         # show result of installation
-        pm.confirmDialog( t = 'FrMaya', m = message, b = [ 'Ok' ], db = 'Ok' )
+        pm.confirmDialog(t = 'FrMaya', m = message, b = ['Ok'], db = 'Ok')
 
     def update_released(self):
         update_bool = False
@@ -108,11 +105,9 @@ class MainGUI(FrMaya.core.uimaya.MyQtWindow):
         result = pm.confirmDialog(t = 'FrMaya', b = ['Yes', 'No'], m = 'Are you sure?')
         try:
             if result == 'Yes':
-                FrMaya.core.install.uninstall(frmaya = True)
+                fmc.uninstall(frmaya = True)
                 message = 'FrMaya succesfuly removed.\nPlease restart maya.'
         except Exception, e:
             message = 'FrMaya failed to remove.{0}'.format(e)
         # show result of removing frmaya
         pm.confirmDialog(t = 'FrMaya', m = message, b = ['Ok'], db = 'Ok')
-
-

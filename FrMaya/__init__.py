@@ -10,18 +10,18 @@ Start Date            : 10 May, 2017
 Purpose               :
 
 """
-import os
 import sys
 
-import FrMaya.core.utility as util
-
-__versiontuple__ = (0, 6, 0)
-__version__ = '.'.join(str(x) for x in __versiontuple__)
-__authors__ = ['Muhammad Fredo']
-__basedir__ = os.path.abspath(os.path.dirname(__file__))
+import FrMaya.utility as util
+from .version import (
+    authors,
+    basedir,
+    version,
+    versiontuple,
+)
 
 assert sys.version_info > (2, 7), (
-    "FrMaya version {0} is compatible with Maya2014/python2.7 or later".format(__version__)
+    "FrMaya version {0} is compatible with Maya2014/python2.7 or later".format(version())
 )
 
 
@@ -38,33 +38,16 @@ class GlobalData(object):
         self.__dict_data[key] = value
 
 
-def versiontuple():
-    return __versiontuple__
-
-
-def version():
-    return __version__
-
-
-def authors():
-    return __authors__
-
-
-def basedir():
-    return __basedir__
-
-
 def __setup():
     # assign frmaya version to global data
     GlobalData.set('version', version())
 
     import pymel.core as pm
     # the new way, more consistent with the other
-    from core import uimaya
-    reload(uimaya)
+    from . import core as fmc
 
     if not pm.about(batch = True):
-        uimaya.build_menubar()
+        fmc.build_menubar()
 
 
 def startup():
