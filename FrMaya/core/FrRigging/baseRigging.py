@@ -14,6 +14,7 @@ import pymel.core as pm
 from FrMaya.vendor import path
 
 from FrMaya.core import FrMath as frmath
+import FrMaya.utility as util
 
 
 def pgroup(pynodes, world = False, re = "", suffix = ""):
@@ -477,14 +478,9 @@ def createControl(filenode, transform = None, name = '', suffix = 'Ctl', color =
     # check function attribute, and modify it if its on default mode
     # fill fullpath variable from filenode,
     # if filenode is name of control grab it from getControl
-    try:
-        controlpath = filenode.data
-    except:
-        try:
-            controlfile = getControlFiles(filenode)[0]
-            controlpath = controlfile.data
-        except:
-            return None
+    controlpath = path.Path(filenode)
+    if not controlpath.exists():
+        controlpath = getControlFiles(filenode)[0]
     # modify if name att on default
     if not name:
         name = 'FrControl'
@@ -494,8 +490,9 @@ def createControl(filenode, transform = None, name = '', suffix = 'Ctl', color =
     if not transform:
         transform = pm.dt.Matrix()
 
+    control_data = util.read_json(controlpath)
     # import control
-    curve_control = buildCurve(controlpath)
+    curve_control = buildCurve(control_data)
     # grab transform of imported control
     # ctl = pm.ls(impNodes, type = 'transform')[0]
 

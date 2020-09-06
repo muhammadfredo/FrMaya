@@ -534,8 +534,10 @@ class MainGUI(FrMaya.core.uimaya.MyQtWindow):
         if not tm_list:
             tm_list.append((pm.dt.Matrix(), None))
 
-        for tm, o in tm_list:
-            object_name = o.name()
+        for tm, object_node in tm_list:
+            object_name = 'Control'
+            if object_node:
+                object_name = object_node.name()
             object_name = object_name.replace(searchtext, replacetext)
             if object_name[len(object_name) - 1] == '_':
                 object_name = object_name[:-1]
@@ -544,12 +546,15 @@ class MainGUI(FrMaya.core.uimaya.MyQtWindow):
                                              group = group_list)
 
             # parent cons
-            if posrot_cons and o:
-                pm.parentConstraint(result.control, o, mo = True)
+            if posrot_cons and object_node:
+                pm.parentConstraint(result.control, object_node, mo = True)
 
             # scale cons
-            if scale_cons and o:
-                pm.scaleConstraint(result.control, o, mo = True)
+            if scale_cons and object_node:
+                pm.scaleConstraint(result.control, object_node, mo = True)
 
         if sender == self.ui.cc_create_btn:
             print 'create control'
+
+
+
