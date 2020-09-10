@@ -13,7 +13,6 @@ import collections
 import pymel.core as pm
 from FrMaya.vendor import path
 
-from FrMaya.core import FrMath as frmath
 import FrMaya.utility as util
 
 
@@ -227,42 +226,41 @@ def keylockhideAttribute(pynodes, attributes_string, keyable = None, lock = None
                     att_node.setKeyable(True)
 
 
-def alignMath(orig, target, mode = 'transform'):
+def alignMath(source, target, mode = 'transform'):
     """
     Align from orig pynode to target pynode using math element ( matrix, quaternion, vector, etc)
 
-    :param orig: PyNode which will get transform applied
+    :param source: PyNode which will get transform applied
     :param target: The destination of alignMath operation
     :param mode: transform, translate, rotate
     """
 
-    # I got this align translate and some rotation algoritm
+    # I got this align translate and some rotation algorithm
     # from Red9 SnapRuntime plugin
 
     # Align translate
     if mode == 'translate' or mode == 'transform':
-        try:
+        if type(target) == pm.MeshVertex:
+            target_trans = target.getPosition(space = 'world')
+        else:
             rot_piv_a = target.getRotatePivot(space = 'world')
-            rot_piv_b = orig.getRotatePivot(space = 'world')
-            orig_trans = orig.getTranslation(space = 'world')
+            rot_piv_b = source.getRotatePivot(space = 'world')
+            orig_trans = source.getTranslation(space = 'world')
             # We subtract the destinations translation from it's rotPivot, before adding it
             # to the source rotPiv. This compensates for offsets in the 2 nodes pivots
             target_trans = rot_piv_a + (orig_trans - rot_piv_b)
-        except:
-            if type(target) == pm.MeshVertex:
-                target_trans = target.getPosition(space = 'world')
 
         # Translate align operation
-        orig.setTranslation(target_trans, space = 'world')
+        source.setTranslation(target_trans, space = 'world')
 
     # Align rotation
     if mode == 'rotate' or mode == 'transform':
-        # Create Quaternion object from target PyNode
-        quat = frmath.Quaternion(target.getRotation(space = 'world', quaternion = True))
-        # orig.setRotation( Quat, space = 'world' )
+        # Get rotation as quaternion
+        rot_qt = target.getRotation(space = 'world', quaternion = True)
+        source.setRotation(rot_qt, space = 'world')
 
         # Maybe we should use MyMatrix object in the future for the sake of math XD
-        pm.xform(orig, ro = quat.toEulerian().asList(), eu = True, ws = True)
+        # pm.xform(orig, ro = rot_qt.toEulerian().asList(), eu = True, ws = True)
 
 
 def jointSplit(pynode, split = 2, replace = True):
@@ -270,9 +268,9 @@ def jointSplit(pynode, split = 2, replace = True):
     Split joint from given parameter
 
     :param pynode: A single joint PyNode
-    :param split: Number, how many split the joint will be splited
-    :param replace: Bool value, new chain of splited joint or replace the input joint
-    :return: list of splited joint
+    :param split: Number, how many split the joint will be split
+    :param replace: Bool value, new chain of split joint or replace the input joint
+    :return: list of split joint
     """
 
     # TODO: naming not yet implement, wait until we build modular auto rigging
@@ -287,8 +285,8 @@ def jointSplit(pynode, split = 2, replace = True):
         # get first child
         first_child = pynode.getChildren()[0]
         # get vector
-        vec_a = frmath.Vector(pynode.getTranslation(space = 'world'))
-        vec_b = frmath.Vector(first_child.getTranslation(space = 'world'))
+        vec_a = pynode.getTranslation(space = 'world')
+        vec_b = first_child.getTranslation(space = 'world')
 
         parent = pynode
         if not replace:
@@ -331,7 +329,7 @@ def jointSplit(pynode, split = 2, replace = True):
     return output
 
 
-def cometJoint_orient(pynodes, aimAxis = [1, 0, 0], upAxis = [0, 0, 1], upDir = [1, 0, 0], doAuto = False):
+def cometJoint_orient(pynodes, aim_axis = [1, 0, 0], up_axis = [0, 0, 1], up_dir = [1, 0, 0], do_auto = False):
     # Filter supplied pynodes, if equal to 0 then return false
     if len(pynodes) == 0:
         return False
@@ -340,13 +338,13 @@ def cometJoint_orient(pynodes, aimAxis = [1, 0, 0], upAxis = [0, 0, 1], upDir = 
     pynodes = pm.ls(pynodes, type = 'joint')
 
     # init variable prevUp for later use
-    prev_up = frmath.Vector()
+    prev_up = pm.dt.Vector()
 
     for i, o in enumerate(pynodes):
-        parent_vec = None
+        parent_point = None
         # first we need to unparent everthing and then store that,
-        childs = o.getChildren()
-        for x in childs:
+        children = o.getChildren()
+        for x in children:
             x.setParent(None)
 
         # find parent for later in case we need it
@@ -354,71 +352,73 @@ def cometJoint_orient(pynodes, aimAxis = [1, 0, 0], upAxis = [0, 0, 1], upDir = 
 
         # Now if we have a child joint... aim to that
         try:
-            aim_tgt = pm.ls(childs, type = 'joint')[0]
+            aim_tgt = pm.ls(children, type = 'joint')[0]
         except:
             aim_tgt = None
 
         if aim_tgt:
             # init variable upVec using upDir variable
-            up_vec = frmath.Vector(upDir)
+            up_vec = pm.dt.Vector(up_dir)
 
             # first off... if doAuto is on, we need to guess the cross axis dir
-            if doAuto:
+            if do_auto:
                 # now since the first joint we want to match the second orientation
                 # we kind of hack the things passed in if it is the first joint
                 # ie: if the joint doesnt have a parent... or if the parent it has
                 # has the 'same' position as itself... then we use the 'next' joints
                 # as the up cross calculations
-                jnt_vec = frmath.Vector(o.getRotatePivot(space = 'world'))
+                jnt_point = o.getRotatePivot(space = 'world')
                 if parent:
-                    parent_vec.setValue(parent.getRotatePivot(space = 'world'))
+                    parent_point.setValue(parent.getRotatePivot(space = 'world'))
                 else:
-                    parent_vec = copy.copy(jnt_vec)
-                aim_tgt_vec = frmath.Vector(aim_tgt.getRotatePivot(space = 'world'))
+                    parent_point = jnt_point.copy()
+                aim_tgt_point = aim_tgt.getRotatePivot(space = 'world')
 
                 # how close to we consider 'same'?
                 tol = 0.0001
 
-                vec_cond = jnt_vec - parent_vec
-                pos_cond = [abs(x) for x in vec_cond.asList()]
+                point_cond = jnt_point - parent_point
+                pos_cond = [abs(x) for x in point_cond.tolist()]
                 if not parent or pos_cond[0] <= tol and pos_cond[1] <= tol and pos_cond[2] <= tol:
                     # get aimChild
-                    aim_childs = aim_tgt.getChildren()
+                    aim_children = aim_tgt.getChildren()
                     try:
-                        aim_child = pm.ls(aim_childs, type = 'joint')[0]
+                        aim_child = pm.ls(aim_children, type = 'joint')[0]
                     except:
                         aim_child = None
 
                     # get aimChild vector
                     if aim_child:
-                        aim_child_vec = frmath.Vector(aim_child.getRotatePivot(space = 'world'))
+                        aim_child_point = aim_child.getRotatePivot(space = 'world')
                     else:
-                        aim_child_vec = frmath.Vector()
+                        aim_child_point = pm.dt.Vector()
 
                     # find the up vector using child vector of aim target
-                    up_vec = (jnt_vec - aim_tgt_vec).cross(aim_child_vec - aim_tgt_vec)
+                    up_vec = (jnt_point - aim_tgt_point).cross(aim_child_point - aim_tgt_point)
                 else:
                     # find the up vector using the parent vector
-                    up_vec = (parent_vec - jnt_vec).cross(aim_tgt_vec - jnt_vec)
+                    up_vec = (parent_point - jnt_point).cross(aim_tgt_point - jnt_point)
 
             # reorient the current joint
-            a_cons = pm.aimConstraint(aim_tgt, o, aimVector = aimAxis, upVector = upAxis, worldUpVector = up_vec.asList(),
-                                      worldUpType = 'vector', weight = 1)
+            a_cons = pm.aimConstraint(
+                aim_tgt, o, aimVector = aim_axis, upVector = up_axis, worldUpVector = up_vec.tolist(),
+                worldUpType = 'vector', weight = 1
+            )
             pm.delete(a_cons)
 
             # now compare the up we used to the prev one
-            curUp = frmath.Vector(up_vec.asList()).normal()
+            current_up = up_vec.normal()
             # dot product for angle between... store for later
-            dot = curUp.dot(prev_up)
-            prev_up = frmath.Vector(up_vec.asList())
+            dot = current_up.dot(prev_up)
+            prev_up = up_vec
 
-            if i > 0 and dot <= 0:
+            if i > 0 >= dot:
                 # adjust the rotation axis 180 if it looks like we have flopped the wrong way!
                 # TODO: fix here
                 # pm.xform( o, relative = True, objectSpace = True, rotateAxis = True )
-                o.rotateX.set(o.rotateX.get() + (aimAxis[0] * 180))
-                o.rotateY.set(o.rotateY.get() + (aimAxis[1] * 180))
-                o.rotateZ.set(o.rotateZ.get() + (aimAxis[2] * 180))
+                o.rotateX.set(o.rotateX.get() + (aim_axis[0] * 180))
+                o.rotateY.set(o.rotateY.get() + (aim_axis[1] * 180))
+                o.rotateZ.set(o.rotateZ.get() + (aim_axis[2] * 180))
 
                 prev_up *= -1
         elif parent:
@@ -430,8 +430,8 @@ def cometJoint_orient(pynodes, aimAxis = [1, 0, 0], upAxis = [0, 0, 1], upDir = 
         freezeTransform([o])
 
         # now that we are done ... reparent
-        if len(childs) > 0:
-            for x in childs:
+        if len(children) > 0:
+            for x in children:
                 x.setParent(o)
 
     return True

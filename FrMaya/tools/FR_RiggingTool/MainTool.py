@@ -485,8 +485,8 @@ class MainGUI(FrMaya.core.uimaya.MyQtWindow):
             up_axis = self.get_vec_orient('upAxis', option)
             up_dir = self.get_vec_orient('upDir', option)
 
-            FrRigging.cometJoint_orient(sel, aimAxis = aim_axis, upAxis = up_axis, upDir = up_dir,
-                                        doAuto = option['worldupAuto'].checkState())
+            FrRigging.cometJoint_orient(sel, aim_axis = aim_axis, up_axis = up_axis, up_dir = up_dir,
+                                        do_auto = option['worldupAuto'].checkState())
 
             pm.select(sel)
 
