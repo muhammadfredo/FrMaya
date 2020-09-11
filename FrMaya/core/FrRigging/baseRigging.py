@@ -7,13 +7,13 @@ Start Date   : 22 Jul 2017
 Purpose      :
 
 """
-import copy
 import collections
 
 import pymel.core as pm
 from FrMaya.vendor import path
 
 import FrMaya.utility as util
+from .. import transformation
 
 
 def pgroup(pynodes, world = False, re = "", suffix = ""):
@@ -49,7 +49,7 @@ def pgroup(pynodes, world = False, re = "", suffix = ""):
             grp = pm.group(empty = True, name = the_name)
 
             # Snap the group to each object transformation
-            align_math(grp, o, mode = 'transform')
+            transformation.align(grp, o, mode = 'transform')
 
             # Get object parent
             parent = o.getParent()
@@ -87,99 +87,6 @@ def pgroup(pynodes, world = False, re = "", suffix = ""):
     return output
 
 
-def align(orig, target, mode = 'transform'):
-    """
-    Align from orig pynode to target pynode using contraint method
-
-    :param orig: source of transform
-    :param target: target gonna get transformed
-    :param mode: transform, translate, rotate
-    """
-
-    # Snap position
-    if mode == 'translate' or mode == 'transform':
-        # Snap position of orig node to target node using constraint
-        cons = pm.pointConstraint(target, orig, maintainOffset = False)
-        # Delete the constraint
-        pm.delete(cons)
-
-    # Snap rotation
-    if mode == 'rotate' or mode == 'transform':
-        # Snap rotation of orig node to target node using constraint
-        cons = pm.orientConstraint(target, orig, maintainOffset = False)
-        # Delete the constraint
-        pm.delete(cons)
-
-
-def freeze_transform(pynodes, mode = 'transform'):
-    """
-    Freeze transform, translate, rotate, scale all supplied pynode
-    depend on the mode
-
-    :param pynodes: List of pynode
-    :param mode: transform, translate, rotate, scale
-    """
-
-    # Filter supplied pynodes, if equal to 0 then return false
-    if len(pynodes) == 0:
-        return False
-
-    # Initiate variable for makeIdentity command
-    t = False
-    r = False
-    s = False
-
-    # Translate mode
-    if mode == 'translate' or mode == 'transform':
-        t = True
-    # Rotate mode
-    if mode == 'rotate' or mode == 'transform':
-        r = True
-    # Scale mode
-    if mode == 'scale' or mode == 'transform':
-        s = True
-
-    # Freeze transform command
-    for o in pynodes:
-        pm.makeIdentity(o, apply = True, translate = t, rotate = r, scale = s)
-
-
-def zeroout_transform(pynodes, mode = 'transform'):
-    """
-    Zero out transform, visibility, and rotate order
-
-    :param pynodes: list of pynode
-    :param mode: transform, translate, rotate, scale, visibility, rotateorder
-    """
-
-    # Filter supplied pynodes, if equal to 0 then return false
-    if len(pynodes) == 0:
-        return False
-
-    for o in pynodes:
-        # Translate mode
-        if mode == 'translate' or mode == 'transform':
-            o.translateX.set(0)
-            o.translateY.set(0)
-            o.translateZ.set(0)
-        # Rotate mode
-        if mode == 'rotate' or mode == 'transform':
-            o.rotateX.set(0)
-            o.rotateY.set(0)
-            o.rotateZ.set(0)
-        # Scale mode
-        if mode == 'scale' or mode == 'transform':
-            o.scaleX.set(1)
-            o.scaleY.set(1)
-            o.scaleZ.set(1)
-        # Visibility
-        if mode == 'visibility':
-            o.visibility.set(1)
-        # Rotate order
-        if mode == 'rotateorder':
-            o.rotateOrder.set(0)
-
-
 def keylockhide_attribute(pynodes, attributes_string, keyable = None, lock = None, hide = None):
     """
     Make attribute keyable or not, lock or unlock, and hide or unhide
@@ -207,7 +114,7 @@ def keylockhide_attribute(pynodes, attributes_string, keyable = None, lock = Non
             if keyable is not None:
                 att_node.setKeyable(keyable)
 
-                # Make sure attribute still showed in channelbox
+                # Make sure attribute still showed in channel box
                 if not keyable:
                     att_node.showInChannelBox(True)
 
@@ -217,50 +124,13 @@ def keylockhide_attribute(pynodes, attributes_string, keyable = None, lock = Non
 
             # Hide or unhide operation
             if hide is not None:
-                # Attribute still showed in channelbox if it still keyable
+                # Attribute still showed in channel box if it still keyable
                 if hide:
                     att_node.setKeyable(False)
                     att_node.showInChannelBox(False)
-                # Set keyable to true will show the attribute in channelbox
+                # Set keyable to true will show the attribute in channel box
                 elif not hide:
                     att_node.setKeyable(True)
-
-
-def align_math(source, target, mode = 'transform'):
-    """
-    Align from orig pynode to target pynode using math element ( matrix, quaternion, vector, etc)
-
-    :param source: PyNode which will get transform applied
-    :param target: The destination of alignMath operation
-    :param mode: transform, translate, rotate
-    """
-
-    # I got this align translate and some rotation algorithm
-    # from Red9 SnapRuntime plugin
-
-    # Align translate
-    if mode == 'translate' or mode == 'transform':
-        if type(target) == pm.MeshVertex:
-            target_trans = target.getPosition(space = 'world')
-        else:
-            rot_piv_a = target.getRotatePivot(space = 'world')
-            rot_piv_b = source.getRotatePivot(space = 'world')
-            orig_trans = source.getTranslation(space = 'world')
-            # We subtract the destinations translation from it's rotPivot, before adding it
-            # to the source rotPiv. This compensates for offsets in the 2 nodes pivots
-            target_trans = rot_piv_a + (orig_trans - rot_piv_b)
-
-        # Translate align operation
-        source.setTranslation(target_trans, space = 'world')
-
-    # Align rotation
-    if mode == 'rotate' or mode == 'transform':
-        # Get rotation as quaternion
-        rot_qt = target.getRotation(space = 'world', quaternion = True)
-        source.setRotation(rot_qt, space = 'world')
-
-        # Maybe we should use MyMatrix object in the future for the sake of math XD
-        # pm.xform(orig, ro = rot_qt.toEulerian().asList(), eu = True, ws = True)
 
 
 def joint_split(pynode, split = 2, replace = True):
@@ -291,7 +161,7 @@ def joint_split(pynode, split = 2, replace = True):
         parent = pynode
         if not replace:
             jnt = pm.createNode('joint')
-            align_math(jnt, pynode)
+            transformation.align(jnt, pynode)
             parent = jnt
             output.append(parent)
 
@@ -300,15 +170,15 @@ def joint_split(pynode, split = 2, replace = True):
             jnt = pm.createNode('joint')
             pos = factor * (i + 1) + vec_a
 
-            # set splited joint translate
+            # set split joint translate
             jnt.setTranslation(pos.asList())
-            # set splited joint rotation
-            align_math(jnt, pynode, mode = 'rotate')
+            # set split joint rotation
+            transformation.align(jnt, pynode, mode = 'rotate')
 
-            # set parent splited joint
+            # set parent split joint
             jnt.setParent(parent)
             # clean transformation on joint
-            freeze_transform([jnt])
+            transformation.freeze_transform([jnt])
 
             # append newly created split joint to output
             output.append(jnt)
@@ -317,7 +187,7 @@ def joint_split(pynode, split = 2, replace = True):
 
         if not replace:
             jnt = pm.createNode('joint')
-            align_math(jnt, first_child)
+            transformation.align(jnt, first_child)
             jnt.setParent(parent)
             output.append(jnt)
         else:
@@ -329,7 +199,13 @@ def joint_split(pynode, split = 2, replace = True):
     return output
 
 
-def comet_joint_orient(pynodes, aim_axis = [1, 0, 0], up_axis = [0, 0, 1], up_dir = [1, 0, 0], do_auto = False):
+def comet_joint_orient(pynodes, aim_axis = None, up_axis = None, up_dir = None, do_auto = False):
+    if aim_axis is None:
+        aim_axis = [1, 0, 0]
+    if up_axis is None:
+        up_axis = [0, 0, 1]
+    if up_dir is None:
+        up_dir = [1, 0, 0]
     # Filter supplied pynodes, if equal to 0 then return false
     if len(pynodes) == 0:
         return False
@@ -342,7 +218,7 @@ def comet_joint_orient(pynodes, aim_axis = [1, 0, 0], up_axis = [0, 0, 1], up_di
 
     for i, o in enumerate(pynodes):
         parent_point = None
-        # first we need to unparent everthing and then store that,
+        # first we need to unparent everything and then store that,
         children = o.getChildren()
         for x in children:
             x.setParent(None)
@@ -351,10 +227,11 @@ def comet_joint_orient(pynodes, aim_axis = [1, 0, 0], up_axis = [0, 0, 1], up_di
         parent = o.getParent()
 
         # Now if we have a child joint... aim to that
-        try:
-            aim_tgt = pm.ls(children, type = 'joint')[0]
-        except:
-            aim_tgt = None
+        aim_tgt = None
+        for child in children:
+            if child.nodeType() == 'joint':
+                aim_tgt = child
+                break
 
         if aim_tgt:
             # init variable upVec using upDir variable
@@ -381,11 +258,10 @@ def comet_joint_orient(pynodes, aim_axis = [1, 0, 0], up_axis = [0, 0, 1], up_di
                 pos_cond = [abs(x) for x in point_cond.tolist()]
                 if not parent or pos_cond[0] <= tol and pos_cond[1] <= tol and pos_cond[2] <= tol:
                     # get aimChild
-                    aim_children = aim_tgt.getChildren()
-                    try:
-                        aim_child = pm.ls(aim_children, type = 'joint')[0]
-                    except:
-                        aim_child = None
+                    aim_child = None
+                    aim_children = aim_tgt.getChildren(type = 'joint')
+                    if aim_children:
+                        aim_child = aim_children[0]
 
                     # get aimChild vector
                     if aim_child:
@@ -423,11 +299,11 @@ def comet_joint_orient(pynodes, aim_axis = [1, 0, 0], up_axis = [0, 0, 1], up_di
                 prev_up *= -1
         elif parent:
             # otherwise if there is no target, just dup orientation of parent...
-            align_math(o, parent, mode = 'rotate')
+            transformation.align(o, parent, mode = 'rotate')
 
         # and now finish clearing out joint axis ...
         pm.joint(o, e = True, zeroScaleOrient = True)
-        freeze_transform([o])
+        transformation.freeze_transform([o])
 
         # now that we are done ... reparent
         if len(children) > 0:
@@ -466,7 +342,7 @@ def build_curve(data):
         point = value.get('point')
         knot = value.get('knot')
 
-        # convert list to tupple
+        # convert list to tuple
         point = [(o[0], o[1], o[2]) for o in point]
 
         curve = pm.curve(d = degree, per = periodic, p = point, k = knot)
@@ -474,23 +350,24 @@ def build_curve(data):
 
 
 # att plan for below function, type of control, name, transform, color, group count
-def create_control(filenode, transform = None, name = '', suffix = 'Ctl', color = None, group = ['Grp']):
+def create_control(control_file, transform = None, name = '', suffix = 'Ctl', color = None, group = None):
+    if group is None:
+        group = ['Grp']
+    if transform is None:
+        transform = pm.dt.Matrix()
     # check function attribute, and modify it if its on default mode
-    # fill fullpath variable from filenode,
-    # if filenode is name of control grab it from getControl
-    controlpath = path.Path(filenode)
-    if not controlpath.exists():
-        controlpath = get_control_files(filenode)[0]
+    # fill full path variable from control_file,
+    # if control_file is name of control grab it from getControl
+    control_file_path = path.Path(control_file)
+    if not control_file_path.exists():
+        control_file_path = get_control_files(control_file)[0]
     # modify if name att on default
     if not name:
         name = 'FrControl'
     # add suffix to name
     name += '_' + suffix
-    # modify if transform is None
-    if not transform:
-        transform = pm.dt.Matrix()
 
-    control_data = util.read_json(controlpath)
+    control_data = util.read_json(control_file_path)
     # import control
     curve_control = build_curve(control_data)
     # grab transform of imported control

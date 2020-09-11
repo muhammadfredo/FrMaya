@@ -17,6 +17,7 @@ import copy
 
 import pymel.core as pm
 
+import FrMaya.core as fmc
 import FrMaya.core.uimaya
 import FrMaya.utility as util
 from FrMaya.vendor import path
@@ -261,13 +262,13 @@ class MainGUI(FrMaya.core.uimaya.MyQtWindow):
 
         # Align transform mode on selection
         if sender == self.ui.align_transform_btn:
-            FrRigging.align_math(selection[0], selection[1], mode = 'transform')
+            fmc.align(selection[0], selection[1], mode = 'transform')
         # Align translate mode on selection
         elif sender == self.ui.align_translate_btn:
-            FrRigging.align_math(selection[0], selection[1], mode = 'translate')
+            fmc.align(selection[0], selection[1], mode = 'translate')
         # Align rotate mode on selection
         elif sender == self.ui.align_rotate_btn:
-            FrRigging.align_math(selection[0], selection[1], mode = 'rotate')
+            fmc.align(selection[0], selection[1], mode = 'rotate')
 
     @util.undoable
     def freeze_tm_pressed(self, sender):
@@ -282,16 +283,16 @@ class MainGUI(FrMaya.core.uimaya.MyQtWindow):
 
         # Freeze transform on selection
         if sender == self.ui.ft_all_btn:
-            FrRigging.freeze_transform(selection)
+            fmc.freeze_transform(selection)
         # Freeze translate on selection
         elif sender == self.ui.ft_translate_btn:
-            FrRigging.freeze_transform(selection, mode = 'translate')
+            fmc.freeze_transform(selection, mode = 'translate')
         # Freeze rotation on selection
         elif sender == self.ui.ft_rotate_btn:
-            FrRigging.freeze_transform(selection, mode = 'rotate')
+            fmc.freeze_transform(selection, mode = 'rotate')
         # Freeze scale on selection
         elif sender == self.ui.ft_scale_btn:
-            FrRigging.freeze_transform(selection, mode = 'scale')
+            fmc.freeze_transform(selection, mode = 'scale')
 
     @util.undoable
     def reset_srt_pressed(self, sender):
@@ -306,19 +307,19 @@ class MainGUI(FrMaya.core.uimaya.MyQtWindow):
 
         # Zero out translate
         if sender == self.ui.r_translate_btn:
-            FrRigging.zeroout_transform(selection, mode = 'translate')
+            fmc.reset_transform(selection, mode = 'translate')
         # Zero out rotate
         elif sender == self.ui.r_rotate_btn:
-            FrRigging.zeroout_transform(selection, mode = 'rotate')
+            fmc.reset_transform(selection, mode = 'rotate')
         # Zero out scale
         elif sender == self.ui.r_scale_btn:
-            FrRigging.zeroout_transform(selection, mode = 'scale')
+            fmc.reset_transform(selection, mode = 'scale')
         # Normalize visibility
         elif sender == self.ui.r_visibility_btn:
-            FrRigging.zeroout_transform(selection, mode = 'visibility')
+            fmc.reset_transform(selection, mode = 'visibility')
         # Normalize rotate order
         elif sender == self.ui.r_rotateorder_btn:
-            FrRigging.zeroout_transform(selection, mode = 'rotateorder')
+            fmc.reset_transform(selection, mode = 'rotateorder')
 
     def lockhide_state_changed(self, sender, checkbox):
         """
@@ -419,7 +420,7 @@ class MainGUI(FrMaya.core.uimaya.MyQtWindow):
             result_jnt = []
             for o in new_selection:
                 jnt = pm.createNode('joint')
-                FrRigging.align_math(jnt, o, mode = 'translate')
+                fmc.align(jnt, o, mode = 'translate')
                 result_jnt.append(jnt)
 
             # reselect the selection
