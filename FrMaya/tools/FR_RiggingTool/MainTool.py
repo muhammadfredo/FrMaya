@@ -148,7 +148,7 @@ class MainGUI(FrMaya.core.uimaya.MyQtWindow):
                                'replace': self.ui.cc_replace_txt}
 
         # Populate control list combo box
-        control_files = FrRigging.getControlFiles()
+        control_files = FrRigging.get_control_files()
         for o in control_files:
             control_setting_grp['controllist'].addItem(o.stem, o)
 
@@ -261,13 +261,13 @@ class MainGUI(FrMaya.core.uimaya.MyQtWindow):
 
         # Align transform mode on selection
         if sender == self.ui.align_transform_btn:
-            FrRigging.alignMath(selection[0], selection[1], mode = 'transform')
+            FrRigging.align_math(selection[0], selection[1], mode = 'transform')
         # Align translate mode on selection
         elif sender == self.ui.align_translate_btn:
-            FrRigging.alignMath(selection[0], selection[1], mode = 'translate')
+            FrRigging.align_math(selection[0], selection[1], mode = 'translate')
         # Align rotate mode on selection
         elif sender == self.ui.align_rotate_btn:
-            FrRigging.alignMath(selection[0], selection[1], mode = 'rotate')
+            FrRigging.align_math(selection[0], selection[1], mode = 'rotate')
 
     @util.undoable
     def freeze_tm_pressed(self, sender):
@@ -282,16 +282,16 @@ class MainGUI(FrMaya.core.uimaya.MyQtWindow):
 
         # Freeze transform on selection
         if sender == self.ui.ft_all_btn:
-            FrRigging.freezeTransform(selection)
+            FrRigging.freeze_transform(selection)
         # Freeze translate on selection
         elif sender == self.ui.ft_translate_btn:
-            FrRigging.freezeTransform(selection, mode = 'translate')
+            FrRigging.freeze_transform(selection, mode = 'translate')
         # Freeze rotation on selection
         elif sender == self.ui.ft_rotate_btn:
-            FrRigging.freezeTransform(selection, mode = 'rotate')
+            FrRigging.freeze_transform(selection, mode = 'rotate')
         # Freeze scale on selection
         elif sender == self.ui.ft_scale_btn:
-            FrRigging.freezeTransform(selection, mode = 'scale')
+            FrRigging.freeze_transform(selection, mode = 'scale')
 
     @util.undoable
     def reset_srt_pressed(self, sender):
@@ -306,19 +306,19 @@ class MainGUI(FrMaya.core.uimaya.MyQtWindow):
 
         # Zero out translate
         if sender == self.ui.r_translate_btn:
-            FrRigging.zerooutTransform(selection, mode = 'translate')
+            FrRigging.zeroout_transform(selection, mode = 'translate')
         # Zero out rotate
         elif sender == self.ui.r_rotate_btn:
-            FrRigging.zerooutTransform(selection, mode = 'rotate')
+            FrRigging.zeroout_transform(selection, mode = 'rotate')
         # Zero out scale
         elif sender == self.ui.r_scale_btn:
-            FrRigging.zerooutTransform(selection, mode = 'scale')
+            FrRigging.zeroout_transform(selection, mode = 'scale')
         # Normalize visibility
         elif sender == self.ui.r_visibility_btn:
-            FrRigging.zerooutTransform(selection, mode = 'visibility')
+            FrRigging.zeroout_transform(selection, mode = 'visibility')
         # Normalize rotate order
         elif sender == self.ui.r_rotateorder_btn:
-            FrRigging.zerooutTransform(selection, mode = 'rotateorder')
+            FrRigging.zeroout_transform(selection, mode = 'rotateorder')
 
     def lockhide_state_changed(self, sender, checkbox):
         """
@@ -361,22 +361,22 @@ class MainGUI(FrMaya.core.uimaya.MyQtWindow):
 
         # Make keyable
         if sender == self.ui.lh_k_btn:
-            FrRigging.keylockhideAttribute(selection, attrubute_list, keyable = True)
+            FrRigging.keylockhide_attribute(selection, attrubute_list, keyable = True)
         # Lock attribute
         if sender == self.ui.lh_l_btn:
-            FrRigging.keylockhideAttribute(selection, attrubute_list, lock = True)
+            FrRigging.keylockhide_attribute(selection, attrubute_list, lock = True)
         # Hide attribute
         if sender == self.ui.lh_h_btn:
-            FrRigging.keylockhideAttribute(selection, attrubute_list, hide = True)
+            FrRigging.keylockhide_attribute(selection, attrubute_list, hide = True)
         # Make unkeyable
         if sender == self.ui.lh_uk_btn:
-            FrRigging.keylockhideAttribute(selection, attrubute_list, keyable = False)
+            FrRigging.keylockhide_attribute(selection, attrubute_list, keyable = False)
         # Unlock attribute
         if sender == self.ui.lh_ul_btn:
-            FrRigging.keylockhideAttribute(selection, attrubute_list, lock = False)
+            FrRigging.keylockhide_attribute(selection, attrubute_list, lock = False)
         # Unhide attribute
         if sender == self.ui.lh_uh_btn:
-            FrRigging.keylockhideAttribute(selection, attrubute_list, hide = False)
+            FrRigging.keylockhide_attribute(selection, attrubute_list, hide = False)
 
     @util.undoable
     def joint_creation_pressed(self, sender, option):
@@ -400,7 +400,7 @@ class MainGUI(FrMaya.core.uimaya.MyQtWindow):
         if sender == self.ui.jc_split_btn:
             sel = pm.ls(os = True, type = 'joint')
             if len(sel) > 0:
-                FrRigging.jointSplit(sel[0], option['splitCount'].value(), option['replace'].isChecked())
+                FrRigging.joint_split(sel[0], option['splitCount'].value(), option['replace'].isChecked())
         # Created joint on selected
         if sender == self.ui.jc_createonsel_btn:
             sel = pm.ls(os = True)
@@ -419,7 +419,7 @@ class MainGUI(FrMaya.core.uimaya.MyQtWindow):
             result_jnt = []
             for o in new_selection:
                 jnt = pm.createNode('joint')
-                FrRigging.alignMath(jnt, o, mode = 'translate')
+                FrRigging.align_math(jnt, o, mode = 'translate')
                 result_jnt.append(jnt)
 
             # reselect the selection
@@ -485,8 +485,8 @@ class MainGUI(FrMaya.core.uimaya.MyQtWindow):
             up_axis = self.get_vec_orient('upAxis', option)
             up_dir = self.get_vec_orient('upDir', option)
 
-            FrRigging.cometJoint_orient(sel, aim_axis = aim_axis, up_axis = up_axis, up_dir = up_dir,
-                                        do_auto = option['worldupAuto'].checkState())
+            FrRigging.comet_joint_orient(sel, aim_axis = aim_axis, up_axis = up_axis, up_dir = up_dir,
+                                         do_auto = option['worldupAuto'].checkState())
 
             pm.select(sel)
 
@@ -542,8 +542,8 @@ class MainGUI(FrMaya.core.uimaya.MyQtWindow):
             if object_name[len(object_name) - 1] == '_':
                 object_name = object_name[:-1]
             # createControl(filenode, name = '', suffix = 'Ctl', transform = None, color = None, group = ['Grp'])
-            result = FrRigging.createControl(item_data, name = object_name, transform = tm, suffix = suffixtext,
-                                             group = group_list)
+            result = FrRigging.create_control(item_data, name = object_name, transform = tm, suffix = suffixtext,
+                                              group = group_list)
 
             # parent cons
             if posrot_cons and object_node:
