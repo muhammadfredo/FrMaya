@@ -246,7 +246,7 @@ class MainGUI(FrMaya.core.uimaya.MyQtWindow):
         selection = pm.ls(os = True)
 
         # Perform pgroup operation on the selection
-        FrRigging.pgroup(selection, world = sender['world'].isChecked(), re = sender['search'].text(),
+        fmc.pgroup(selection, world = sender['world'].isChecked(), re = sender['search'].text(),
                          suffix = sender['replace'].text())
 
     @util.undoable
@@ -401,7 +401,7 @@ class MainGUI(FrMaya.core.uimaya.MyQtWindow):
         if sender == self.ui.jc_split_btn:
             sel = pm.ls(os = True, type = 'joint')
             if len(sel) > 0:
-                FrRigging.joint_split(sel[0], option['splitCount'].value(), option['replace'].isChecked())
+                fmc.joint_split(sel[0], option['splitCount'].value(), option['replace'].isChecked())
         # Created joint on selected
         if sender == self.ui.jc_createonsel_btn:
             sel = pm.ls(os = True)
@@ -486,7 +486,7 @@ class MainGUI(FrMaya.core.uimaya.MyQtWindow):
             up_axis = self.get_vec_orient('upAxis', option)
             up_dir = self.get_vec_orient('upDir', option)
 
-            FrRigging.comet_joint_orient(sel, aim_axis = aim_axis, up_axis = up_axis, up_dir = up_dir,
+            fmc.comet_joint_orient(sel, aim_axis = aim_axis, up_axis = up_axis, up_dir = up_dir,
                                          do_auto = option['worldupAuto'].checkState())
 
             pm.select(sel)

@@ -1,3 +1,9 @@
+from .general import (
+    pgroup,
+    joint_split,
+    comet_joint_orient
+)
+
 from .install import (
     install,
     uninstall

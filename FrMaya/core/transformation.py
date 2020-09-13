@@ -7,14 +7,16 @@ Start Date   : 11 Sep 2020
 Info         :
 
 """
-from typing import List
+from typing import List, Optional, Type
+
 import pymel.core as pm
 
 
 def align(source, target, mode = ''):
-    # type: (pm.PyNode, pm.PyNode, str) -> None
+    # type: (Type[pm.nt.Transform], Type[pm.nt.Transform], Optional[str]) -> None
     """
-    Align from orig pynode to target pynode
+    Align from source pynode to target pynode
+    # TODO: fix docstring
 
     :arg source: PyNode which will get transform applied
     :type source: pm.PyNode
@@ -47,10 +49,11 @@ def align(source, target, mode = ''):
 
 
 def freeze_transform(pynodes, mode = ''):
-    # type: (List[pm.PyNode], str) -> None
+    # type: (List[Type[pm.nt.Transform]], Optional[str]) -> None
     """
-    Freeze translate, rotate, scale, or transform supplied pynode.
+    Freeze translate, rotate, scale supplied pynode.
     Default transform.
+    # TODO: fix docstring
 
     :arg pynodes: List of pynode
     :type pynodes: list of pm.PyNode
@@ -79,9 +82,10 @@ def freeze_transform(pynodes, mode = ''):
 
 
 def reset_transform(pynodes, mode = ''):
-    # type: (List[pm.PyNode], str) -> None
+    # type: (List[Type[pm.nt.Transform]], Optional[str]) -> None
     """
     Reset transform, visibility, and rotate order
+    # TODO: fix docstring
 
     :arg pynodes: list of pynode
     :type pynodes: list of pm.PyNode
