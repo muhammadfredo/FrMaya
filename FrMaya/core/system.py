@@ -13,7 +13,6 @@ from FrMaya.vendor import path
 
 
 def get_menubar_path():
-    # type : () -> List[path.Path]
     """Collect menubar path from FR_MYMENUBAR environment"""
     menubar_environ = os.environ.get('FR_MYMENUBAR')
 

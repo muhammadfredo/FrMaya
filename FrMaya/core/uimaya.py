@@ -25,8 +25,8 @@ from FrMaya.core import system
 
 
 def get_menu_name(name):
-    # type: (str) -> str
     """
+    # TODO: docstring here
     :param name:
     """
     # TODO: write docstring documentation here

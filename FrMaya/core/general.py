@@ -15,7 +15,6 @@ from . import transformation
 
 
 def pgroup(pynodes, world = False, re = "", suffix = ""):
-    # type: (List[Type[pm.nt.DagNode]], Optional[bool], Optional[str], Optional[str]) -> List[pm.nt.Transform]
     """
     Create pgroup on supplied pynode
     # TODO: fix docstring
@@ -92,7 +91,6 @@ def pgroup(pynodes, world = False, re = "", suffix = ""):
 
 
 def joint_split(pynode, split = 2, replace = True):
-    # type: (Type[pm.nt.Joint], Optional[int], Optional[bool]) -> List[pm.nt.Joint]
     """
     Split joint from given parameter
     # TODO: fix docstring
@@ -122,7 +120,7 @@ def joint_split(pynode, split = 2, replace = True):
 
         parent = pynode
         if not replace:
-            parent = pm.createNode('joint') # type: pm.nt.Joint
+            parent = pm.createNode('joint')
             transformation.align(parent, pynode)
             output.append(parent)
 
@@ -157,14 +155,7 @@ def joint_split(pynode, split = 2, replace = True):
     return output
 
 
-def comet_joint_orient(
-        pynodes,            # type: List[Type[pm.nt.Joint]]
-        aim_axis = None,    # type: Optional[Union[Type[pm.dt.Vector], List[float]]]
-        up_axis = None,     # type: Optional[Union[Type[pm.dt.Vector], List[float]]]
-        up_dir = None,      # type: Optional[Union[Type[pm.dt.Vector], List[float]]]
-        do_auto = False     # type: bool
-):
-    # type: (...) -> bool
+def comet_joint_orient(pynodes, aim_axis = None, up_axis = None, up_dir = None, do_auto = False):
     """
     # TODO: fix docstring
 

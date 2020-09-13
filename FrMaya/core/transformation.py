@@ -13,7 +13,6 @@ import pymel.core as pm
 
 
 def align(source, target, mode = ''):
-    # type: (Type[pm.nt.Transform], Type[pm.nt.Transform], Optional[str]) -> None
     """
     Align from source pynode to target pynode
     # TODO: fix docstring
@@ -49,7 +48,6 @@ def align(source, target, mode = ''):
 
 
 def freeze_transform(pynodes, mode = ''):
-    # type: (List[Type[pm.nt.Transform]], Optional[str]) -> None
     """
     Freeze translate, rotate, scale supplied pynode.
     Default transform.
@@ -82,7 +80,6 @@ def freeze_transform(pynodes, mode = ''):
 
 
 def reset_transform(pynodes, mode = ''):
-    # type: (List[Type[pm.nt.Transform]], Optional[str]) -> None
     """
     Reset transform, visibility, and rotate order
     # TODO: fix docstring
