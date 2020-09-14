@@ -13,7 +13,7 @@ from FrMaya.vendor import path
 
 
 def __get_environ_path(environ_key):
-    """Collect path from given environment key"""
+    """Collect path from given environment key."""
     environ_value = os.environ.get(environ_key)
 
     if not environ_value:
@@ -24,12 +24,12 @@ def __get_environ_path(environ_key):
 
 
 def get_menubar_path():
-    """Collect menubar path from FR_MYMENUBAR environment"""
+    """Collect menubar path from FR_MYMENUBAR environment."""
     return __get_environ_path('FR_MYMENUBAR')
 
 
 def get_control_curve_path():
-    """Collect control curve path from FR_CONTROLCURVE environment"""
+    """Collect control curve path from FR_CONTROLCURVE environment."""
     return __get_environ_path('FR_CONTROLCURVE')
 
 
