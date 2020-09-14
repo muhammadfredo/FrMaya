@@ -11,6 +11,7 @@ import pymel.core as pm
 
 
 def singelton(input_class):
+    # TODO: docstring here
     instances = {}
 
     def get_instance(*args, **kwargs):
@@ -27,6 +28,7 @@ def undoable(input_function):
     from "Kriss Andrews" on http://blog.3dkris.com/
     A decorator that will make commands undoable in maya
     """
+    # TODO: docstring here
 
     def decorator_code(*args, **kwargs):
         pm.undoInfo(openChunk=True)

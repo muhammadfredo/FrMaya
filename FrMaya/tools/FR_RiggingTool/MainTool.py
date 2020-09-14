@@ -149,7 +149,7 @@ class MainGUI(FrMaya.core.uimaya.MyQtWindow):
                                'replace': self.ui.cc_replace_txt}
 
         # Populate control list combo box
-        control_files = FrRigging.get_control_files()
+        control_files = fmc.get_control_files()
         for o in control_files:
             control_setting_grp['controllist'].addItem(o.stem, o)
 
@@ -362,22 +362,22 @@ class MainGUI(FrMaya.core.uimaya.MyQtWindow):
 
         # Make keyable
         if sender == self.ui.lh_k_btn:
-            FrRigging.keylockhide_attribute(selection, attrubute_list, keyable = True)
+            fmc.keylockhide_attribute(selection, attrubute_list, keyable = True)
         # Lock attribute
         if sender == self.ui.lh_l_btn:
-            FrRigging.keylockhide_attribute(selection, attrubute_list, lock = True)
+            fmc.keylockhide_attribute(selection, attrubute_list, lock = True)
         # Hide attribute
         if sender == self.ui.lh_h_btn:
-            FrRigging.keylockhide_attribute(selection, attrubute_list, hide = True)
+            fmc.keylockhide_attribute(selection, attrubute_list, hide = True)
         # Make unkeyable
         if sender == self.ui.lh_uk_btn:
-            FrRigging.keylockhide_attribute(selection, attrubute_list, keyable = False)
+            fmc.keylockhide_attribute(selection, attrubute_list, keyable = False)
         # Unlock attribute
         if sender == self.ui.lh_ul_btn:
-            FrRigging.keylockhide_attribute(selection, attrubute_list, lock = False)
+            fmc.keylockhide_attribute(selection, attrubute_list, lock = False)
         # Unhide attribute
         if sender == self.ui.lh_uh_btn:
-            FrRigging.keylockhide_attribute(selection, attrubute_list, hide = False)
+            fmc.keylockhide_attribute(selection, attrubute_list, hide = False)
 
     @util.undoable
     def joint_creation_pressed(self, sender, option):
@@ -543,7 +543,7 @@ class MainGUI(FrMaya.core.uimaya.MyQtWindow):
             if object_name[len(object_name) - 1] == '_':
                 object_name = object_name[:-1]
             # createControl(filenode, name = '', suffix = 'Ctl', transform = None, color = None, group = ['Grp'])
-            result = FrRigging.create_control(item_data, name = object_name, transform = tm, suffix = suffixtext,
+            result = fmc.create_control(item_data, name = object_name, transform = tm, suffix = suffixtext,
                                               group = group_list)
 
             # parent cons

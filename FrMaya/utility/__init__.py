@@ -7,6 +7,10 @@ Start Date   : 03 Sep 2020
 Info         :
 
 """
+from .common import (
+    flatten,
+)
+
 from .decoration import (
     singelton,
     undoable

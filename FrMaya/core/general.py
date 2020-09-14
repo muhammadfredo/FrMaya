@@ -283,6 +283,73 @@ def comet_joint_orient(pynodes, aim_axis = None, up_axis = None, up_dir = None, 
     return True
 
 
+def build_curve(curve_data):
+    """
+    # TODO: docstring here
+    :param curve_data:
+    :return:
+    """
+    result = []
+    for key, value in curve_data.items():
+        degree = value.get('degree')
+        periodic = value.get('periodic')
+        point = value.get('point')
+        knot = value.get('knot')
+
+        # convert list to tuple
+        point = [tuple(o) for o in point]
+
+        curve = pm.curve(d = degree, per = periodic, p = point, k = knot)
+        result.append(curve)
+    return result
+
+
+def keylockhide_attribute(pynodes, attributes_string, keyable = None, lock = None, hide = None):
+    """
+    Make attribute keyable or not, lock or unlock, and hide or unhide
+    # TODO: docstring here
+    :param pynodes: list of pynode
+    :param attributes_string: List of attribute as string, ex => [ 'translateX', 'scaleZ' ]
+    :param keyable: None = Ignore; True or False
+    :param lock: None = Ignore; True or False
+    :param hide: None = Ignore; True or False
+    """
+
+    # Filter supplied pynodes, if equal to 0 then return false
+    if len(pynodes) == 0:
+        return False
+
+    # TODO: change this to more 'PyNode' way
+    # Loop through list of attribute string
+    for o in attributes_string:
+        # Loop through list of pynode
+        for x in pynodes:
+            # Set attribute as PyNode object
+            att_node = pm.PyNode('{0}.{1}'.format(x.nodeName(), o))
+
+            # Keyable or non keyable operation
+            if keyable is not None:
+                att_node.setKeyable(keyable)
+
+                # Make sure attribute still showed in channel box
+                if not keyable:
+                    att_node.showInChannelBox(True)
+
+            # Lock or unlock operation
+            if lock is not None:
+                att_node.setLocked(lock)
+
+            # Hide or unhide operation
+            if hide is not None:
+                # Attribute still showed in channel box if it still keyable
+                if hide:
+                    att_node.setKeyable(False)
+                    att_node.showInChannelBox(False)
+                # Set keyable to true will show the attribute in channel box
+                elif not hide:
+                    att_node.setKeyable(True)
+
+
 
 
 
