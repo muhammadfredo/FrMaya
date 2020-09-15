@@ -28,7 +28,7 @@ def pgroup(pynodes, world = False, re = "", suffix = ""):
     :arg suffix: Suffix to add to pynode name
     :type suffix: str
     :return: list of pgroup node
-    :rtype: pm.nt.Transform
+    :rtype: list of pm.nt.Transform
     """
     # Initiate return variable
     output = []
@@ -301,7 +301,8 @@ def build_curve(curve_data):
 
         curve = pm.curve(d = degree, per = periodic, p = point, k = knot)
         result.append(curve)
-    return result
+    # FIXME: multi shape not supported
+    return result[0]
 
 
 def keylockhide_attribute(pynodes, attributes_string, keyable = None, lock = None, hide = None):
