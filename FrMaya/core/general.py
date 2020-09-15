@@ -351,6 +351,25 @@ def keylockhide_attribute(pynodes, attributes_string, keyable = None, lock = Non
                     att_node.setKeyable(True)
 
 
+def transfer_shape(source_object, target_objects, replace = True):
+    # TODO: docstring here
+    if len(target_objects) == 0:
+        return False
+    shapes_list = []
+    if source_object.type() == 'transform':
+        shapes_list = source_object.getShapes(noIntermediate = True)
+    if not shapes_list:
+        return False
+
+    for tgt in target_objects:
+        if replace:
+            pm.delete(tgt.getShapes(noIntermediate = True))
+        for shp in shapes_list:
+            new_shp = pm.duplicate(shp, addShape = True)[0]
+            new_shp.setParent(tgt, relative = True, shape = True)
+            new_shp.rename(tgt.nodeName(stripNamespace = True) + 'Shape')
+
+
 
 
 

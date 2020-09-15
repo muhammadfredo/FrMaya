@@ -128,8 +128,8 @@ def get_bad_shape_name():
     bad_shape_name = []
     for shape in pm.ls(shapes = True, noIntermediate = True, editable = True):
         transform = shape.getParent()
-        tm_name = transform.nodeName(stripNamespace = 1)
-        shape_name = shape.nodeName(stripNamespace = 1)
+        tm_name = transform.nodeName(stripNamespace = True)
+        shape_name = shape.nodeName(stripNamespace = True)
         regex = r"({0})(ShapeDeformed|Shape)".format(tm_name)
         m = re.match(regex, shape_name)
         if not m:

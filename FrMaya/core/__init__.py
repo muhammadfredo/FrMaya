@@ -8,10 +8,15 @@ from .general import (
     comet_joint_orient,
     build_curve,
     keylockhide_attribute,
+    transfer_shape,
 )
 from .install import (
     install,
     uninstall,
+)
+from .rig import (
+    get_joint_influence,
+    get_skincluster_node,
 )
 from .scene_info import (
     get_duplicate_name,
