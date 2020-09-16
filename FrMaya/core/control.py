@@ -35,12 +35,12 @@ def get_control_files(name = ''):
     return control_files
 
 
-def create_control(control_file, transform = pm.dt.Matrix(), name = 'FrControl', suffix = 'Ctl', group = None):
+def create_control(control_file, transform = None, name = 'FrControl', suffix = 'Ctl', group = None):
     """Create control curve for FrMaya rig.
 
     :arg control_file: Control file absolute path or control file name.
     :type control_file: path.Path or str
-    :key transform: Sets transformation of the newly-created control.
+    :key transform: Sets transformation of the newly-created control. Default use world transform.
     :type transform: pm.dt.Matrix
     :key name: Sets the name of the newly-created control.
     :type name: str
@@ -51,6 +51,8 @@ def create_control(control_file, transform = pm.dt.Matrix(), name = 'FrControl',
     :return: ControlTuple(control = control_curve, group_data = group_dict_data)
     :rtype: (pm.nt.Transform, dict of pm.nt.Transform)
     """
+    if transform is None:
+        transform = pm.dt.Matrix()
     if group is None:
         group = ['Grp']
     # if control_file is file name of control grab it from get_control_files

@@ -7,27 +7,26 @@ Start Date   : 11 Sep 2020
 Info         :
 
 """
-from typing import List, Optional, Tuple, Type, Union
-
 import pymel.core as pm
 
 from . import transformation
 
 
 def pgroup(pynodes, world = False, re = "", suffix = ""):
-    """
-    Create pgroup on supplied pynode
-    # TODO: fix docstring
+    """Pgroup the specified PyNodes,
+    either per-PyNode or all PyNodes under the same pgroup.
+    Pgroup name based on the specified PyNodes,
+    then modified by 're' and 'suffix' key argument.
 
-    :arg pynodes: List of pynode
+    :arg pynodes: Specified pynodes need to be pgrouped.
     :type pynodes: list of pm.PyNode
-    :arg world: Position of group in world pos or object pos
+    :arg world: Align pgroup to world transform or align to per-PyNode transform.
     :type world: bool
-    :arg re: Find and replace input pynode name
+    :arg re: String to search and then replace by suffix.
     :type re: str
-    :arg suffix: Suffix to add to pynode name
+    :arg suffix: Suffix for pgroup name.
     :type suffix: str
-    :return: list of pgroup node
+    :return: list of pgroup node.
     :rtype: list of pm.nt.Transform
     """
     # Initiate return variable
@@ -35,34 +34,27 @@ def pgroup(pynodes, world = False, re = "", suffix = ""):
     # Filter supplied pynodes, if equal to 0 then return false
     if len(pynodes) == 0:
         return output
-
     # Group created on each object transformation
     if not world:
         for o in pynodes:
             # Name var
             the_name = o.name()
-
             # Replace object name if any
             if re != "":
                 the_name = the_name.replace(re, suffix)
             else:
                 the_name = the_name + suffix
-
-            # Create group for each supplied object
+            # Create group for each specified PyNode
             grp = pm.group(empty = True, name = the_name)
-
-            # Snap the group to each object transformation
+            # Align the pgroup to each PyNode transformation
             transformation.align(grp, o, mode = 'transform')
-
             # Get object parent
             parent = o.getParent()
-
             # If the object have parent,
             # Parent the group to object parent
             if parent:
                 grp.setParent(parent)
-
-            # Parent the object to Group
+            # Parent the object to pgroup
             o.setParent(grp)
             # Collect group to output
             output.append(grp)
@@ -70,38 +62,31 @@ def pgroup(pynodes, world = False, re = "", suffix = ""):
     else:
         # Name var
         the_name = pynodes[0].name()
-
         # Replace object name if any
         if re != "":
             the_name = the_name.replace(re, suffix)
         else:
             the_name = the_name + suffix
-
         # Create single group
         grp = pm.group(empty = True, name = the_name)
-
         # Collect group to output
         output.append(grp)
-
-        # Loop through all supplied object and parent it to group
-        for o in pynodes:
-            o.setParent(grp)
+        # Parent all specified PyNodes to pgroup
+        pm.parent(pynodes, grp)
 
     return output
 
 
-def joint_split(pynode, split = 2, replace = True):
-    """
-    Split joint from given parameter
-    # TODO: fix docstring
+def split_joint(pynode, split = 2, replace = True):
+    """Split joint into pieces as per split key argument.
 
-    :arg pynode: A single joint PyNode
+    :arg pynode: A single joint PyNode.
     :type pynode: pm.nt.Joint
-    :arg split: How many split the joint will be split
+    :arg split: How many pieces the joint will be split.
     :type split: int
-    :arg replace: New chain of split joint or replace the input joint
+    :arg replace: Remove old joint (specified joint) or keep it.
     :type replace: bool
-    :return: list of split joint
+    :return: All new joint pieces.
     :rtype: list of pm.nt.Joint
     """
     # TODO: naming not yet implement, wait until we build modular auto rigging
@@ -155,16 +140,24 @@ def joint_split(pynode, split = 2, replace = True):
     return output
 
 
+# Based on code by Michael B. Comet - comet@comet-cartoons.com
+# http://www.comet-cartoons.com/
 def comet_joint_orient(pynodes, aim_axis = None, up_axis = None, up_dir = None, do_auto = False):
-    """
-    # TODO: fix docstring
+    """Complete Joint Orient function for properly setting up joint axis.
+    Translated from cometJointOrient.mel.
 
-    :arg pynodes:
-    :arg aim_axis:
-    :arg up_axis:
-    :arg up_dir:
-    :arg do_auto:
-    :return:
+    :arg pynodes: Pynodes joint need to orient.
+    :type pynodes: list of pm.PyNode
+    :key aim_axis: Joint aim axis in xyz list or Vector. Default aim to x axis > pm.dt.Vector(1, 0, 0).
+    :type aim_axis: list or pm.dt.Vector
+    :key up_axis: Joint up axis in xyz list or Vector. Default up to z axis > pm.dt.Vector(0, 0, 1).
+    :type up_axis: list or pm.dt.Vector
+    :key up_dir: Joint up direction in xyz list or Vector. Default up direction to x > pm.dt.Vector(1, 0, 0).
+    :type up_dir: list or pm.dt.Vector
+    :key do_auto: If possible will try to guess the up axis otherwise
+     it will use prev joint up axis or else world up dir.
+    :type do_auto: bool
+    :rtype: bool
     """
     if aim_axis is None:
         aim_axis = [1, 0, 0]
@@ -284,10 +277,18 @@ def comet_joint_orient(pynodes, aim_axis = None, up_axis = None, up_dir = None, 
 
 
 def build_curve(curve_data):
-    """
-    # TODO: docstring here
-    :param curve_data:
-    :return:
+    """Build curve shape from dictionary curve data.
+
+    :arg curve_data: Dictionary curve data.
+     {'curve_shape_name': {
+       'degree': int,
+       'periodic': bool,
+       'point': nested list,
+       'knot': list of float
+     } }
+    :type curve_data: dict
+    :return: Curve PyNode object.
+    :rtype: pm.nt.Transform
     """
     result = []
     for key, value in curve_data.items():
@@ -352,7 +353,16 @@ def keylockhide_attribute(pynodes, attributes_string, keyable = None, lock = Non
 
 
 def transfer_shape(source_object, target_objects, replace = True):
-    # TODO: docstring here
+    """
+
+    :arg source_object: PyNode object shape transfer source.
+    :type source_object: pm.nt.Transform
+    :arg target_objects: PyNodes object transfer destination.
+    :type target_objects: list of pm.nt.Transform
+    :arg replace: Replace target shape or keep it.
+    :type replace: bool
+    :rtype: bool
+    """
     if len(target_objects) == 0:
         return False
     shapes_list = []
@@ -368,6 +378,8 @@ def transfer_shape(source_object, target_objects, replace = True):
             new_shp = pm.duplicate(shp, addShape = True)[0]
             new_shp.setParent(tgt, relative = True, shape = True)
             new_shp.rename(tgt.nodeName(stripNamespace = True) + 'Shape')
+
+    return True
 
 
 

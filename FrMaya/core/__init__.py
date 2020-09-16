@@ -4,7 +4,7 @@ from .control import (
 )
 from .general import (
     pgroup,
-    joint_split,
+    split_joint,
     comet_joint_orient,
     build_curve,
     keylockhide_attribute,
@@ -15,7 +15,7 @@ from .install import (
     uninstall,
 )
 from .rig import (
-    get_joint_influence,
+    get_skincluster_info,
     get_skincluster_node,
 )
 from .scene_info import (

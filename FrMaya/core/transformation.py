@@ -7,26 +7,19 @@ Start Date   : 11 Sep 2020
 Info         :
 
 """
-from typing import List, Optional, Type
-
 import pymel.core as pm
 
 
-def align(source, target, mode = ''):
-    """
-    Align from source pynode to target pynode
-    # TODO: fix docstring
+def align(source, target, mode = 'transform'):
+    """Align source PyNode to target PyNode.
 
-    :arg source: PyNode which will get transform applied
-    :type source: pm.PyNode
-    :arg target: The destination of align operation
-    :type target: pm.PyNode
-    :key mode: transform, translate, rotate
+    :arg source: PyNode object need to align.
+    :type source: pm.nt.Transform
+    :arg target: Destination of align operation.
+    :type target: pm.nt.Transform
+    :key mode: Transform, translate, rotate.
     :type mode: str
     """
-    if mode is None:
-        mode = 'transform'
-
     # Align translate from Red9 SnapRuntime plugin
     if mode == 'translate' or mode == 'transform':
         if type(target) == pm.MeshVertex:
@@ -47,52 +40,47 @@ def align(source, target, mode = ''):
         source.setRotation(rot_qt, space = 'world')
 
 
-def freeze_transform(pynodes, mode = ''):
-    """
-    Freeze translate, rotate, scale supplied pynode.
-    Default transform.
-    # TODO: fix docstring
+def freeze_transform(pynodes, mode = 'Transform'):
+    """Freeze translate, rotate, scale specified PyNodes.
 
-    :arg pynodes: List of pynode
-    :type pynodes: list of pm.PyNode
-    :key mode: translate, rotate, scale
+    :arg pynodes: PyNodes object need to freeze transform.
+    :type pynodes: list of pm.nt.Transform
+    :key mode: Transform, translate, rotate, and scale.
     :type mode: str
+    :rtype: bool
     """
     # Filter supplied pynodes, if equal to 0 then return false
     if len(pynodes) == 0:
-        return
-
+        return False
     # Initiate variable for makeIdentity command
     t = False
     r = False
     s = False
-
-    if mode == 'translate' or mode == '':
+    if mode == 'translate' or mode == 'Transform':
         t = True
-    if mode == 'rotate' or mode == '':
+    if mode == 'rotate' or mode == 'Transform':
         r = True
-    if mode == 'scale' or mode == '':
+    if mode == 'scale' or mode == 'Transform':
         s = True
-
     # Freeze transform command
     for o in pynodes:
         pm.makeIdentity(o, apply = True, translate = t, rotate = r, scale = s)
 
+    return True
+
 
 def reset_transform(pynodes, mode = ''):
-    """
-    Reset transform, visibility, and rotate order
-    # TODO: fix docstring
+    """Reset transform, visibility, or rotate order.
 
-    :arg pynodes: list of pynode
-    :type pynodes: list of pm.PyNode
-    :arg mode: transform, translate, rotate, scale, visibility, rotate_order
+    :arg pynodes: PyNodes object need to reset transform.
+    :type pynodes: list of pm.nt.Transform
+    :arg mode: transform, translate, rotate, scale, visibility, and rotate_order. Default will reset all.
     :type mode: str
+    :rtype: bool
     """
     # Filter supplied pynodes, if equal to 0 then return false
     if len(pynodes) == 0:
         return
-
     for o in pynodes:
         # Translate mode
         if mode == 'translate' or mode == 'transform' or mode == '':
@@ -115,5 +103,8 @@ def reset_transform(pynodes, mode = ''):
         # Rotate order
         if mode == 'rotate_order' or mode == '':
             o.rotateOrder.set(0)
+
+    return True
+
 
 

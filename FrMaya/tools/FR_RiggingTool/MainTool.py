@@ -22,8 +22,6 @@ import FrMaya.core.uimaya
 import FrMaya.utility as util
 from FrMaya.vendor import path
 
-from FrMaya.core import FrRigging
-
 
 class MainGUI(FrMaya.core.uimaya.MyQtWindow):
     """
@@ -401,7 +399,7 @@ class MainGUI(FrMaya.core.uimaya.MyQtWindow):
         if sender == self.ui.jc_split_btn:
             sel = pm.ls(os = True, type = 'joint')
             if len(sel) > 0:
-                fmc.joint_split(sel[0], option['splitCount'].value(), option['replace'].isChecked())
+                fmc.split_joint(sel[0], option['splitCount'].value(), option['replace'].isChecked())
         # Created joint on selected
         if sender == self.ui.jc_createonsel_btn:
             sel = pm.ls(os = True)

@@ -15,6 +15,7 @@ from pymel import core as pm
 
 
 def install(*args, **kwargs):
+    # TODO: docstring here
     if kwargs:
         # Maya user script path
         usd = pm.internalVar(usd = True)
@@ -63,6 +64,7 @@ def install(*args, **kwargs):
 
 
 def uninstall(*args, **kwargs):
+    # TODO: docstring here
     if kwargs:
         if kwargs.get('frmaya'):
             # Maya user script path
