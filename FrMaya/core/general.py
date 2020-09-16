@@ -89,7 +89,7 @@ def split_joint(pynode, split = 2, replace = True):
     :return: All new joint pieces.
     :rtype: list of pm.nt.Joint
     """
-    # TODO: naming not yet implement, wait until we build modular auto rigging
+    # FIXME: naming not yet implement, wait until we build modular auto rigging
     output = []
     # make sure this is joint
     if not isinstance(pynode, pm.nt.Joint):
@@ -253,11 +253,11 @@ def comet_joint_orient(pynodes, aim_axis = None, up_axis = None, up_dir = None, 
 
             if i > 0 >= dot:
                 # adjust the rotation axis 180 if it looks like we have flopped the wrong way!
-                # TODO: fix here
+                # FIXME: some shit need to fix here
                 # pm.xform( o, relative = True, objectSpace = True, rotateAxis = True )
-                o.rotateX.set(o.rotateX.get() + (aim_axis[0] * 180))
-                o.rotateY.set(o.rotateY.get() + (aim_axis[1] * 180))
-                o.rotateZ.set(o.rotateZ.get() + (aim_axis[2] * 180))
+                o.rotateX.set(o.rotateX.get() + (aim_axis.x * 180))
+                o.rotateY.set(o.rotateY.get() + (aim_axis.y * 180))
+                o.rotateZ.set(o.rotateZ.get() + (aim_axis.z * 180))
 
                 prev_up *= -1
         elif parent:
@@ -321,7 +321,7 @@ def keylockhide_attribute(pynodes, attributes_string, keyable = None, lock = Non
     if len(pynodes) == 0:
         return False
 
-    # TODO: change this to more 'PyNode' way
+    # FIXME: change this to more 'PyNode' way
     # Loop through list of attribute string
     for o in attributes_string:
         # Loop through list of pynode

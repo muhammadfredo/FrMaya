@@ -85,7 +85,7 @@ class MainGUI(fmc.MyQtWindow):
                 break
 
         if update_bool:
-            # TODO: get build_link.yml first, compare version, decide, then download the zip url
+            # FIXME: get build_link.yml first, compare version, decide, then download the zip url
             temp_zip = os.path.join(tempfile.gettempdir(), 'temp.zip')
             temp_frmaya = os.path.join(tempfile.gettempdir(), 'temp_frmaya')
             zip_url = data.get('FrMaya').get('zip_url')

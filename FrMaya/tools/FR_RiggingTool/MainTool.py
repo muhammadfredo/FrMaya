@@ -18,12 +18,11 @@ import copy
 import pymel.core as pm
 
 import FrMaya.core as fmc
-import FrMaya.core.uimaya
 import FrMaya.utility as util
 from FrMaya.vendor import path
 
 
-class MainGUI(FrMaya.core.uimaya.MyQtWindow):
+class MainGUI(fmc.MyQtWindow):
     """
     Main GUI for FR_RiggingTool
     """
@@ -245,7 +244,7 @@ class MainGUI(FrMaya.core.uimaya.MyQtWindow):
 
         # Perform pgroup operation on the selection
         fmc.pgroup(selection, world = sender['world'].isChecked(), re = sender['search'].text(),
-                         suffix = sender['replace'].text())
+                   suffix = sender['replace'].text())
 
     @util.undoable
     def align_pressed(self, sender):
@@ -425,7 +424,7 @@ class MainGUI(FrMaya.core.uimaya.MyQtWindow):
             # pm.select(sel)
             pm.select(result_jnt)
 
-    # TODO: below is not yet documented
+    # TODO: docstring here
     @staticmethod
     def bool_to_number(value, flip):
         flip_val = 1
@@ -485,7 +484,7 @@ class MainGUI(FrMaya.core.uimaya.MyQtWindow):
             up_dir = self.get_vec_orient('upDir', option)
 
             fmc.comet_joint_orient(sel, aim_axis = aim_axis, up_axis = up_axis, up_dir = up_dir,
-                                         do_auto = option['worldupAuto'].checkState())
+                                   do_auto = option['worldupAuto'].checkState())
 
             pm.select(sel)
 
@@ -542,7 +541,7 @@ class MainGUI(FrMaya.core.uimaya.MyQtWindow):
                 object_name = object_name[:-1]
             # createControl(filenode, name = '', suffix = 'Ctl', transform = None, color = None, group = ['Grp'])
             result = fmc.create_control(item_data, name = object_name, transform = tm, suffix = suffixtext,
-                                              group = group_list)
+                                        group = group_list)
 
             # parent cons
             if posrot_cons and object_node:
@@ -554,6 +553,3 @@ class MainGUI(FrMaya.core.uimaya.MyQtWindow):
 
         if sender == self.ui.cc_create_btn:
             print 'create control'
-
-
-

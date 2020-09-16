@@ -138,4 +138,10 @@ def get_bad_shape_name():
     return bad_shape_name
 
 
+def get_empty_mesh():
+    # TODO: docstring here
+    all_mesh = pm.ls(type = 'mesh', editable = True)
+    return [o for o in all_mesh if not pm.polyEvaluate(o, face=True)]
+
+
 
