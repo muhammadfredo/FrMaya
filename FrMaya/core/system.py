@@ -36,8 +36,10 @@ def get_control_curve_path():
 
 
 def maya_version_as_float():
-    # TODO: docstring here
-    version = 2012.0
+    """Return maya version as float.
+
+    :rtype: float
+    """
     if pm.about(version = True) == '2016 Extension 2':
         return 2016.5
     try:

@@ -139,9 +139,28 @@ def get_bad_shape_name():
 
 
 def get_empty_mesh():
-    # TODO: docstring here
+    """Get empty mesh in current scene.
+
+    :rtype: list of pm.nt.Mesh
+    """
     all_mesh = pm.ls(type = 'mesh', editable = True)
     return [o for o in all_mesh if not pm.polyEvaluate(o, face=True)]
+
+
+def get_start_frame():
+    """Get current scene start frame.
+
+    :rtype: float
+    """
+    return pm.playbackOptions(animationStartTime = True, query = True)
+
+
+def get_end_frame():
+    """Get current scene end frame.
+
+    :rtype: float
+    """
+    return pm.playbackOptions(animationEndTime = True, query = True)
 
 
 

@@ -10,10 +10,10 @@ Info         :
 import collections
 
 import pymel.core as pm
+from FrMaya.vendor import path
 
 from FrMaya import utility as util
-from FrMaya.core import system, general
-from FrMaya.vendor import path
+from . import system, general
 
 
 def get_skincluster_node(input_node):

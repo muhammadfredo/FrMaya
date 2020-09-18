@@ -9,23 +9,18 @@ Info         :
 """
 import pymel.core as pm
 
-
-def get_start_frame():
-    # TODO: docstring here
-    return pm.playbackOptions(animationStartTime = True, query = True)
-
-
-def get_end_frame():
-    # TODO: docstring here
-    return pm.playbackOptions(animationEndTime = True, query = True)
+from . import scene_info
 
 
 def bake_animation(input_node):
+    """
+    """
     # TODO: docstring here
+    # FIXME: some homework need to be done
     # pause viewport maya
     pm.general.refresh(suspend = True)
     # format time range
-    timerange = '{}:{}'.format(get_start_frame(), get_end_frame())
+    timerange = '{}:{}'.format(scene_info.get_start_frame(), scene_info.get_end_frame())
     # bake keys
     pm.bakeResults(input_node, simulation = True, t = timerange, hi = 'below',
                    at = ['tx', 'ty', 'tz', 'rx', 'ry', 'rz'],
@@ -40,6 +35,7 @@ def bake_animation(input_node):
 def copy_animation():
     # TODO: docstring here
     # FIXME: this is not ready function
+    # FIXME: some homework need to be done
     att_list = ['translateX', 'translateY', 'translateZ', 'rotateX', 'rotateY', 'rotateZ', 'scaleX', 'scaleY', 'scaleZ']
 
     sel = pm.ls(os = 1)

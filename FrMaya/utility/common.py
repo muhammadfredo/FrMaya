@@ -20,11 +20,10 @@ def __flatten(input_iter):
 
 
 def flatten(input_list):
-    """Flatten nested list
-    # TODO: docstring here
-    :arg input_list:
+    """Flatten nested list.
+
+    :arg input_list: Nested list need to be flatten.
     :type input_list: list of list
-    :return:
     :rtype: list
     """
     return list(__flatten(input_list))

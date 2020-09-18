@@ -24,12 +24,9 @@ def singelton(input_class):
 
 
 def undoable(input_function):
-    """
+    """A decorator that will make commands undoable in maya.
     from "Kriss Andrews" on http://blog.3dkris.com/
-    A decorator that will make commands undoable in maya
     """
-    # TODO: docstring here
-
     def decorator_code(*args, **kwargs):
         pm.undoInfo(openChunk=True)
         function_return = None

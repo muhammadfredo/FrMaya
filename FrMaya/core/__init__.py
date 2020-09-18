@@ -1,6 +1,4 @@
 from .animation import (
-    get_start_frame,
-    get_end_frame,
     bake_animation,
     copy_animation,
 )
@@ -32,6 +30,8 @@ from .scene_info import (
     get_scene_unit,
     get_bad_shape_name,
     get_empty_mesh,
+    get_start_frame,
+    get_end_frame,
 )
 from .system import (
     get_menubar_path,
