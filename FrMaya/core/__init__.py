@@ -15,6 +15,11 @@ from .rig import (
     get_skincluster_node,
     get_control_files,
     create_control,
+    remove_unused_influence,
+    transfer_skincluster,
+    reset_attributes,
+    get_channelbox_attributes,
+    set_attrs_default,
 )
 from .scene_cleanup import (
     clean_unknown_plugins

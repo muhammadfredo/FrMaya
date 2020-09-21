@@ -316,7 +316,7 @@ def keylockhide_attribute(pynodes, attributes_string, keyable = None, lock = Non
     :param lock: None = Ignore; True or False
     :param hide: None = Ignore; True or False
     """
-
+    # TODO: can use map function, no need pynode list
     # Filter supplied pynodes, if equal to 0 then return false
     if len(pynodes) == 0:
         return False

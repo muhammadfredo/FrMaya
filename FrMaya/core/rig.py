@@ -16,14 +16,14 @@ from FrMaya import utility as util
 from . import system, general
 
 
-def get_skincluster_node(input_node):
+def get_skincluster_node(input_object):
     """Get skincluster node from specified PyNode object.
 
-    :arg input_node: PyNode object that have skincluster.
-    :type input_node: pm.nt.Transform
+    :arg input_object: PyNode object that have skincluster.
+    :type input_object: pm.nt.Transform
     :rtype: pm.nt.SkinCluster
     """
-    history_list = input_node.listHistory(pruneDagObjects = True, interestLevel = True)
+    history_list = input_object.listHistory(pruneDagObjects = True, interestLevel = True)
     skin_node = None
     for o in history_list:
         if o.nodeType() == 'skinCluster':
@@ -43,10 +43,42 @@ def get_skincluster_info(skin_node):
     joint_list = []
     skin_method = 0
     if skin_node:
-        joint_list = skin_node.getInfluence(q=True)
+        joint_list = skin_node.getInfluence()
         skin_method = skin_node.getSkinMethod()
 
     return joint_list, skin_method
+
+
+def remove_unused_influence(skin_node):
+    # TODO: docstring here
+    influence_list = skin_node.getInfluence()
+    weight_inf_list = skin_node.getWeightedInfluence()
+    # Set skinCluster to HasNoEffect so it won't process after each removal
+    skin_node.nodeState.set(1)
+    zero_weight_inf_list = list(set(influence_list) - set(weight_inf_list))
+    skin_node.removeInfluence(zero_weight_inf_list)
+    skin_node.nodeState.set(0)
+    return zero_weight_inf_list
+
+
+def transfer_skincluster(source_object, target_objects):
+    # TODO: docstring here
+    source_skin_node = get_skincluster_node(source_object)
+    assert source_skin_node, 'Skincluster not found on source object.'
+    joint_list, skin_method = get_skincluster_info(source_skin_node)
+    for tgt_obj in target_objects:
+        old_tgt_skin_node = get_skincluster_node(tgt_obj)
+        if old_tgt_skin_node:
+            old_tgt_skin_node.unbind()
+        tgt_skin_node = pm.skinCluster(joint_list, tgt_obj, bindMethod = skin_method)
+        pm.copySkinWeights(
+            sourceSkin = source_skin_node,
+            destinationSkin = tgt_skin_node,
+            noMirror = True,
+            surfaceAssociation = 'closestPoint',
+            influenceAssociation = ['name', 'oneToOne', 'closestJoint'],
+        )
+        remove_unused_influence(tgt_skin_node)
 
 
 def get_control_files(name = ''):
@@ -114,6 +146,38 @@ def create_control(control_file, transform = None, name = 'FrControl', suffix = 
     result = ControlTuple(control = curve_control, group_data = resgrp)
 
     return result
+
+
+def get_channelbox_attributes(input_object):
+    # TODO: docstring here
+    attr_list = input_object.listAttr(keyable = True, scalar = True, multi = True)
+    attr_list.extend(input_object.listAttr(channelBox = True))
+    return attr_list
+
+
+def reset_attributes(input_object, attr_name_list = None):
+    # TODO: docstring here
+    if attr_name_list is None:
+        attr_name_list = []
+    if len(attr_name_list) > 0:
+        attr_list = [input_object.attr(attr_name) for attr_name in attr_name_list]
+    else:
+        attr_list = get_channelbox_attributes(input_object)
+    for attr in attr_list:
+        # def_val = attr.get(default = True)
+        def_val = pm.attributeQuery(attr.plugAttr(), node = attr.node(), listDefault = True)[0]
+        print attr, def_val
+        if attr.isSettable():
+            attr.set(def_val)
+
+
+def set_attrs_default(input_object):
+    # TODO: docstring here
+    attr_list = get_channelbox_attributes(input_object)
+    for attr in attr_list:
+        current_val = attr.get()
+        if hasattr(attr, 'addAttr'):
+            attr.addAttr(e = True, defaultValue = current_val)
 
 
 

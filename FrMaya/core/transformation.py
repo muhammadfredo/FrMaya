@@ -49,6 +49,7 @@ def freeze_transform(pynodes, mode = 'Transform'):
     :type mode: str
     :rtype: bool
     """
+    # TODO: can use map function, no need pynode list
     # Filter supplied pynodes, if equal to 0 then return false
     if len(pynodes) == 0:
         return False
@@ -78,6 +79,7 @@ def reset_transform(pynodes, mode = ''):
     :type mode: str
     :rtype: bool
     """
+    # TODO: can use map function, no need pynode list
     # Filter supplied pynodes, if equal to 0 then return false
     if len(pynodes) == 0:
         return

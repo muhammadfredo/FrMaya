@@ -149,8 +149,6 @@ def build_menubar():
 
     # build all menubar root item
     for menubar_root in menubar_list:
-        print 'RAPTORIAN'
-        print menubar_root
         Menubar(menubar_root, parent = main_window)
 
 
