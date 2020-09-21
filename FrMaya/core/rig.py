@@ -70,7 +70,10 @@ def transfer_skincluster(source_object, target_objects):
         old_tgt_skin_node = get_skincluster_node(tgt_obj)
         if old_tgt_skin_node:
             old_tgt_skin_node.unbind()
-        tgt_skin_node = pm.skinCluster(joint_list, tgt_obj, bindMethod = skin_method)
+        try:
+            tgt_skin_node = pm.skinCluster(joint_list, tgt_obj, bindMethod = skin_method)
+        except:
+            tgt_skin_node = pm.skinCluster(joint_list, tgt_obj)
         pm.copySkinWeights(
             sourceSkin = source_skin_node,
             destinationSkin = tgt_skin_node,
@@ -166,7 +169,6 @@ def reset_attributes(input_object, attr_name_list = None):
     for attr in attr_list:
         # def_val = attr.get(default = True)
         def_val = pm.attributeQuery(attr.plugAttr(), node = attr.node(), listDefault = True)[0]
-        print attr, def_val
         if attr.isSettable():
             attr.set(def_val)
 
