@@ -11,7 +11,7 @@ import pymel.core as pm
 
 
 def singelton(input_class):
-    # TODO: docstring here
+    """A decorator that will turn class into singleton."""
     instances = {}
 
     def get_instance(*args, **kwargs):

@@ -25,11 +25,13 @@ from FrMaya.core import system
 
 
 def get_menu_name(name):
+    """Make any supplied string suitable/nice for menubar name.
+
+    :arg name: Name need to make nice for menubar.
+    :type name: str
+    :return: Nice menu name for menubar.
+    :rtype: str
     """
-    # TODO: docstring here
-    :param name:
-    """
-    # TODO: write docstring documentation here
 
     # get menu name and use it for menu identifier
     menu_name = ""
@@ -52,16 +54,15 @@ class Menubar(pmui.SubMenuItem):
         :param menubar_path: Path folder to collection of folder which will be used as menubar root
         :param parent: Parent of menubar root, in this case $gMainWindow
         """
-
         # give menubar proper name which is basename instead fullpath name
         menubar_name = os.path.basename(menubar_path)
-        menu_name = get_menu_name(menubar_name.replace("_", " "))
+        menu_name = get_menu_name(menubar_name)
 
         # delete existing menu if the menu already exist
         if pywin.menu(menu_name, ex = 1):
             pywin.deleteUI(menu_name)
 
-        # TODO: need comment here
+        # build root menu and return it as pmui.SubMenuItem
         self = pywin.menu(menu_name, label = menu_name, aob = True, tearOff = True, p = parent)
         return pmui.SubMenuItem.__new__(cls, self)
 
@@ -256,3 +257,4 @@ class MyQtWindow(QtWidgets.QWidget):
                 width = self.ui.size().width(),
                 allowedArea = ['right', 'left']
             )
+
