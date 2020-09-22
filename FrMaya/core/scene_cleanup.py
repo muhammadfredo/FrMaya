@@ -53,6 +53,29 @@ def clean_namespace():
             print('{}, {}'.format(o, e))
 
 
+def clean_anim_layer():
+    # TODO: docstring here
+    # FIXME: some homework need to be done
+    default_layer = ['BaseAnimation']
+    layer_node = pm.ls(type = ['animLayer'])
+    dirty_layer = [o for o in layer_node if o not in default_layer]
+    pm.delete(dirty_layer)
+
+    # need evalDeferred waiting to update or something
+    # or else it will screw up some transform that got anim layer connection
+    pm.evalDeferred("pm.delete(pm.PyNode('BaseAnimation'))")
+
+
+def clean_display_layer():
+    # TODO: docstring here
+    # FIXME: some homework need to be done
+    default_layer = ['defaultLayer']
+    layer_node = pm.ls(type = ['displayLayer'])
+    dirty_layer = [o for o in layer_node if o not in default_layer]
+
+    pm.delete(dirty_layer)
+
+
 
 
 

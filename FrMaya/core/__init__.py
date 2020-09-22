@@ -22,7 +22,11 @@ from .rig import (
     set_attrs_default,
 )
 from .scene_cleanup import (
-    clean_unknown_plugins
+    clean_unknown_plugins,
+    clean_anim_layer,
+    clean_display_layer,
+    clean_mentalray_nodes,
+    clean_namespace,
 )
 from .scene_info import (
     get_duplicate_name,
