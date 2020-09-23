@@ -50,7 +50,13 @@ def get_skincluster_info(skin_node):
 
 
 def remove_unused_influence(skin_node):
-    # TODO: docstring here
+    """Remove zero weight influences on skincluster.
+
+    :arg skin_node: PyNode skincluster need to remove unused influence.
+    :type skin_node: pm.nt.SkinCluster
+    :return: List of removed influences.
+    :rtype: list of pm.PyNode
+    """
     influence_list = skin_node.getInfluence()
     weight_inf_list = skin_node.getWeightedInfluence()
     # Set skinCluster to HasNoEffect so it won't process after each removal
@@ -62,7 +68,17 @@ def remove_unused_influence(skin_node):
 
 
 def transfer_skincluster(source_object, target_objects):
-    # TODO: docstring here
+    """Bind the target objects based on source object,
+    then copied the skin data from source to target objects.
+    If target object have skincluster,
+    it will get replaced by new skincluster.
+
+    :arg source_object: PyNode object transfer source.
+    :type source_object: pm.PyNode
+    :arg target_objects: PyNode objects transfer destination.
+    :type target_objects: list of pm.PyNode
+    :rtype: None
+    """
     source_skin_node = get_skincluster_node(source_object)
     assert source_skin_node, 'Skincluster not found on source object.'
     joint_list, skin_method = get_skincluster_info(source_skin_node)
@@ -152,14 +168,27 @@ def create_control(control_file, transform = None, name = 'FrControl', suffix = 
 
 
 def get_channelbox_attributes(input_object):
-    # TODO: docstring here
+    """Collect all visible in channelbox attributes.
+
+    :arg input_object: PyNode object need to collect attributes from.
+    :type input_object: pm.PyNode
+    :rtype: list of pm.general.Attribute
+    """
     attr_list = input_object.listAttr(keyable = True, scalar = True, multi = True)
     attr_list.extend(input_object.listAttr(channelBox = True))
     return attr_list
 
 
 def reset_attributes(input_object, attr_name_list = None):
-    # TODO: docstring here
+    """Reset all attributes visible in channel box or supplied attributes
+    to their respective attributes default value.
+
+    :arg input_object: PyNode object which attributes need to reset.
+    :type input_object: pm.PyNode
+    :param attr_name_list: Attributes name need to reset.
+    :type attr_name_list: list of str
+    :rtype: None
+    """
     if attr_name_list is None:
         attr_name_list = []
     if len(attr_name_list) > 0:
@@ -174,7 +203,13 @@ def reset_attributes(input_object, attr_name_list = None):
 
 
 def set_attrs_default(input_object):
-    # TODO: docstring here
+    """Set current value attributes as the default value.
+    Some default value attributes cannot be set.
+
+    :arg input_object: PyNode object which attributes need to set default value.
+    :type input_object: pm.PyNode
+    :rtype: None
+    """
     attr_list = get_channelbox_attributes(input_object)
     for attr in attr_list:
         current_val = attr.get()

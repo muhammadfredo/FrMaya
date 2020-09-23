@@ -353,7 +353,8 @@ def keylockhide_attribute(pynodes, attributes_string, keyable = None, lock = Non
 
 
 def transfer_shape(source_object, target_objects, replace = True):
-    """
+    """Copied source shape object into target object,
+    Default it will replace target shape objects.
 
     :arg source_object: PyNode object shape transfer source.
     :type source_object: pm.nt.Transform
