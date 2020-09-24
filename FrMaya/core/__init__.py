@@ -1,3 +1,11 @@
+try:
+    import sys
+    _fmc_modules = [o for o in sys.modules.keys() if o.startswith('FrMaya.core.') and sys.modules[o]]
+    _fmc_modules.sort()
+    for o in _fmc_modules:
+        reload(sys.modules[o])
+except (Exception, ImportError):
+    pass
 from .animation import (
     bake_animation,
     copy_animation,
@@ -41,6 +49,10 @@ from .scene_info import (
     get_empty_mesh,
     get_start_frame,
     get_end_frame,
+)
+from .shading import (
+    get_file_node_path,
+    seq_to_glob,
 )
 from .system import (
     get_menubar_path,
