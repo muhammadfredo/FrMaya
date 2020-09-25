@@ -9,6 +9,8 @@ Info         :
 """
 import pymel.core as pm
 
+from . import scene_info
+
 
 def clean_unknown_plugins():
     # TODO: docstring here
@@ -74,6 +76,44 @@ def clean_display_layer():
     dirty_layer = [o for o in layer_node if o not in default_layer]
 
     pm.delete(dirty_layer)
+
+
+def fix_shading_engine_intermediate():
+    # TODO: docstring here
+    # FIXME: some homework need to be done
+    shape_inter_list = scene_info.get_shading_engine_intermediate()
+    # shape_inter_list = pm.ls(type = 'mesh', intermediateObjects = True)
+    for shape_intermediate in shape_inter_list:
+        inter_shd_engine_list = shape_intermediate.shadingGroups()
+        inter_connection = shape_intermediate.outputs(type = 'shadingEngine', plugs = True)
+        if inter_shd_engine_list[0].name() == 'initialShadingGroup':
+            shape_intermediate.instObjGroups[0].disconnect(inter_connection[0])
+            continue
+
+        # find shape deformed
+        shape_deformed = shape_intermediate.getParent().getShape(noIntermediate = True)
+        # noninter_shd_engine_list = shape_deformed.shadingGroups()
+        noninter_connection = shape_deformed.outputs(type = 'shadingEngine', plugs = True)
+        if noninter_connection:
+            shape_deformed.instObjGroups[0].disconnect(noninter_connection[0])
+
+        shape_deformed.instObjGroups[0] >> inter_connection[0]
+    #     if inter_shd_engine_list:
+    #         if inter_shd_engine_list[0].name() == 'initialShadingGroup':
+    #             continue
+    #         the_object = shape_intermediate.getParent()
+    #         shape_deformed = the_object.getShape(noIntermediate = 1)
+    #         noninter_shd_engine_list = shape_deformed.shadingGroups()
+    #         if noninter_shd_engine_list:
+    #             if noninter_shd_engine_list[0].name() == 'initialShadingGroup':
+    #                 continue
+    #             inter_connection = shape_intermediate.outputs(type = 'shadingEngine', plugs = 1)
+    #             noninter_connection = shape_deformed.outputs(type = 'shadingEngine', plugs = 1)
+    #
+    #             shape_intermediate.instObjGroups[0].disconnect(destination = inter_connection[0])
+    #             shape_deformed.instObjGroups[0].disconnect(destination = noninter_connection[0])
+    #
+    #             shape_deformed.instObjGroups[0] >> inter_connection[0]
 
 
 

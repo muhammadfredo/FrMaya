@@ -163,4 +163,12 @@ def get_end_frame():
     return pm.playbackOptions(animationEndTime = True, query = True)
 
 
+def get_shading_engine_intermediate():
+    # TODO: docstring here
+    # FIXME: some homework need to be done
+    shape_inter_list = pm.ls(type = 'mesh', intermediateObjects = True)
+
+    return [o for o in shape_inter_list if o.shadingGroups()]
+
+
 
