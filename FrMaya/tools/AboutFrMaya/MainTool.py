@@ -60,9 +60,9 @@ class MainGUI(fmc.MyQtWindow):
         result = pm.confirmDialog(t = 'FrMaya Install Option', b = ['local', 'remote'], m = mssg)
         try:
             if result == 'local':
-                fmc.install(source = self.source_path, local = True)
+                fmc.install(self.source_path, local_install = True)
             elif result == 'remote':
-                fmc.install(source = self.source_path, remote = True)
+                fmc.install(self.source_path)
 
             message = 'FrMaya succesfuly installed.\nPlease restart maya.'
         except Exception, e:
@@ -105,7 +105,7 @@ class MainGUI(fmc.MyQtWindow):
         result = pm.confirmDialog(t = 'FrMaya', b = ['Yes', 'No'], m = 'Are you sure?')
         try:
             if result == 'Yes':
-                fmc.uninstall(frmaya = True)
+                fmc.uninstall('FrMaya')
                 message = 'FrMaya succesfuly removed.\nPlease restart maya.'
         except Exception, e:
             message = 'FrMaya failed to remove.{0}'.format(e)

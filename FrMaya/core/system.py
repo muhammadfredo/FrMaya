@@ -50,73 +50,56 @@ def maya_version_as_float():
         return float(temp_string)
 
 
-def install(*args, **kwargs):
+def install(source_path, local_install = False):
     # TODO: docstring here
     # FIXME: some homework need to be done
-    if kwargs:
-        # Maya user script path
-        usd = pm.internalVar(usd = True)
-        if kwargs.get('source') and kwargs.get('local'):
-            # uninstall frmaya if any
-            uninstall(frmaya = True)
+    source_path = path.Path(source_path)
+    assert source_path.exists(), 'Source path did not exist!!!'
+    installed_title = source_path.stem
+    # Maya user application directory
+    user_app_dir = path.Path(pm.internalVar(uad = True))
+    # create modules dir
+    module_dir = user_app_dir / 'modules'
+    if not module_dir.exists():
+        module_dir.mkdir()
 
-            # FrMaya script folder path
-            script_folder = os.path.join(usd, 'FrMaya')
-
-            # copy frmaya to usd
-            shutil.copytree(kwargs.get('source'), script_folder)
-
-            # userSetup.py path
-            file_path = os.path.join(usd, 'userSetup.py')
-
-            script_file = ''
-
-            # check if userSetup exist
-            if os.path.exists(file_path):
-                # TODO: append FrMaya userSetup to existing userSetup
-                pass
-
-            script_file += 'import FrMaya\n'
-            script_file += 'FrMaya.startup()\n'
-
-            with open(file_path, 'w') as ss:
-                ss.write(script_file)
-
-        if kwargs.get('source') and kwargs.get('remote'):
-            # uninstall frmaya if any
-            uninstall(frmaya = True)
-
-            file_path = os.path.join(usd, 'userSetup.py')
-
-            with open(file_path, 'w') as ss:
-                ss.write("import sys\n")
-                ss.write("sys.path.append(r'{0}')\n".format(os.path.dirname(kwargs.get('source'))))
-                ss.write("import FrMaya\n")
-                ss.write("FrMaya.startup()\n")
-
-        return True
+    # uninstall first if any
+    uninstall(installed_title)
+    if local_install:
+        # FrMaya script folder path
+        target_dir = user_app_dir / installed_title
+        # copy frmaya to user script directory
+        shutil.copytree(source_path, target_dir)
     else:
-        print 'please specify keyword argument'
-        return False
+        target_dir = source_path
+
+    # write module file
+    module_file = module_dir / '{}.mod'.format(installed_title)
+    with open(module_file, 'w') as ss:
+        ss.write('+ FrMaya any {}\n'.format(target_dir))
+        ss.write('scripts+:=startup\n')
+        ss.write('PYTHONPATH+:=\n')
+        ss.write('PYTHONPATH+:=startup\n')
+        ss.write('FR_MYMENUBAR+:=MayaMenubar\n')
+        ss.write('FR_CONTROLCURVE+:=RigData\\ControlCurve\n')
+
+    return True
 
 
-def uninstall(*args, **kwargs):
+def uninstall(installed_title):
     # TODO: docstring here
     # FIXME: some homework need to be done
-    if kwargs:
-        if kwargs.get('frmaya'):
-            # Maya user script path
-            usd = pm.internalVar(usd = True)
-            # FrMaya script folder path
-            script_folder = os.path.join(usd, 'FrMaya')
+    # Maya user application directory
+    user_app_dir = path.Path(pm.internalVar(uad = True))
+    # modules dir
+    module_dir = user_app_dir / 'modules'
+    module_file = module_dir / '{}.mod'.format(installed_title)
+    if module_file.exists():
+        module_file.remove()
 
-            if os.path.exists(script_folder):
-                shutil.rmtree(script_folder, ignore_errors = True)
-
-            # userSetup.py path
-            file_path = os.path.join(usd, 'userSetup.py')
-
-            if os.path.exists(file_path):
-                os.remove(file_path)
+    # installed package
+    installed_pkg = user_app_dir / installed_title
+    if installed_pkg.exists():
+        shutil.rmtree(ignore_errors = True)
 
 
