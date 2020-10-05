@@ -7,19 +7,19 @@ Start Date   : 16 Sep 2020
 Info         :
 
 """
+import copy
+
 import pymel.core as pm
 
 from . import scene_info
 
 
 def clean_unknown_plugins():
-    # TODO: docstring here
-    # FIXME: some homework need to be done, need to separate clean and get
-    # remove unknownplugins expect nodes that exist in scene
-    # http://mayastation.typepad.com/maya-station/2015/04/how-to-prevent-maya-writing-a-requires-command-for-a-plug-in.html
-    # some unknown plugins may needed in another environment
-    # example: Vray plugin will not available to animator but will available to lighting artist
-
+    """Remove all unknownplugins expect nodes that exist in scene.
+    http://mayastation.typepad.com/maya-station/2015/04/how-to-prevent-maya-writing-a-requires-command-for-a-plug-in.html
+    Some unknown plugins may needed in another environment.
+    example: Vray plugin will not available to animator but will available to lighting artist.
+    """
     unknown_nodes = set()
     for unknown_node in pm.ls(type = ["unknown", "unknownDag"], editable = True):
         unknown_nodes.add(pm.unknownNode(unknown_node, q = True, plugin = True))
@@ -35,18 +35,21 @@ def clean_unknown_plugins():
 
 
 def clean_mentalray_nodes():
-    # TODO: docstring here
-    # FIXME: some homework need to be done, need to separate clean and get
-    mentalray_type = ['mentalrayGlobals', 'mentalrayItemsList', 'mentalrayOptions', 'mentalrayFramebuffer']
-    result = pm.ls(type = mentalray_type)
-    if result:
-        pm.delete(result)
+    """Remove all mental ray nodes in the scene."""
+    mentalray_nodes = ['mentalrayGlobals', 'mentalrayItemsList', 'mentalrayOptions', 'mentalrayFramebuffer']
+    result = pm.ls(type = mentalray_nodes)
+    result.extend(pm.ls([o + '*' for o in mentalray_nodes]))
+    pm.delete(result)
 
 
-def clean_namespace():
-    # TODO: docstring here
-    # FIXME: some homework need to be done, need to separate clean and get
-    namespace_list = [] # get_namespaces()
+def clean_namespace(namespace_list = None):
+    """Remove all namespace or supplied namespace list.
+
+    :key namespace_list: Namespace list that need to be removed.
+    :type namespace_list: list of str
+    """
+    if namespace_list is None:
+        namespace_list = scene_info.get_namespaces(exclude_ref = True)
 
     for o in namespace_list:
         try:
@@ -55,34 +58,46 @@ def clean_namespace():
             print('{}, {}'.format(o, e))
 
 
-def clean_anim_layer():
-    # TODO: docstring here
-    # FIXME: some homework need to be done
-    default_layer = ['BaseAnimation']
+def clean_anim_layer(exception_list = None):
+    """Remove all animation layer in the scene.
+
+    :key exception_list: Animation layer name that need to be keep.
+    :type exception_list: list of str
+    """
+    if exception_list is None:
+        exception_list = []
     layer_node = pm.ls(type = ['animLayer'])
-    dirty_layer = [o for o in layer_node if o not in default_layer]
+    dirty_layer = [o for o in layer_node if o not in exception_list]
     pm.delete(dirty_layer)
 
-    # need evalDeferred waiting to update or something
-    # or else it will screw up some transform that got anim layer connection
-    pm.evalDeferred("pm.delete(pm.PyNode('BaseAnimation'))")
 
+def clean_display_layer(exception_list = None):
+    """Remove all display layer in the scene.
 
-def clean_display_layer():
-    # TODO: docstring here
-    # FIXME: some homework need to be done
-    default_layer = ['defaultLayer']
+    :key exception_list: Display layer name that need to be keep.
+    :type exception_list: list of str
+    """
+    if exception_list is None:
+        exception_list = []
+    exception_list.append('defaultLayer')
     layer_node = pm.ls(type = ['displayLayer'])
-    dirty_layer = [o for o in layer_node if o not in default_layer]
+    dirty_layer = [o for o in layer_node if o not in exception_list]
 
     pm.delete(dirty_layer)
 
 
-def fix_shading_engine_intermediate():
-    # TODO: docstring here
-    # FIXME: some homework need to be done
-    shape_inter_list = scene_info.get_shading_engine_intermediate()
-    # shape_inter_list = pm.ls(type = 'mesh', intermediateObjects = True)
+def fix_shading_engine_intermediate(input_shape_intermediate = None):
+    """Re-wire shading engine connection that connect to
+    intermediate shape to non intermediate shape.
+
+    :arg input_shape_intermediate: Intermediate shape that have shading engine connection and need re-wire.
+    :type input_shape_intermediate: list of pm.PyNode
+    """
+    if input_shape_intermediate is not None:
+        shape_inter_list = copy.deepcopy(input_shape_intermediate)
+    else:
+        shape_inter_list = scene_info.get_shading_engine_intermediate()
+
     for shape_intermediate in shape_inter_list:
         inter_shd_engine_list = shape_intermediate.shadingGroups()
         inter_connection = shape_intermediate.outputs(type = 'shadingEngine', plugs = True)
@@ -98,22 +113,6 @@ def fix_shading_engine_intermediate():
             shape_deformed.instObjGroups[0].disconnect(noninter_connection[0])
 
         shape_deformed.instObjGroups[0] >> inter_connection[0]
-    #     if inter_shd_engine_list:
-    #         if inter_shd_engine_list[0].name() == 'initialShadingGroup':
-    #             continue
-    #         the_object = shape_intermediate.getParent()
-    #         shape_deformed = the_object.getShape(noIntermediate = 1)
-    #         noninter_shd_engine_list = shape_deformed.shadingGroups()
-    #         if noninter_shd_engine_list:
-    #             if noninter_shd_engine_list[0].name() == 'initialShadingGroup':
-    #                 continue
-    #             inter_connection = shape_intermediate.outputs(type = 'shadingEngine', plugs = 1)
-    #             noninter_connection = shape_deformed.outputs(type = 'shadingEngine', plugs = 1)
-    #
-    #             shape_intermediate.instObjGroups[0].disconnect(destination = inter_connection[0])
-    #             shape_deformed.instObjGroups[0].disconnect(destination = noninter_connection[0])
-    #
-    #             shape_deformed.instObjGroups[0] >> inter_connection[0]
 
 
 

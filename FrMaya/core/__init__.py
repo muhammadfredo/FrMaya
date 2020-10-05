@@ -35,6 +35,7 @@ from .scene_cleanup import (
     clean_display_layer,
     clean_mentalray_nodes,
     clean_namespace,
+    fix_shading_engine_intermediate,
 )
 from .scene_info import (
     get_duplicate_name,
@@ -49,6 +50,7 @@ from .scene_info import (
     get_empty_mesh,
     get_start_frame,
     get_end_frame,
+    get_shading_engine_intermediate,
 )
 from .shading import (
     get_file_node_path,

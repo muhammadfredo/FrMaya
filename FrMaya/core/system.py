@@ -51,8 +51,14 @@ def maya_version_as_float():
 
 
 def install(source_path, local_install = False):
-    # TODO: docstring here
-    # FIXME: some homework need to be done
+    """Install FrMaya package.
+
+    :arg source_path: Downloaded or cloned FrMaya package absolute path.
+    :type source_path: str or path.Path
+    :key local_install: If True, FrMaya package will be copied into maya user application directory.
+    :type local_install: bool
+    :rtype: bool
+    """
     source_path = path.Path(source_path)
     assert source_path.exists(), 'Source path did not exist!!!'
     installed_title = source_path.stem
@@ -87,8 +93,11 @@ def install(source_path, local_install = False):
 
 
 def uninstall(installed_title):
-    # TODO: docstring here
-    # FIXME: some homework need to be done
+    """Uninstall FrMaya package.
+
+    :arg installed_title: FrMaya package title name.
+    :type installed_title: str
+    """
     # Maya user application directory
     user_app_dir = path.Path(pm.internalVar(uad = True))
     # modules dir

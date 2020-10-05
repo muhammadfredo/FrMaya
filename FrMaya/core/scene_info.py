@@ -139,7 +139,7 @@ def get_bad_shape_name():
 
 
 def get_empty_mesh():
-    """Get empty mesh in current scene.
+    """Collect empty mesh in current scene.
 
     :rtype: list of pm.nt.Mesh
     """
@@ -164,8 +164,11 @@ def get_end_frame():
 
 
 def get_shading_engine_intermediate():
-    # TODO: docstring here
-    # FIXME: some homework need to be done
+    """Collect all intermediate shape
+    that have connection with shading engine.
+
+    :rtype: list of pm.nt.ShadingEngine
+    """
     shape_inter_list = pm.ls(type = 'mesh', intermediateObjects = True)
 
     return [o for o in shape_inter_list if o.shadingGroups()]
