@@ -43,7 +43,7 @@ class MainGUI(fmc.MyQtWindow):
         Connect event handler/sender from UI to slot
         """
 
-        ## MAIN TOOL ##
+        # MAIN TOOL #
         # Display group ui list
         dispaly_grp = [self.ui.dis_over_btn, self.ui.dis_ref_btn, self.ui.dis_norm_btn, self.ui.dis_none_btn,
                        self.ui.dis_jnt_btn, self.ui.dis_axis_btn, self.ui.dis_noaxis_btn]
@@ -66,7 +66,7 @@ class MainGUI(fmc.MyQtWindow):
         for o in freeze_tm_grp:
             o.pressed.connect(partial(self.freeze_tm_pressed, o))
 
-        ## SRT TAB ##
+        # SRT TAB #
         # Reset srt ui list
         reset_srt_grp = [self.ui.r_translate_btn, self.ui.r_rotate_btn, self.ui.r_scale_btn, self.ui.r_visibility_btn,
                          self.ui.r_rotateorder_btn]
@@ -98,7 +98,7 @@ class MainGUI(fmc.MyQtWindow):
         for o in lock_hide_btn_grp:
             o.pressed.connect(partial(self.lockhide_pressed, o, lock_hide_check_grp))
 
-        ## Joint TAB ##
+        # Joint TAB #
         # Joint creation button group ui list
         joint_creation_btn_grp = [self.ui.jc_create_btn, self.ui.jc_insert_btn, self.ui.jc_reroot_btn,
                                   self.ui.jc_split_btn, self.ui.jc_createonsel_btn]
@@ -131,7 +131,7 @@ class MainGUI(fmc.MyQtWindow):
         for o in mirror_joint_btn_grp:
             o.pressed.connect(partial(self.mirror_joint_pressed, o, mirror_joint_opt_grp))
 
-        ## Control TAB ##
+        # Control TAB #
         # Color overide group ui list
         coloroveride_btn_grp = [self.ui.color_06_btn, self.ui.color_09_btn, self.ui.color_13_btn, self.ui.color_14_btn,
                                 self.ui.color_17_btn]
@@ -277,19 +277,21 @@ class MainGUI(fmc.MyQtWindow):
 
         # Collect selection
         selection = pm.ls(os = True)
-
+        freeze_mode = ''
         # Freeze transform on selection
         if sender == self.ui.ft_all_btn:
-            fmc.freeze_transform(selection)
+            freeze_mode = 'Transform'
         # Freeze translate on selection
         elif sender == self.ui.ft_translate_btn:
-            fmc.freeze_transform(selection, mode = 'translate')
+            freeze_mode = 'translate'
         # Freeze rotation on selection
         elif sender == self.ui.ft_rotate_btn:
-            fmc.freeze_transform(selection, mode = 'rotate')
+            freeze_mode = 'rotate'
         # Freeze scale on selection
         elif sender == self.ui.ft_scale_btn:
-            fmc.freeze_transform(selection, mode = 'scale')
+            freeze_mode = 'scale'
+
+        [fmc.freeze_transform(o, mode = freeze_mode)for o in selection]
 
     @util.undoable
     def reset_srt_pressed(self, sender):
@@ -301,22 +303,24 @@ class MainGUI(fmc.MyQtWindow):
 
         # Collect selection
         selection = pm.ls(os = True)
-
+        reset_tm_mode = ''
         # Zero out translate
         if sender == self.ui.r_translate_btn:
-            fmc.reset_transform(selection, mode = 'translate')
+            reset_tm_mode = 'translate'
         # Zero out rotate
         elif sender == self.ui.r_rotate_btn:
-            fmc.reset_transform(selection, mode = 'rotate')
+            reset_tm_mode = 'rotate'
         # Zero out scale
         elif sender == self.ui.r_scale_btn:
-            fmc.reset_transform(selection, mode = 'scale')
+            reset_tm_mode = 'scale'
         # Normalize visibility
         elif sender == self.ui.r_visibility_btn:
-            fmc.reset_transform(selection, mode = 'visibility')
+            reset_tm_mode = 'visibility'
         # Normalize rotate order
         elif sender == self.ui.r_rotateorder_btn:
-            fmc.reset_transform(selection, mode = 'rotateorder')
+            reset_tm_mode = 'rotateorder'
+
+        [fmc.reset_transform(o, mode = reset_tm_mode) for o in selection]
 
     def lockhide_state_changed(self, sender, checkbox):
         """
@@ -352,29 +356,29 @@ class MainGUI(fmc.MyQtWindow):
         """
 
         # Collect which attribute that will lock, hide, or make keyable
-        attrubute_list = [o for o in checkbox if checkbox[o].isChecked() == True]
+        attribute_list = [o for o in checkbox if checkbox[o].isChecked()]
 
         # Collect selection
         selection = pm.ls(os = True)
 
         # Make keyable
         if sender == self.ui.lh_k_btn:
-            fmc.keylockhide_attribute(selection, attrubute_list, keyable = True)
+            [fmc.keyable_attributes(o, attributes = attribute_list) for o in selection]
         # Lock attribute
         if sender == self.ui.lh_l_btn:
-            fmc.keylockhide_attribute(selection, attrubute_list, lock = True)
+            [fmc.lock_attributes(o, attributes = attribute_list) for o in selection]
         # Hide attribute
         if sender == self.ui.lh_h_btn:
-            fmc.keylockhide_attribute(selection, attrubute_list, hide = True)
+            [fmc.hide_attributes(o, attributes = attribute_list) for o in selection]
         # Make unkeyable
         if sender == self.ui.lh_uk_btn:
-            fmc.keylockhide_attribute(selection, attrubute_list, keyable = False)
+            [fmc.nonkeyable_attributes(o, attributes = attribute_list) for o in selection]
         # Unlock attribute
         if sender == self.ui.lh_ul_btn:
-            fmc.keylockhide_attribute(selection, attrubute_list, lock = False)
+            [fmc.unlock_attributes(o, attributes = attribute_list) for o in selection]
         # Unhide attribute
         if sender == self.ui.lh_uh_btn:
-            fmc.keylockhide_attribute(selection, attrubute_list, hide = False)
+            [fmc.unhide_attributes(o, attributes = attribute_list) for o in selection]
 
     @util.undoable
     def joint_creation_pressed(self, sender, option):

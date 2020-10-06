@@ -15,8 +15,13 @@ from .general import (
     split_joint,
     comet_joint_orient,
     build_curve,
-    keylockhide_attribute,
     transfer_shape,
+    lock_attributes,
+    unlock_attributes,
+    hide_attributes,
+    unhide_attributes,
+    keyable_attributes,
+    nonkeyable_attributes,
 )
 from .rig import (
     get_skincluster_info,

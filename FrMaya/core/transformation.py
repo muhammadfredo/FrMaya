@@ -40,19 +40,15 @@ def align(source, target, mode = 'transform'):
         source.setRotation(rot_qt, space = 'world')
 
 
-def freeze_transform(pynodes, mode = 'Transform'):
-    """Freeze translate, rotate, scale specified PyNodes.
+def freeze_transform(pynode, mode = 'Transform'):
+    """Freeze translate, rotate, scale specified PyNode.
 
-    :arg pynodes: PyNodes object need to freeze transform.
-    :type pynodes: list of pm.nt.Transform
+    :arg pynode: PyNode object need to freeze transform.
+    :type pynode: pm.nt.Transform
     :key mode: Transform, translate, rotate, and scale.
     :type mode: str
     :rtype: bool
     """
-    # TODO: can use map function, no need pynode list
-    # Filter supplied pynodes, if equal to 0 then return false
-    if len(pynodes) == 0:
-        return False
     # Initiate variable for makeIdentity command
     t = False
     r = False
@@ -64,47 +60,41 @@ def freeze_transform(pynodes, mode = 'Transform'):
     if mode == 'scale' or mode == 'Transform':
         s = True
     # Freeze transform command
-    for o in pynodes:
-        pm.makeIdentity(o, apply = True, translate = t, rotate = r, scale = s)
+    pm.makeIdentity(pynode, apply = True, translate = t, rotate = r, scale = s)
 
     return True
 
 
-def reset_transform(pynodes, mode = ''):
+def reset_transform(pynode, mode = ''):
     """Reset transform, visibility, or rotate order.
 
-    :arg pynodes: PyNodes object need to reset transform.
-    :type pynodes: list of pm.nt.Transform
+    :arg pynode: PyNode object need to reset transform.
+    :type pynode: pm.nt.Transform
     :arg mode: transform, translate, rotate, scale, visibility, and rotate_order. Default will reset all.
     :type mode: str
     :rtype: bool
     """
-    # TODO: can use map function, no need pynode list
-    # Filter supplied pynodes, if equal to 0 then return false
-    if len(pynodes) == 0:
-        return
-    for o in pynodes:
-        # Translate mode
-        if mode == 'translate' or mode == 'transform' or mode == '':
-            o.translateX.set(0)
-            o.translateY.set(0)
-            o.translateZ.set(0)
-        # Rotate mode
-        if mode == 'rotate' or mode == 'transform' or mode == '':
-            o.rotateX.set(0)
-            o.rotateY.set(0)
-            o.rotateZ.set(0)
-        # Scale mode
-        if mode == 'scale' or mode == 'transform' or mode == '':
-            o.scaleX.set(1)
-            o.scaleY.set(1)
-            o.scaleZ.set(1)
-        # Visibility
-        if mode == 'visibility' or mode == '':
-            o.visibility.set(1)
-        # Rotate order
-        if mode == 'rotate_order' or mode == '':
-            o.rotateOrder.set(0)
+    # Translate mode
+    if mode == 'translate' or mode == 'transform' or mode == '':
+        pynode.translateX.set(0)
+        pynode.translateY.set(0)
+        pynode.translateZ.set(0)
+    # Rotate mode
+    if mode == 'rotate' or mode == 'transform' or mode == '':
+        pynode.rotateX.set(0)
+        pynode.rotateY.set(0)
+        pynode.rotateZ.set(0)
+    # Scale mode
+    if mode == 'scale' or mode == 'transform' or mode == '':
+        pynode.scaleX.set(1)
+        pynode.scaleY.set(1)
+        pynode.scaleZ.set(1)
+    # Visibility
+    if mode == 'visibility' or mode == '':
+        pynode.visibility.set(1)
+    # Rotate order
+    if mode == 'rotate_order' or mode == '':
+        pynode.rotateOrder.set(0)
 
     return True
 
