@@ -90,7 +90,7 @@ def fix_shading_engine_intermediate(input_shape_intermediate = None):
     """Re-wire shading engine connection that connect to
     intermediate shape to non intermediate shape.
 
-    :arg input_shape_intermediate: Intermediate shape that have shading engine connection and need re-wire.
+    :key input_shape_intermediate: Intermediate shape that have shading engine connection and need re-wire.
     :type input_shape_intermediate: list of pm.PyNode
     """
     if input_shape_intermediate is not None:
