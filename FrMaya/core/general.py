@@ -473,7 +473,7 @@ def nonkeyable_attributes(pynode, attr_name_list = None):
 
 
 def get_channelbox_attributes(input_object):
-    """Collect all visible in channelbox attributes.
+    """Collect all visible attributes in channelbox.
 
     :arg input_object: PyNode object need to collect attributes from.
     :type input_object: pm.PyNode

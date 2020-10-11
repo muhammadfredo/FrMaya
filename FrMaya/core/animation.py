@@ -12,22 +12,49 @@ import pymel.core as pm
 from . import general, scene_info
 
 
-def bake_animation(input_node):
+def bake_animation(input_object, translate = True, rotate = True, scale = False, time_range = None, hierarchy = True):
+    """Bake animation specified PyNode object.
+    
+    :arg input_object: PyNode object need to bake the animation.
+    :type input_object: pm.PyNode
+    :key translate: If True, all translate attributes will get bake animation.
+    :type translate: bool
+    :key rotate: If True, all rotate attributes will get bake animation.
+    :type rotate: bool 
+    :key scale: If True, all scale attributes will get bake animation.
+    :type scale: bool
+    :key time_range: Specified start and end frame of bake animation.
+     Default using current scene start and end frame.
+    :type time_range: list of int 
+    :key hierarchy: If True, all children of specified PyNode object will get bake animation.
+    :type hierarchy: bool
     """
-    """
-    # TODO: docstring here
-    # FIXME: some homework need to be done
+    if time_range is None:
+        time_range = [scene_info.get_start_frame(), scene_info.get_end_frame()]
+    if hierarchy:
+        hi_format = 'below'
+    else:
+        hi_format = 'none'
+    attr_list = []
+    if translate:
+        attr_list.extend(['tx', 'ty', 'tz'])
+    if rotate:
+        attr_list.extend(['rx', 'ry', 'rz'])
+    if scale:
+        attr_list.extend(['sx', 'sy', 'sz'])
+
     # pause viewport maya
     pm.general.refresh(suspend = True)
     # format time range
-    timerange = '{}:{}'.format(scene_info.get_start_frame(), scene_info.get_end_frame())
+    timerange_format = '{}:{}'.format(time_range[0], time_range[1])
     # bake keys
-    pm.bakeResults(input_node, simulation = True, t = timerange, hi = 'below',
-                   at = ['tx', 'ty', 'tz', 'rx', 'ry', 'rz'],
-                   sampleBy = 1, oversamplingRate = 1,
-                   disableImplicitControl = True, preserveOutsideKeys = False, sparseAnimCurveBake = False,
-                   removeBakedAttributeFromLayer = False, removeBakedAnimFromLayer = False, bakeOnOverrideLayer = False,
-                   minimizeRotation = True, controlPoints = False, shape = False)
+    pm.bakeResults(
+        input_object, simulation = True, t = timerange_format, hi = hi_format,
+        at = attr_list, sampleBy = 1, oversamplingRate = 1,
+        disableImplicitControl = True, preserveOutsideKeys = False, sparseAnimCurveBake = False,
+        removeBakedAttributeFromLayer = False, removeBakedAnimFromLayer = False, bakeOnOverrideLayer = False,
+        minimizeRotation = True, controlPoints = False, shape = False
+    )
     # end of pause viewport maya
     pm.general.refresh(suspend = False)
 
@@ -40,6 +67,7 @@ def copy_animation(source_object, target_objects, attr_name_list = None, relativ
     :arg target_objects: PyNodes object copy animation destination.
     :type target_objects: list of pm.PyNode
     :key attr_name_list: Attributes name need to copy the animation.
+     Default is using all visible attributes in channelbox.
     :type attr_name_list: list of str
     :key relative: If True, target object will keep the initial attribute value.
     :type relative: bool

@@ -33,7 +33,8 @@ def undoable(input_function):
 
         try:
             function_return = input_function(*args, **kwargs)
-
+        except Exception as e:
+            raise e
         finally:
             pm.undoInfo(closeChunk=True)
             return function_return
