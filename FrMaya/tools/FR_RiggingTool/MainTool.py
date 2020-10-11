@@ -363,22 +363,22 @@ class MainGUI(fmc.MyQtWindow):
 
         # Make keyable
         if sender == self.ui.lh_k_btn:
-            [fmc.keyable_attributes(o, attributes = attribute_list) for o in selection]
+            [fmc.keyable_attributes(o, attr_name_list = attribute_list) for o in selection]
         # Lock attribute
         if sender == self.ui.lh_l_btn:
-            [fmc.lock_attributes(o, attributes = attribute_list) for o in selection]
+            [fmc.lock_attributes(o, attr_name_list = attribute_list) for o in selection]
         # Hide attribute
         if sender == self.ui.lh_h_btn:
-            [fmc.hide_attributes(o, attributes = attribute_list) for o in selection]
+            [fmc.hide_attributes(o, attr_name_list = attribute_list) for o in selection]
         # Make unkeyable
         if sender == self.ui.lh_uk_btn:
-            [fmc.nonkeyable_attributes(o, attributes = attribute_list) for o in selection]
+            [fmc.nonkeyable_attributes(o, attr_name_list = attribute_list) for o in selection]
         # Unlock attribute
         if sender == self.ui.lh_ul_btn:
-            [fmc.unlock_attributes(o, attributes = attribute_list) for o in selection]
+            [fmc.unlock_attributes(o, attr_name_list = attribute_list) for o in selection]
         # Unhide attribute
         if sender == self.ui.lh_uh_btn:
-            [fmc.unhide_attributes(o, attributes = attribute_list) for o in selection]
+            [fmc.unhide_attributes(o, attr_name_list = attribute_list) for o in selection]
 
     @util.undoable
     def joint_creation_pressed(self, sender, option):

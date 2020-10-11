@@ -167,18 +167,6 @@ def create_control(control_file, transform = None, name = 'FrControl', suffix = 
     return result
 
 
-def get_channelbox_attributes(input_object):
-    """Collect all visible in channelbox attributes.
-
-    :arg input_object: PyNode object need to collect attributes from.
-    :type input_object: pm.PyNode
-    :rtype: list of pm.general.Attribute
-    """
-    attr_list = input_object.listAttr(keyable = True, scalar = True, multi = True)
-    attr_list.extend(input_object.listAttr(channelBox = True))
-    return attr_list
-
-
 def reset_attributes(input_object, attr_name_list = None):
     """Reset all attributes visible in channel box or supplied attributes
     to their respective attributes default value.
@@ -194,7 +182,8 @@ def reset_attributes(input_object, attr_name_list = None):
     if len(attr_name_list) > 0:
         attr_list = [input_object.attr(attr_name) for attr_name in attr_name_list]
     else:
-        attr_list = get_channelbox_attributes(input_object)
+        attr_list = general.get_channelbox_attributes(input_object)
+
     for attr in attr_list:
         # def_val = attr.get(default = True)
         def_val = pm.attributeQuery(attr.plugAttr(), node = attr.node(), listDefault = True)[0]
@@ -210,7 +199,7 @@ def set_attrs_default(input_object):
     :type input_object: pm.PyNode
     :rtype: None
     """
-    attr_list = get_channelbox_attributes(input_object)
+    attr_list = general.get_channelbox_attributes(input_object)
     for attr in attr_list:
         current_val = attr.get()
         if hasattr(attr, 'addAttr'):

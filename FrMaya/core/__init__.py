@@ -13,6 +13,7 @@ from .animation import (
 from .general import (
     build_curve,
     comet_joint_orient,
+    get_channelbox_attributes,
     hide_attributes,
     keyable_attributes,
     lock_attributes,
@@ -25,7 +26,6 @@ from .general import (
 )
 from .rig import (
     create_control,
-    get_channelbox_attributes,
     get_control_files,
     get_skincluster_info,
     get_skincluster_node,

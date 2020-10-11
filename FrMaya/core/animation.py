@@ -9,7 +9,7 @@ Info         :
 """
 import pymel.core as pm
 
-from . import scene_info
+from . import general, scene_info
 
 
 def bake_animation(input_node):
@@ -32,40 +32,50 @@ def bake_animation(input_node):
     pm.general.refresh(suspend = False)
 
 
-def copy_animation():
-    # TODO: docstring here
-    # FIXME: this is not ready function
-    # FIXME: some homework need to be done
-    att_list = ['translateX', 'translateY', 'translateZ', 'rotateX', 'rotateY', 'rotateZ', 'scaleX', 'scaleY', 'scaleZ']
+def copy_animation(source_object, target_objects, attr_name_list = None, relative = False):
+    """Copy animation from single source to multiple target.
 
-    sel = pm.ls(os = 1)
-    char_obj = None
-    dummy_obj = None
-    for i, o in enumerate(sel):
-        res_num = i % 2
-        # even number
-        if res_num == 0:
-            # dummy
-            dummy_obj = o
+    :arg source_object: PyNode object copy animation source.
+    :type source_object: pm.PyNode
+    :arg target_objects: PyNodes object copy animation destination.
+    :type target_objects: list of pm.PyNode
+    :key attr_name_list: Attributes name need to copy the animation.
+    :type attr_name_list: list of str
+    :key relative: If True, target object will keep the initial attribute value.
+    :type relative: bool
+    """
+    if attr_name_list is None:
+        attr_name_list = []
+
+    if len(attr_name_list) > 0:
+        attr_name_list = [attr_name for attr_name in attr_name_list if source_object.hasAttr(attr_name)]
+    else:
+        attr_name_list = [attr_node.attrName() for attr_node in general.get_channelbox_attributes(source_object)]
+
+    for attr_name in attr_name_list:
+        # If attribute doesnt have anim key, skip it
+        keyframe_count = pm.keyframe(source_object, attribute = attr_name, q = True, keyframeCount = True)
+        if not keyframe_count:
+            continue
+
+        pm.copyKey(source_object, attribute = attr_name)
+
+        paste_key_data = {
+            'attribute': attr_name,
+            'clipboard': 'anim',
+            'option': 'replaceCompletely'
+        }
+        if relative:
+            # calculate offset value before paste the key
+            src_val = source_object.attr(attr_name).get()
+            for tgt_obj in target_objects:
+                tgt_val = tgt_obj.attr(attr_name).get()
+                offset_value = tgt_val - src_val
+                paste_key_data['valueOffset'] = offset_value
+
+                pm.pasteKey(tgt_obj, **paste_key_data)
         else:
-            # odd number
-            # character
-            char_obj = o
-        print 'odd or not', res_num
-        print char_obj
-        print dummy_obj
-
-        if res_num == 1 and char_obj and dummy_obj:
-            # snap char to dummy
-            parent_cons = pm.parentConstraint(dummy_obj, char_obj, maintainOffset = False)
-            pm.delete(parent_cons)
-
-            # copy animation
-            for x in att_list:
-                dummy_att = dummy_obj.attr(x)
-                anim_node = dummy_att.inputs()[0]
-
-                anim_node.output >> char_obj.attr(x)
+            pm.pasteKey(target_objects, **paste_key_data)
 
 
 

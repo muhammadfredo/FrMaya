@@ -140,11 +140,13 @@ def split_joint(pynode, split = 2, replace = True):
     return output
 
 
-# Based on code by Michael B. Comet - comet@comet-cartoons.com
-# http://www.comet-cartoons.com/
 def comet_joint_orient(pynodes, aim_axis = None, up_axis = None, up_dir = None, do_auto = False):
     """Complete Joint Orient function for properly setting up joint axis.
     Translated from cometJointOrient.mel.
+
+    Based on code by Michael B. Comet - comet@comet-cartoons.com
+
+    http://www.comet-cartoons.com
 
     :arg pynodes: Pynodes joint need to orient.
     :type pynodes: list of pm.PyNode
@@ -310,7 +312,7 @@ def transfer_shape(source_object, target_objects, replace = True):
     """Copied source shape object into target object,
     Default it will replace target shape objects.
 
-    :arg source_object: PyNode object shape transfer source.
+    :arg source_object: PyNode object transfer shape source.
     :type source_object: pm.nt.Transform
     :arg target_objects: PyNodes object transfer destination.
     :type target_objects: list of pm.nt.Transform
@@ -337,13 +339,13 @@ def transfer_shape(source_object, target_objects, replace = True):
     return True
 
 
-def _do_attributes_key_lock_hide(pynode, attributes_list, keyable = None, lock = None, hide = None):
+def _do_attributes_key_lock_hide(pynode, attr_name_list, keyable = None, lock = None, hide = None):
     """Make attribute keyable or nonkeyable, lock or unlock, and hide or unhide.
 
     :arg pynode: PyNode need to key, lock, or hide operation.
     :type pynode: pm.PyNode
-    :arg attributes_list: Attribute name need to key, lock, or hide operation.
-    :type attributes_list: list of str
+    :arg attr_name_list: Attribute name need to key, lock, or hide operation.
+    :type attr_name_list: list of str
     :key keyable: True to make attribute keyable, False to make non keyable.
     :type keyable: bool or None
     :key lock: True to lock attribute, False to unlock attribute.
@@ -352,7 +354,7 @@ def _do_attributes_key_lock_hide(pynode, attributes_list, keyable = None, lock =
     :type hide: bool or None
     """
     # Loop through list of attribute name
-    for attribute_name in attributes_list:
+    for attribute_name in attr_name_list:
         # get attribute node
         if not pynode.hasAttr(attribute_name):
             continue
@@ -380,96 +382,105 @@ def _do_attributes_key_lock_hide(pynode, attributes_list, keyable = None, lock =
                 att_node.setKeyable(True)
 
 
-def lock_attributes(pynode, attributes = None):
+def lock_attributes(pynode, attr_name_list = None):
     """Lock specified attributes of given PyNode.
     By default will lock all translate, rotate, scale, and visibility.
 
     :arg pynode: PyNode which attribute need to lock.
     :type pynode: pm.PyNode
-    :key attributes: Attributes name need to lock.
-    :type attributes: list of str
+    :key attr_name_list: Attributes name need to lock.
+    :type attr_name_list: list of str
     """
-    if attributes is None:
-        attributes = ['tx', 'ty', 'tz', 'rx', 'ry', 'rz', 'sx', 'sy', 'sz', 'v']
+    if attr_name_list is None:
+        attr_name_list = ['tx', 'ty', 'tz', 'rx', 'ry', 'rz', 'sx', 'sy', 'sz', 'v']
 
-    _do_attributes_key_lock_hide(pynode, attributes, lock = True)
+    _do_attributes_key_lock_hide(pynode, attr_name_list, lock = True)
 
 
-def unlock_attributes(pynode, attributes = None):
+def unlock_attributes(pynode, attr_name_list = None):
     """Unlock specified attributes of given PyNode.
     By default will unlock all translate, rotate, scale, and visibility.
 
     :arg pynode: PyNode which attribute need to unlock.
     :type pynode: pm.PyNode
-    :key attributes: Attributes name need to unlock.
-    :type attributes: list of str
+    :key attr_name_list: Attributes name need to unlock.
+    :type attr_name_list: list of str
     """
-    if attributes is None:
-        attributes = ['tx', 'ty', 'tz', 'rx', 'ry', 'rz', 'sx', 'sy', 'sz', 'v']
+    if attr_name_list is None:
+        attr_name_list = ['tx', 'ty', 'tz', 'rx', 'ry', 'rz', 'sx', 'sy', 'sz', 'v']
 
-    _do_attributes_key_lock_hide(pynode, attributes, lock = False)
+    _do_attributes_key_lock_hide(pynode, attr_name_list, lock = False)
 
 
-def hide_attributes(pynode, attributes = None):
+def hide_attributes(pynode, attr_name_list = None):
     """Hide specified attributes of given PyNode.
     By default will hide all translate, rotate, scale, and visibility.
 
     :arg pynode: PyNode which attribute need to hide.
     :type pynode: pm.PyNode
-    :key attributes: Attributes name need to hide.
-    :type attributes: list of str
+    :key attr_name_list: Attributes name need to hide.
+    :type attr_name_list: list of str
     """
-    if attributes is None:
-        attributes = ['tx', 'ty', 'tz', 'rx', 'ry', 'rz', 'sx', 'sy', 'sz', 'v']
+    if attr_name_list is None:
+        attr_name_list = ['tx', 'ty', 'tz', 'rx', 'ry', 'rz', 'sx', 'sy', 'sz', 'v']
 
-    _do_attributes_key_lock_hide(pynode, attributes, hide = True)
+    _do_attributes_key_lock_hide(pynode, attr_name_list, hide = True)
 
 
-def unhide_attributes(pynode, attributes = None):
+def unhide_attributes(pynode, attr_name_list = None):
     """Unhide specified attributes of given PyNode.
     By default will unhide all translate, rotate, scale, and visibility.
 
     :arg pynode: PyNode which attribute need to unhide.
     :type pynode: pm.PyNode
-    :key attributes: Attributes name need to unhide.
-    :type attributes: list of str
+    :key attr_name_list: Attributes name need to unhide.
+    :type attr_name_list: list of str
     """
-    if attributes is None:
-        attributes = ['tx', 'ty', 'tz', 'rx', 'ry', 'rz', 'sx', 'sy', 'sz', 'v']
+    if attr_name_list is None:
+        attr_name_list = ['tx', 'ty', 'tz', 'rx', 'ry', 'rz', 'sx', 'sy', 'sz', 'v']
 
-    _do_attributes_key_lock_hide(pynode, attributes, hide = False)
+    _do_attributes_key_lock_hide(pynode, attr_name_list, hide = False)
 
 
-def keyable_attributes(pynode, attributes = None):
+def keyable_attributes(pynode, attr_name_list = None):
     """Make specified attributes of given PyNode keyable.
     By default will make all translate, rotate, scale, and visibility into keyable.
 
     :arg pynode: PyNode which attribute will be keyable.
     :type pynode: pm.PyNode
-    :key attributes: Attributes name need to be keyable.
-    :type attributes: list of str
+    :key attr_name_list: Attributes name need to be keyable.
+    :type attr_name_list: list of str
     """
-    if attributes is None:
-        attributes = ['tx', 'ty', 'tz', 'rx', 'ry', 'rz', 'sx', 'sy', 'sz', 'v']
+    if attr_name_list is None:
+        attr_name_list = ['tx', 'ty', 'tz', 'rx', 'ry', 'rz', 'sx', 'sy', 'sz', 'v']
 
-    _do_attributes_key_lock_hide(pynode, attributes, keyable = True)
+    _do_attributes_key_lock_hide(pynode, attr_name_list, keyable = True)
 
 
-def nonkeyable_attributes(pynode, attributes = None):
+def nonkeyable_attributes(pynode, attr_name_list = None):
     """Make specified attributes of given PyNode non keyable.
     By default will make all translate, rotate, scale, and visibility into non keyable.
 
     :arg pynode: PyNode which attribute will be non keyable.
     :type pynode: pm.PyNode
-    :key attributes: Attributes name need to be non keyable.
-    :type attributes: list of str
+    :key attr_name_list: Attributes name need to be non keyable.
+    :type attr_name_list: list of str
     """
-    if attributes is None:
-        attributes = ['tx', 'ty', 'tz', 'rx', 'ry', 'rz', 'sx', 'sy', 'sz', 'v']
+    if attr_name_list is None:
+        attr_name_list = ['tx', 'ty', 'tz', 'rx', 'ry', 'rz', 'sx', 'sy', 'sz', 'v']
 
-    _do_attributes_key_lock_hide(pynode, attributes, keyable = False)
+    _do_attributes_key_lock_hide(pynode, attr_name_list, keyable = False)
 
 
+def get_channelbox_attributes(input_object):
+    """Collect all visible in channelbox attributes.
 
+    :arg input_object: PyNode object need to collect attributes from.
+    :type input_object: pm.PyNode
+    :rtype: list of pm.general.Attribute
+    """
+    attr_list = input_object.listAttr(keyable = True, scalar = True, multi = True)
+    attr_list.extend(input_object.listAttr(channelBox = True))
+    return attr_list
 
 
