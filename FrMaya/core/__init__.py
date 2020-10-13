@@ -59,7 +59,7 @@ from .scene_info import (
 )
 from .shading import (
     get_file_node_path,
-    seq_to_glob,
+    get_texture_pattern_files,
 )
 from .system import (
     get_control_curve_path,
