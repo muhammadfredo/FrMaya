@@ -38,6 +38,8 @@ class MainGUI(fmc.MyQtWindow):
 
         self.connect_event_handlers()
 
+        self.docking()
+
     def connect_event_handlers(self):
         """
         Connect event handler/sender from UI to slot

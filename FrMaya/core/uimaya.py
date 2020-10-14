@@ -192,28 +192,6 @@ class MyQtWindow(QtWidgets.QWidget):
                     setattr(base_instance, member, getattr(ui, member))
             return ui
 
-    def build_ui(self, ui_file):
-        """
-        Building Pyside UI from UI file
-
-        :param ui_file: UI file as 'BasePath' object
-        """
-
-        # Set main layout of the window
-        self.mainLayout = QtWidgets.QVBoxLayout()
-        self.mainLayout.setContentsMargins(4, 4, 4, 4)
-        self.setLayout(self.mainLayout)
-
-        # Load the UI file
-        self.ui = self.setup_ui(ui_file.abspath())
-
-        # Add loaded UI to main layout
-        self.mainLayout.addWidget(self.ui)
-
-        # Set window size the same as size from UI file
-        size = self.ui.size()
-        self.resize(size.width(), size.height())
-
     def __init__(self, ui_file, title_tool = '', *args, **kwargs):
         """
         Pyside base class for dialog window inside maya
@@ -249,12 +227,37 @@ class MyQtWindow(QtWidgets.QWidget):
             # Build UI tool from UI file
             self.build_ui(ui_file)
 
-            pm.dockControl(
-                title_tool,
-                label = title_tool.replace("_", " "),
-                area = 'left',
-                content = title_tool,
-                width = self.ui.size().width(),
-                allowedArea = ['right', 'left']
-            )
+    def build_ui(self, ui_file):
+        """
+        Building Pyside UI from UI file
+
+        :param ui_file: UI file as 'BasePath' object
+        """
+
+        # Set main layout of the window
+        self.mainLayout = QtWidgets.QVBoxLayout()
+        self.mainLayout.setContentsMargins(4, 4, 4, 4)
+        self.setLayout(self.mainLayout)
+
+        # Load the UI file
+        self.ui = self.setup_ui(ui_file.abspath())
+
+        # Add loaded UI to main layout
+        self.mainLayout.addWidget(self.ui)
+
+        # Set window size the same as size from UI file
+        size = self.ui.size()
+        self.resize(size.width(), size.height())
+
+    def docking(self, direction = 'left'):
+        title_tool = self.objectName()
+        width_tool = self.size().width()
+        pm.dockControl(
+            title_tool,
+            label = title_tool.replace("_", " "),
+            area = direction,
+            content = title_tool,
+            width = width_tool,
+            allowedArea = ['right', 'left']
+        )
 
