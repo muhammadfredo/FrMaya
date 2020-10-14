@@ -12,7 +12,7 @@ from collections import Iterable
 
 def __flatten(input_iter):
     for item in input_iter:
-        if isinstance(item, Iterable) and not isinstance(item, str):
+        if isinstance(item, Iterable) and not isinstance(item, unicode):
             for x in __flatten(item):
                 yield x
         else:
