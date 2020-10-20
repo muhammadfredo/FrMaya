@@ -1,8 +1,0 @@
-import sys
-
-# change <username> to your username, example >> r'C:\Users\fredo\Documents\maya\scripts'
-sys.path.append(r'C:\Users\<username>\Documents\maya\scripts')
-
-import FrMaya
-
-FrMaya.startup()

@@ -1,0 +1,17 @@
+global proc anchorScript (){}
+string $thisScriptLocation=`whatIs anchorScript`;
+string $thisScriptFullpath=`substring $thisScriptLocation 25 999`;
+
+int $fullpathCount=size($thisScriptFullpath);
+string $folderLocation=`substring $thisScriptFullpath 1 ($fullpathCount-11)`;
+
+string $cmd = "";
+
+$cmd += "import sys\n";
+$cmd += "sys.path.append(r'" + $folderLocation + "')\n";
+$cmd += "import FrMaya\n";
+$cmd += "FrMaya.install(r'" + $folderLocation + "')\n";
+
+python($cmd);
+
+
