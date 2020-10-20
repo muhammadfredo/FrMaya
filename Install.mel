@@ -10,7 +10,7 @@ string $cmd = "";
 $cmd += "import sys\n";
 $cmd += "sys.path.append(r'" + $folderLocation + "')\n";
 $cmd += "import FrMaya\n";
-$cmd += "FrMaya.install(r'" + $folderLocation + "\FrMaya" + "')\n";
+$cmd += "FrMaya.install(r'" + $folderLocation + "')\n";
 
 python($cmd);
 

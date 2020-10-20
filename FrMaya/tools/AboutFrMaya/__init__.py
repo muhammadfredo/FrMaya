@@ -13,6 +13,8 @@
 ####################################################################################
 ####################################################################################
 """
+import os
+
 import MainTool as tool
 import FrMaya
 
@@ -24,9 +26,9 @@ def show(source_path = '', install_btn = False, update_btn = False, remove_btn =
     the_tool = tool.MainGUI()
 
     if source_path:
-        the_tool.source_path = source_path
+        the_tool.set_source_path(source_path)
     elif not source_path:
-        the_tool.source_path = FrMaya.basedir()
+        the_tool.set_source_path(os.path.dirname(FrMaya.basedir()))
 
     the_tool.ui.install_btn.setEnabled(install_btn)
     the_tool.ui.update_btn.setEnabled(update_btn)

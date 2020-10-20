@@ -1,0 +1,670 @@
+/* This file downloaded from Highend3d.com
+''  
+''  Highend3d.com File Information:
+''  
+''    Script Name: wp rename
+''    Author:  
+''    Last Updated: Jun 09, 2009
+''    Update/Change this file at:
+''    http://Highend3d.com/maya/downloads/mel_scripts/utility_external/renaming/5786.html
+''  
+''  Please do not alter any information above this line
+''  it is generated dynamically by Highend3d.com and will
+''  be changed automatically on any updates.
+*/
+//======================================================================
+//======================================================================
+// ---->  Author Information  <----
+//======================================================================
+/*
+
+William Petruccelli
+email:	williampetruccelli@gmail.com
+web site:	www.williampetruccelli.com
+
+*/
+
+//======================================================================
+//======================================================================
+// ---->  Script Information  <----
+//======================================================================
+/*
+
+Creation Date:		June - 2009
+Version:			1.0
+
+	
+Description:
+
+	Script for renaming/replacing names of DAG objects and adding prefix, suffix etc.
+	I have integrated the hashRename tool (by Jason Schleifer) and the rename tool (by Michael Comet) in my interface as well.
+	
+
+Usage and Example:
+
+	Run the "wp_rename()" procedure on the command line
+	
+	
+External Scripts:
+
+		- HashRename by Jason Schleifer
+		- cometRename.mel by Michael Comet
+
+*/
+
+
+//======================================================================
+// entry procedure
+//======================================================================
+global proc wp_rename()
+{
+	wp_RenameWindow();
+}
+
+
+//======================================================================
+// Window Procedures
+//======================================================================
+global proc wp_RenameWindow ()
+{//wp_RenameWindow
+
+if (`window -q -exists wp_RenameWindow`) deleteUI wp_RenameWindow;
+
+window -title "wp Rename - William Petruccelli" -maximizeButton 0 -minimizeButton 1 wp_RenameWindow;
+
+columnLayout -adjustableColumn 0;
+
+	//======================================================================
+	// Rename Tools
+	frameLayout -label "Rename Tools" -borderStyle "etchedIn" 
+				-collapse 0 -collapsable 1 
+				//-collapseCommand "int $winSize = `window -q -h wp_RenameWindow`; int $newSize = $winSize - 188; window -e -h $newSize wp_RenameWindow;"
+				//-expandCommand "int $winSize = `window -q -h wp_RenameWindow`; int $newSize = $winSize + 188; window -e -h $newSize wp_RenameWindow;"
+				-w 320 -h 219 -marginWidth 5 -marginHeight 5;
+				
+		columnLayout -adjustableColumn 1;
+			textFieldGrp -label "Rename:" -text "" -columnWidth 1 63 -columnWidth 2 243 WP_renameRenameTFG;
+			text -l "" -h 4;
+			
+			rowColumnLayout -numberOfColumns 2 -columnWidth 1 130 -columnWidth 2 170;
+				intFieldGrp -label "Start #:" -v1 1 -columnWidth 1 63 -columnWidth 2 63 WP_renameStartIFG;
+				intFieldGrp -label "Padding:" -v1 2 -columnWidth 1 65 -columnWidth 2 63 WP_renamePaddingIFG;
+			setParent..;
+			
+			text -l "" -h 4;
+
+			button -h 23 -l "Rename and Number" -bgc 0.675 0.663 0.843 -c "wpRename_mc_doRename(3)";
+			
+			text -l "" -h 7;
+			separator -style "in" -w 375;
+			text -l "" -h 5;
+			
+			
+			//======================================================================
+			// Remove
+			rowColumnLayout -numberOfColumns 3 -cs 1 10 -cs 3 4 -columnWidth 1 107 -columnWidth 2 92 -columnWidth 3 93;
+				text -label "Remove..." -align "left";
+				button -h 23 -l "First Character" -bgc 0.675 0.663 0.843 -c "WP_remove_FirstChr()";
+				button -l "Last Character" -bgc 0.675 0.663 0.843 -c "WP_remove_LastChr()";
+			setParent..;
+			
+			text -l "" -h 4;
+			
+			rowColumnLayout -numberOfColumns 2 -cs 1 10 -columnWidth 1 107 -columnWidth 2 189;
+				text -label "Rename Shapes..." -align "left";
+				button -h 23 -l "Apply" -bgc 0.675 0.663 0.843 -c "WP_renameSelectedShape(); WP_renameSelectedShape()";
+			setParent..;
+			
+			text -l "" -h 7;
+			separator -style "in" -w 375;
+			text -l "" -h 5;
+			
+			rowColumnLayout -numberOfColumns 3 -cs 1 10 -columnWidth 1 70 -columnWidth 2 171 -columnWidth 3 55;
+			text -l "Hash Rename:";
+			textFieldGrp -label "" -text "name_####_suffix" -columnWidth 1 10 -columnWidth 2 155 wpRename_js_hashRenameTFG;
+			button -h 23 -l "Rename" -bgc 0.675 0.663 0.843 -c "wpRename_js_hashRename_MainProc()";
+			setParent..;
+		setParent..;
+	setParent..;
+	
+	
+	
+	//======================================================================
+	// Prefix - Suffix
+	frameLayout -label "Prefix - Suffix" -borderStyle "etchedIn" 
+				-collapse 0 -collapsable 1 
+				//-collapseCommand "int $winSize = `window -q -h wp_RenameWindow`; int $newSize = $winSize - 64; window -e -h $newSize wp_RenameWindow;"
+				//-expandCommand "int $winSize = `window -q -h wp_RenameWindow`; int $newSize = $winSize + 64; window -e -h $newSize wp_RenameWindow;"
+				-w 320 -h 85 -marginWidth 5 -marginHeight 5;
+				
+		columnLayout -adjustableColumn 1;
+			text -l "" -h 3;
+			
+			rowColumnLayout -numberOfColumns 3 -cs 1 10 -columnWidth 1 35 -columnWidth 2 205 -columnWidth 3 56;
+			text -l "Prefix:";
+			textFieldGrp -label "" -text "prefix_" -columnWidth 1 10 -columnWidth 2 188 WP_prefixTFG;
+			button -h 23 -l "Add"  -bgc 0.675 0.663 0.843  -c "wpRename_mc_doRename(1)";
+			setParent..;
+			
+			text -l "" -h 4;
+		
+			rowColumnLayout -numberOfColumns 3 -cs 1 10 -columnWidth 1 35 -columnWidth 2 205 -columnWidth 3 56;
+			text -l "Suffix:";
+			textFieldGrp -label "" -text "_suffix" -columnWidth 1 10 -columnWidth 2 188 WP_suffixTFG;
+			button -h 23 -l "Add" -bgc 0.675 0.663 0.843 -c "wpRename_mc_doRename(2)";
+			setParent..;
+
+			text -l "" -h 7;
+			text -l "" -h 7;
+			
+			
+		setParent..;
+	setParent..;
+	
+	
+	
+	//======================================================================
+	// Quick suffix
+	frameLayout -label "Quick Suffix" -borderStyle "etchedIn" 
+				-collapse 0 -collapsable 1 
+				-collapseCommand "int $winSize = `window -q -h wp_RenameWindow`; int $newSize = $winSize - 101; window -e -h $newSize wp_RenameWindow;"
+				-expandCommand "int $winSize = `window -q -h wp_RenameWindow`; int $newSize = $winSize + 101; window -e -h $newSize wp_RenameWindow;"
+				-w 320 -h 132 -marginWidth 5 -marginHeight 5;
+				
+		columnLayout -adjustableColumn 1;
+			text -l "" -h 3;
+			
+			rowColumnLayout -numberOfColumns 5 -columnWidth 1 61 -columnWidth 2 61 -columnWidth 3 61 -columnWidth 4 61 -columnWidth 5 62;
+				button -l "Grp" -bgc 1 0.65 1 -c "WP_quickSuffix _Grp";
+				button -l "Jnt" -bgc 1 0.65 1 -c "WP_quickSuffix _Jnt";
+				button -l "Anim" -bgc 1 0.65 1 -c "WP_quickSuffix _Anim";
+				button -l "Loc" -bgc 1 0.65 1 -c "WP_quickSuffix _Loc";
+				button -l "Crv" -bgc 1 0.65 1 -c "WP_quickSuffix _Crv";
+				
+				button -l "IK" -bgc 1 0.65 1 -c "WP_quickSuffix _IK";
+				button -l "Geo" -bgc 1 0.65 1 -c "WP_quickSuffix _Geo";
+				button -l "ProxyGeo" -bgc 1 0.65 1 -c "WP_quickSuffix _ProxyGeo";
+				button -l "Set" -bgc 1 0.65 1 -c "WP_quickSuffix _Set";
+				button -l "Eff" -bgc 1 0.65 1 -c "WP_quickSuffix _Eff";
+				
+				button -l "Dummy" -bgc 1 0.65 1 -c "WP_quickSuffix _Dummy";
+				button -l "Ltc" -bgc 1 0.65 1 -c "WP_quickSuffix _Ltc";
+				button -l "Clstr" -bgc 1 0.65 1 -c "WP_quickSuffix _Clstr";
+				button -l "Inf" -bgc 1 0.65 1 -c "WP_quickSuffix _Inf";
+				button -l "MSH" -bgc 1 0.65 1 -c "WP_quickSuffix _MSH";
+				
+				button -l "Const" -bgc 1 0.65 1 -c "WP_quickSuffix _Const";
+				button -l "OConst" -bgc 1 0.65 1 -c "WP_quickSuffix _OConst";
+				button -l "PConst" -bgc 1 0.65 1 -c "WP_quickSuffix _PConst";
+				button -l "POConst" -bgc 1 0.65 1 -c "WP_quickSuffix _POConst";
+				button -l "AConst" -bgc 1 0.65 1 -c "WP_quickSuffix _AConst";
+			setParent ..;
+		setParent..;
+	setParent..;
+	
+	
+
+	//======================================================================
+	// Search and Replace
+	frameLayout -label "Search and Replace" -borderStyle "etchedIn" 
+				-collapse 0 -collapsable 1 
+				//-collapseCommand "int $winSize = `window -q -h wp_RenameWindow`; int $newSize = $winSize - 104; window -e -h $newSize wp_RenameWindow;"
+				//-expandCommand "int $winSize = `window -q -h wp_RenameWindow`; int $newSize = $winSize + 104; window -e -h $newSize wp_RenameWindow;"
+				-w 320 -h 135 -marginWidth 5 -marginHeight 5;
+				
+		columnLayout -adjustableColumn 1;
+			textFieldGrp -label "Search:" -text "pasted__" -columnWidth 1 70 -columnWidth 2 236 WP_SearchAndReplace_SearchTFG;
+			text -l "" -h 4;
+			textFieldGrp -label "Replace:" -text "" -columnWidth 1 70 -columnWidth 2 236 WP_SearchAndReplace_ReplaceTFG;
+			text -l "" -h 4;
+			radioButtonGrp -numberOfRadioButtons 3 -label "" -sl 1 -labelArray3 "Hierarchy" "Selected" "All" -columnWidth 1 30 WP_SearchAndReplace_OptionRBG;
+			text -l "" -h 4;
+			button -h 23 -l "Apply" -bgc 0.675 0.663 0.843 -c "WP_SearchAndRename()";
+		setParent..;
+	setParent..;
+	
+
+window -e -wh 330 576 wp_RenameWindow;
+showWindow wp_RenameWindow;
+
+}//wp_RenameWindow
+
+
+
+//======================================================================
+//======================================================================
+// ---->  Remove Last character <----
+//======================================================================
+//======================================================================
+
+global proc WP_remove_LastChr()
+{//WP_remove_LastChr
+
+	//string $objects[] = `ls -sl`;
+	string $jointSelected[0]= `ls -sl -long`;
+	string $jointSelected[0]= sort($jointSelected);
+	int $jointSelectedSize = size($jointSelected);
+
+	for ($i=$jointSelectedSize-1; $i >= 0; $i--)
+	{
+		string $obj = $jointSelected[$i];
+	
+		string $pathNodes[];
+		int $numTokens = tokenize($obj, "|", $pathNodes);
+		string $myObj = $pathNodes[$numTokens - 1];
+		
+		int $stringSize = size($myObj);
+
+		
+		if ($stringSize > 1) 
+		{
+			string $newName = `substring $myObj 1 ($stringSize - 1)`;
+			rename $obj $newName;
+		}
+	}	
+}//WP_remove_LastChr
+
+
+
+//======================================================================
+//======================================================================
+// ---->  Remove First character <----
+//======================================================================
+//======================================================================
+
+global proc WP_remove_FirstChr()
+{//WP_remove_FirstChr
+
+	//string $objects[] = `ls -sl`;
+	string $jointSelected[0]= `ls -sl -long`;
+	string $jointSelected[0]= sort($jointSelected);
+	int $jointSelectedSize = size($jointSelected);
+
+	for ($i=$jointSelectedSize-1; $i >= 0; $i--)
+	{
+		string $obj = $jointSelected[$i];
+	
+		string $pathNodes[];
+		int $numTokens = tokenize($obj, "|", $pathNodes);
+		string $myObj = $pathNodes[$numTokens - 1];
+		
+		int $stringSize = size($myObj);
+		
+		if ($stringSize > 1) 
+		{
+			string $newName = `substring $myObj 2 $stringSize`;
+			rename $obj $newName;
+		}
+	}
+}//WP_remove_FirstChr
+
+
+
+//======================================================================
+//======================================================================
+// ---->  Rename Selected Shapes <----
+//======================================================================
+//======================================================================
+
+global proc WP_renameSelectedShape()
+{//WP_renameSelectedShape
+	string $objects[] = `ls -sl`;
+
+	string $objTransform;
+	for ($objTransform in $objects)
+	{
+	
+		string $shapes[] = `listRelatives -s -f $objTransform`;
+		
+		string $pathTransNodes[];
+		int $numTokens = tokenize($objTransform, "|", $pathTransNodes);
+		string $myTransObj = $pathTransNodes[$numTokens - 1];
+		
+		string $obj;
+		int $num = 1;
+		
+		for ($obj in $shapes)
+		{
+			string $newShapeName = ($myTransObj + "_Shape" + $num);
+			rename $obj $newShapeName;
+			$num += 1;
+		}
+	}
+}//WP_renameSelectedShape
+
+
+
+//======================================================================
+//======================================================================
+// ---->  Search and Rename <----
+//======================================================================
+//======================================================================
+
+global proc WP_SearchAndRename()
+{
+    string $search = `textFieldGrp -q -tx WP_SearchAndReplace_SearchTFG`;
+	string $replace = `textFieldGrp -q -tx WP_SearchAndReplace_ReplaceTFG`;
+	string $options = `radioButtonGrp -q -sl WP_SearchAndReplace_OptionRBG`;
+	
+	if ($options == 1)
+	{
+			searchReplaceNames $search $replace "hierarchy";
+	}
+	
+	else if ($options == 2)
+	{
+			searchReplaceNames $search $replace "selected";
+	}
+	
+	else if ($options == 3)
+	{
+			searchReplaceNames $search $replace "all";
+	}
+}
+
+
+
+//======================================================================
+//======================================================================
+// ---->  Quick suffix <----
+//======================================================================
+//======================================================================
+
+global proc WP_quickSuffix(string $suffix)
+{//WP_quickSuffix
+
+	string $jointSelected[0]= `ls -sl -long`;
+	string $jointSelected[0]= sort($jointSelected);
+	int $jointSelectedSize = size($jointSelected);
+
+	for ($i=$jointSelectedSize-1; $i >= 0; $i--)
+	{
+		string $obj = $jointSelected[$i];
+	
+		string $pathNodes[];
+		int $numTokens = tokenize($obj, "|", $pathNodes);
+		string $myObj = $pathNodes[$numTokens - 1];
+		
+		rename $obj ($myObj + $suffix);
+	}
+}//WP_quickSuffix
+
+
+
+//======================================================================
+//======================================================================
+// ---->  External Script!
+//======================================================================
+//======================================================================
+
+
+//======================================================================
+//======================================================================
+// ---->  JS Hash rename <---- by Jason Schleifer
+//======================================================================
+//======================================================================
+
+global proc wpRename_js_hashRename_MainProc()
+{
+
+    string $search = `textFieldGrp -q -tx wpRename_js_hashRenameTFG`;
+    
+    if ($search != "")
+    {
+		evalEcho ("wpRename_js_hashRename \"" + $search + "\"");
+    }
+}
+
+
+/*
+    Script:     wpRename_js_replaceHash
+    Author:     Jason Schleifer
+    Web Site:   http://jonhandhisdog.com
+    
+    Descr:      Replaces ### in the given string with a number
+
+    Ex:         wpRename_js_replaceHash "my_###_blah" 2;
+                // Result:  my_002_blah;
+
+*/
+global proc string wpRename_js_replaceHash (string $string, int $number)
+{
+
+    string $result;
+    // we want to replace the #'s in the name with the $number.
+
+    string $substring = "#+";
+    $substring = `match $substring $string`;
+
+    // $substring is now the number of #'s
+    string $substringNum = substituteAllString($substring, "#", "0");
+    // now add the number at the end
+    string $numString = $number;
+
+    string $newString = ($substringNum + $numString);
+
+    // now strip away the start numbers so we only have the num left
+    int $fullSize =`size($newString)`;
+    int $numSize = `size($numString)`;
+    if ($numSize < size($substringNum))
+    {
+        $numSize = $numSize+1;
+        $numString = `substring $newString $numSize $fullSize`;
+    } 
+    $result = `substitute $substring $string $numString`;
+    return $result;
+}
+
+
+/*
+    Script:     wpRename_js_hashRename
+    Version:    1.0
+    Author:     Jason Schleifer
+    Website:    http://jonhandhisdog.com
+
+    Descr:      wpRename_js_hashRename will rename the selected objects and will replace any # marks with numbers. 
+                For example, if given the command:
+                
+                wpRename_js_hashRename "torso_####_control";
+
+                It will rename selected objects as torso_0001_control, torso_0002_control, etc.
+
+    Requires:   wpRename_js_replaceHash.mel
+
+*/
+global proc string[] wpRename_js_hashRename (string $newName)
+{
+    // this procedure will rename the selected objects with $newName, and it will replace the # with a count.  It will zero-pad with the
+    // number of hashes
+
+    string $objs[0];
+    int $count = 0;
+    string $return[0];
+
+    $objs = `ls -sl`;
+
+    if (size($objs) > 0)
+    {
+        // create a dummy node for keeping track of all the objects.  when we rename them, it may change the object's
+        // names, which could get confusing for maya.
+        $node = `createNode unknown`;
+        addAttr -ln "selObjects" -at message -multi -im 0;
+
+        for ($obj in $objs)
+        {
+            // connect the attributes
+            connectAttr -na ($obj + ".message") ($node + ".selObjects");
+        }
+        
+        $con = `listConnections ($node + ".selObjects")`;
+       
+        for ($x = 0; $x < size($con); $x++)
+        {
+            string $tmp[0];
+            $tmp = `listConnections ($node + ".selObjects["+$x+"]")`;
+            string $object = $tmp[0];
+      
+            // check the searchString for the #'s.  Based on the number of hashes, we'll replace them with the index number
+            $name = `wpRename_js_replaceHash $newName ($x + 1)`;
+
+            // rename the object
+            $result = `rename $object $name`;
+            
+            print ("// Renamed: " + $object + " --> " + $result + "\n");
+        } 
+        $return = `listConnections ($node + ".selObjects")`;
+        delete $node;
+
+    }
+    if ((`size $return`) > 0)
+        select $return;
+    return $return;
+}
+
+
+
+
+//======================================================================
+//======================================================================
+// ---->  cometRename.mel  procedures <----
+//======================================================================
+//======================================================================
+
+
+/*
+ * getShortName() - Given a string, get last part after last | pipe.
+ */
+proc string getShortName(string $obj)
+{
+    string $ret = "";
+    
+    if ($obj == "")
+        return $ret;
+        
+    string $parts[];
+    int $cnt = tokenize($obj, "|", $parts);
+    
+    if ($cnt <= 0)
+        $ret = $obj;
+    else
+        $ret = $parts[($cnt-1)];
+    
+    return $ret;
+}
+
+// --------------------------------------------------------------------------
+
+/*
+ * chop() - Removes last char
+ */
+proc string chop(string $str)
+{
+    string $ret = "";
+
+    int $cnt = size($str);
+    
+    if ($cnt <= 1)
+        return $ret;
+    
+    $ret = `substring $str 1 ($cnt-1)`;
+
+    return $ret;
+}
+
+// --------------------------------------------------------------------------
+
+global proc wpRename_mc_doRename(int $mode)
+{//wpRename_mc_doRename
+    string $objs[] = `ls -sl -long`;
+    int $objCnt = size($objs);
+    int $i;
+
+	// Get all UI data...
+	//
+    string $prefix = `textFieldGrp -q -tx WP_prefixTFG`;
+    string $suffix = `textFieldGrp -q -tx WP_suffixTFG`;
+    string $rename = `textFieldGrp -q -tx WP_renameRenameTFG`;
+    int $start = `intFieldGrp -q -v1 WP_renameStartIFG`;
+    int $padding = `intFieldGrp -q -v1 WP_renamePaddingIFG`;
+    
+    string $shortName;
+    string $newShortName;
+    string $newName;
+
+	// Now do it
+	//
+    for ($i=0; $i < $objCnt; ++$i)
+        {
+	$obj = $objs[$i];
+	
+	$shortName = getShortName($obj);
+		
+	switch ($mode)
+	    {
+	    case 1:
+	        if ($prefix == "")
+	            {
+	            warning -sl 0 ("Can't add prefix, prefix entry field is blank!");
+	            return;
+	    	    }
+	        $newShortName = ($prefix + $shortName);
+	        break;
+
+	    case 2:
+	        if ($suffix == "")
+	            {
+	            warning -sl 0 ("Can't add suffix, suffix entry field is blank!");
+	            return;
+	    	    }
+	        $newShortName = ($shortName + $suffix);
+	        break;
+
+	    case 3:
+	        if ($rename == "")
+	            {
+	            warning -sl 0 ("Can't rename and number, rename entry field is blank!");
+	            return;
+	            }
+	    		// get index of string as user wants
+	    	int $n = $i + $start;
+	    		// pad of 0's
+	    	string $padStr = "";
+	    	
+	    		// Add padding as needed
+	    	for ($p=1; $p < $padding; ++$p)
+	    	{
+				if ($n < pow(10, $p) )
+					$padStr += "0";
+		    }
+	    	
+	    	$newShortName = ($rename+$padStr+$n);
+	        break;
+
+	    } // end of switch
+	
+	
+	$newName = `rename $obj $newShortName`;
+	select -r $newName;
+	string $newLongNames[] = `ls -sl -long`;
+	string $newLongName = $newLongNames[0];
+	
+	    // Now update rest of stuff in list in case |long|names
+	    // required it
+	for ($j=0; $j < $objCnt; ++$j)
+	    {
+	    string $tmp = $objs[$j];
+
+	    $tmp += "|";	// add to end for easy replacing
+	    $tmp = `substitute ($obj+"|") $tmp ("|"+$newLongName+"|")`;
+	    $tmp = chop($tmp);
+	    
+	    $objs[$j] = $tmp;
+	    }
+	
+
+	}  // end of for all objs
+
+    select $objs;
+}//wpRename_mc_doRename
+
+wp_rename();

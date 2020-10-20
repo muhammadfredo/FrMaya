@@ -59,9 +59,15 @@ def install(source_path, local_install = False):
     :type local_install: bool
     :rtype: bool
     """
-    source_path = path.Path(source_path)
+    frmaya_content = ['FrMaya', 'MayaMenubar', 'RigData', 'startup', 'LICENSE.txt', 'README.md']
+    source_path = path.Path(source_path).abspath()
+    installed_title = source_path.name
     assert source_path.exists(), 'Source path did not exist!!!'
-    installed_title = source_path.stem
+    assert installed_title, 'Package title not found!!!'
+    for each in frmaya_content:
+        sub_item = source_path / each
+        assert sub_item.exists(), '{} did not exists, make sure its exists!!'.format(sub_item)
+
     # Maya user application directory
     user_app_dir = path.Path(pm.internalVar(uad = True))
     # create modules dir
@@ -74,8 +80,17 @@ def install(source_path, local_install = False):
     if local_install:
         # FrMaya script folder path
         target_dir = user_app_dir / installed_title
-        # copy frmaya to user script directory
-        shutil.copytree(source_path, target_dir)
+        # create FrMaya root dir
+        if not target_dir.exists():
+            target_dir.mkdir()
+        # copy all sub content into target_dir
+        for each in frmaya_content:
+            src = source_path / each
+            tgt = target_dir / each
+            if src.isdir():
+                shutil.copytree(src.abspath(), tgt.abspath())
+            elif src.isfile():
+                shutil.copy(src.abspath(), tgt.abspath())
     else:
         target_dir = source_path
 
@@ -98,6 +113,8 @@ def uninstall(installed_title):
     :arg installed_title: FrMaya package title name.
     :type installed_title: str
     """
+    assert installed_title, 'Package title not found!!!'
+    assert installed_title != 'maya', '{} is not package!!'.format(installed_title)
     # Maya user application directory
     user_app_dir = path.Path(pm.internalVar(uad = True))
     # modules dir
@@ -109,6 +126,6 @@ def uninstall(installed_title):
     # installed package
     installed_pkg = user_app_dir / installed_title
     if installed_pkg.exists():
-        shutil.rmtree(ignore_errors = True)
+        shutil.rmtree(installed_pkg, ignore_errors = True)
 
 
