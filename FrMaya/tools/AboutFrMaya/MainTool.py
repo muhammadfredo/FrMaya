@@ -13,13 +13,10 @@
 ####################################################################################
 ####################################################################################
 """
-import os
-import urllib2
-import tempfile
+import shutil
 from functools import partial
 
 import pymel.core as pm
-from FrMaya.vendor import yaml
 from FrMaya.vendor import path
 
 import FrMaya.core as fmc
@@ -48,7 +45,7 @@ class MainGUI(fmc.MyQtWindow):
         self.ui.versionNum_lbl.setText(FrMaya.version())
 
         self.ui.install_btn.released.connect(partial(self.install_released))
-        # self.ui.update_btn.released.connect(partial(self.update_released))
+        self.ui.update_btn.released.connect(partial(self.update_released))
         self.ui.remove_btn.released.connect(partial(self.remove_released))
 
     def set_source_path(self, input_path):
@@ -85,37 +82,28 @@ class MainGUI(fmc.MyQtWindow):
             # show result of installation
             pm.confirmDialog(t = 'FrMaya', m = message, b = ['Ok'], db = 'Ok')
 
-    # TODO: Update method need to be implemented
-    # def update_released(self):
-    #     update_bool = False
-    #     build_link = 'https://www.dropbox.com/s/8lh6pbqqh42cktm/build_link.yml?dl=1'
-    #
-    #     result_url = urllib2.urlopen(build_link)
-    #     data = yaml.load(result_url.read())
-    #     result_url.close()
-    #
-    #     server_version = data.get('FrMaya').get('version')
-    #     for i in range(len(server_version)):
-    #         if FrMaya.versiontuple()[i] < server_version[i]:
-    #             update_bool = True
-    #             break
-    #
-    #     if update_bool:
-    #         # FIXME: get build_link.yml first, compare version, decide, then download the zip url
-    #         temp_zip = os.path.join(tempfile.gettempdir(), 'temp.zip')
-    #         temp_frmaya = os.path.join(tempfile.gettempdir(), 'temp_frmaya')
-    #         zip_url = data.get('FrMaya').get('zip_url')
-    #
-    #         # open( temp_zip, 'wb' ).write(
-    #         #     urllib2.urlopen( zip_url ).read() )
-    #         # print 'INFO: Extracting plugin to : ' + temp_frmaya
-    #         # zipfile.ZipFile( temp_zip ).extractall( temp_frmaya )
-    #
-    #         # check if its local
-    #         usd = pm.internalVar(usd = True)
-    #         print self.source_path
-    #         if self.source_path.startswith(usd):
-    #             print 'Great'
+    @staticmethod
+    def update_released():
+        update_bool = False
+        local_version = FrMaya.versiontuple()
+        server_version = fmc.get_server_version()
+        for lv, sv in zip(local_version, server_version):
+            if lv < sv:
+                update_bool = True
+                break
+
+        if update_bool:
+            zip_file, new_frmaya_dir = fmc.download_latest_version(target_name = 'FrMaya')
+
+            # check if its local
+            frmaya_local = fmc.check_local_package('FrMaya')
+            if frmaya_local:
+                fmc.install(new_frmaya_dir, local_install = True)
+            else:
+                old_package_dir = path.Path(FrMaya.basedir()).parent
+                shutil.rmtree(old_package_dir, ignore_errors = True)
+                shutil.copytree(new_frmaya_dir.abspath(), old_package_dir.abspath())
+                fmc.install(old_package_dir)
 
     @staticmethod
     def remove_released():
