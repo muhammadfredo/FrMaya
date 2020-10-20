@@ -8,7 +8,11 @@ Info         :
 
 """
 import os
+import re
 import shutil
+import tempfile
+import urllib2
+import zipfile
 
 import pymel.core as pm
 from FrMaya.vendor import path
@@ -127,5 +131,64 @@ def uninstall(installed_title):
     installed_pkg = user_app_dir / installed_title
     if installed_pkg.exists():
         shutil.rmtree(installed_pkg, ignore_errors = True)
+
+
+def get_server_version():
+    """Get FrMaya version from github.
+
+    :rtype: list of int
+    """
+    url_address = 'https://raw.githubusercontent.com/muhammadfredo/FrMaya/master/FrMaya/version.py'
+    url_data = urllib2.urlopen(url_address).read(200)
+    result = re.search(r'(\d+), (\d+), (\d+)', url_data, re.MULTILINE)
+    if result:
+        version_list = [int(v) for v in result.groups()]
+        return version_list
+    else:
+        raise ValueError('Cannot get server version!!!')
+
+
+def download_latest_version(target_name = '', target_dir = None):
+    """Download latest FrMaya version from github.
+
+    :key target_name: Zip or directory new downloaded data.
+    :type target_name: str
+    :key target_dir: Directory where the download will placed.
+    :type target_dir: str or path.Path
+    :return: FrMaya master zip and FrMaya extracted zip file.
+    :rtype: tuple of str
+    """
+    url_address = 'https://github.com/muhammadfredo/FrMaya/archive/master.zip'
+    if target_dir is None:
+        temp_dir = path.Path(tempfile.gettempdir())
+    else:
+        temp_dir = path.Path(target_dir)
+    temp_frmaya_zip = temp_dir / '{}.zip'.format(target_name)
+    temp_frmaya_dir = temp_dir / target_name
+
+    with open(temp_frmaya_zip, 'wb') as temp_zip:
+        temp_zip.write(urllib2.urlopen(url_address).read())
+    zipfile.ZipFile(temp_frmaya_zip).extractall(temp_frmaya_dir)
+
+    return temp_frmaya_zip, temp_frmaya_dir
+
+
+def check_local_package(installed_title):
+    """Check installed package in Maya user application directory.
+
+    :return: True if its exists, Falser otherwise
+    :rtype: bool
+    """
+    user_app_dir = path.Path(pm.internalVar(uad = True))
+    installed_dir = user_app_dir / installed_title
+
+    if installed_dir.isfile():
+        return False
+    elif installed_dir.isdir():
+        return True
+    else:
+        return False
+
+
 
 
