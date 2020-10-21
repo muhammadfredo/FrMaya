@@ -84,6 +84,8 @@ class MainGUI(fmc.MyQtWindow):
 
     @staticmethod
     def update_released():
+        # TODO: confirmation to update
+        # TODO: local version and server version
         update_bool = False
         local_version = FrMaya.versiontuple()
         server_version = fmc.get_server_version()
