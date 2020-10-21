@@ -52,6 +52,15 @@ class MainGUI(fmc.MyQtWindow):
         source_path = path.Path(input_path)
         self.source_path = source_path
 
+    @staticmethod
+    def check_update():
+        local_version = FrMaya.versiontuple()
+        server_version = fmc.get_server_version()
+        for lv, sv in zip(local_version, server_version):
+            if lv < sv:
+                return True
+        return False
+
     def install_released(self):
         mssg = 'Local install ::\n'
         mssg += '    FrMaya python package and the module will\n '
@@ -70,9 +79,9 @@ class MainGUI(fmc.MyQtWindow):
         )
         try:
             if result == 'local':
-                fmc.install(self.source_path, local_install = True)
+                fmc.install(self.source_path, package_title = 'FrMaya', local_install = True)
             elif result == 'remote':
-                fmc.install(self.source_path)
+                fmc.install(self.source_path, package_title = 'FrMaya')
 
             message = 'FrMaya succesfuly installed.\nPlease restart maya.'
         except (Exception, ImportError) as e:
@@ -82,34 +91,44 @@ class MainGUI(fmc.MyQtWindow):
             # show result of installation
             pm.confirmDialog(t = 'FrMaya', m = message, b = ['Ok'], db = 'Ok')
 
-    @staticmethod
-    def update_released():
-        # TODO: confirmation to update
-        # TODO: local version and server version
-        update_bool = False
-        local_version = FrMaya.versiontuple()
-        server_version = fmc.get_server_version()
-        for lv, sv in zip(local_version, server_version):
-            if lv < sv:
-                update_bool = True
-                break
+    def update_released(self):
+        mssg = 'Installed version :  '
+        mssg += '{}\n '.format(FrMaya.version())
+        mssg += 'Server version   :  '
+        mssg += '{}\n\n'.format('.'.join(str(x) for x in fmc.get_server_version()))
+        if self.check_update():
+            mssg += 'New version available!!'
+            btn_list = ['Yes', 'No']
+        else:
+            mssg += 'No new version.'
+            btn_list = ['Ok']
+        result = pm.confirmDialog(t = 'FrMaya Update', b = btn_list, m = mssg)
 
-        if update_bool:
-            zip_file, new_frmaya_dir = fmc.download_latest_version(target_name = 'FrMaya')
+        message = ''
+        try:
+            if result == 'Yes':
+                zip_file, new_frmaya_dir = fmc.download_latest_version(target_name = 'FrMaya')
 
-            # check if its local
-            frmaya_local = fmc.check_local_package('FrMaya')
-            if frmaya_local:
-                fmc.install(new_frmaya_dir, local_install = True)
-            else:
-                old_package_dir = path.Path(FrMaya.basedir()).parent
-                shutil.rmtree(old_package_dir, ignore_errors = True)
-                shutil.copytree(new_frmaya_dir.abspath(), old_package_dir.abspath())
-                fmc.install(old_package_dir)
+                # check if its local
+                frmaya_local = fmc.check_local_package('FrMaya')
+                if frmaya_local:
+                    fmc.install(new_frmaya_dir, local_install = True)
+                else:
+                    old_package_dir = path.Path(FrMaya.basedir()).parent
+                    shutil.rmtree(old_package_dir, ignore_errors = True)
+                    shutil.copytree(new_frmaya_dir.abspath(), old_package_dir.abspath())
+                    fmc.install(old_package_dir)
+
+                message = 'FrMaya succesfuly updated.\nPlease restart maya.'
+        except Exception as e:
+            message = 'FrMaya failed to update.\n{0}'.format(e)
+
+        # show result of updating frmaya
+        pm.confirmDialog(t = 'FrMaya info', m = message, b = ['Ok'], db = 'Ok')
 
     @staticmethod
     def remove_released():
-        result = pm.confirmDialog(t = 'FrMaya', b = ['Yes', 'No'], m = 'Are you sure?')
+        result = pm.confirmDialog(t = 'FrMaya Remove', b = ['Yes', 'No'], m = 'Are you sure?')
 
         message = ''
         try:
@@ -119,7 +138,7 @@ class MainGUI(fmc.MyQtWindow):
         except Exception as e:
             message = 'FrMaya failed to remove.{0}'.format(e)
         # show result of removing frmaya
-        pm.confirmDialog(t = 'FrMaya', m = message, b = ['Ok'], db = 'Ok')
+        pm.confirmDialog(t = 'FrMaya info', m = message, b = ['Ok'], db = 'Ok')
 
 
 
