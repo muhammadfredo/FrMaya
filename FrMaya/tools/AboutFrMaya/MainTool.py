@@ -93,16 +93,16 @@ class MainGUI(fmc.MyQtWindow):
 
     def update_released(self):
         mssg = 'Installed version :  '
-        mssg += '{}\n '.format(FrMaya.version())
-        mssg += 'Server version   :  '
-        mssg += '{}\n\n'.format('.'.join(str(x) for x in fmc.get_server_version()))
+        mssg += '{}\t\n'.format(FrMaya.version())
+        mssg += 'Server version     :  '
+        mssg += '{}\t\n\n'.format('.'.join(str(x) for x in fmc.get_server_version()))
         if self.check_update():
             mssg += 'New version available!!'
             btn_list = ['Yes', 'No']
         else:
             mssg += 'No new version.'
             btn_list = ['Ok']
-        result = pm.confirmDialog(t = 'FrMaya Update', b = btn_list, m = mssg)
+        result = pm.confirmDialog(t = 'FrMaya Update', b = btn_list, m = mssg, messageAlign = 'left')
 
         message = ''
         try:
@@ -123,8 +123,9 @@ class MainGUI(fmc.MyQtWindow):
         except Exception as e:
             message = 'FrMaya failed to update.\n{0}'.format(e)
 
-        # show result of updating frmaya
-        pm.confirmDialog(t = 'FrMaya info', m = message, b = ['Ok'], db = 'Ok')
+        if result != 'Ok':
+            # show result of updating frmaya
+            pm.confirmDialog(t = 'FrMaya info', m = message, b = ['Ok'], db = 'Ok')
 
     @staticmethod
     def remove_released():
