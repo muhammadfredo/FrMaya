@@ -10,10 +10,6 @@ FrMaya also has built in tool, from general purpose, modeling, rigging, etc.
 
 These instructions will get you a copy of FrMaya up and running on your machine.
 
-### Prerequisites
-
-Tested and used on Maya2016, Maya2017
-
 ### Installing
 
 ```
@@ -34,6 +30,11 @@ Tested and used on Maya2016, Maya2017
 ```
 6. Now FrMaya menubar should be showed on your maya
 ```
+
+## Maya version
+
+Tested and used on 2016, 2017, 2018.
+On maya 2016 the update system wont work because python security issues. 
 
 ## Authors
 
