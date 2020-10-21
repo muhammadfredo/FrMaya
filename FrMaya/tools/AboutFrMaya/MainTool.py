@@ -108,22 +108,32 @@ class MainGUI(fmc.MyQtWindow):
         try:
             if result == 'Yes':
                 zip_file, new_frmaya_dir = fmc.download_latest_version(target_name = 'FrMaya')
+                new_frmaya_dir = new_frmaya_dir / 'FrMaya-master'
 
                 # check if its local
                 frmaya_local = fmc.check_local_package('FrMaya')
                 if frmaya_local:
-                    fmc.install(new_frmaya_dir, local_install = True)
+                    fmc.install(new_frmaya_dir, package_title = 'FrMaya', local_install = True)
                 else:
                     old_package_dir = path.Path(FrMaya.basedir()).parent
                     shutil.rmtree(old_package_dir, ignore_errors = True)
-                    shutil.copytree(new_frmaya_dir.abspath(), old_package_dir.abspath())
-                    fmc.install(old_package_dir)
+                    if not old_package_dir.exists():
+                        old_package_dir.mkdir()
+                    # use this method instead of copy tree from the root directory to avoid error
+                    for src_item in new_frmaya_dir.listdir():
+                        nama = src_item.name
+                        tgt_item = old_package_dir / nama
+                        if src_item.isdir():
+                            shutil.copytree(src_item.abspath(), tgt_item.abspath())
+                        elif src_item.isfile():
+                            shutil.copy(src_item.abspath(), tgt_item.abspath())
+                    fmc.install(old_package_dir, package_title = 'FrMaya')
 
                 message = 'FrMaya succesfuly updated.\nPlease restart maya.'
         except Exception as e:
             message = 'FrMaya failed to update.\n{0}'.format(e)
 
-        if result != 'Ok':
+        if result == 'Yes':
             # show result of updating frmaya
             pm.confirmDialog(t = 'FrMaya info', m = message, b = ['Ok'], db = 'Ok')
 
