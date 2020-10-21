@@ -161,7 +161,7 @@ def download_latest_version(target_name = '', target_dir = None):
     :key target_dir: Directory where the download will placed.
     :type target_dir: str or path.Path
     :return: FrMaya master zip and FrMaya extracted zip file.
-    :rtype: tuple of str
+    :rtype: tuple of path.Path
     """
     url_address = 'https://github.com/muhammadfredo/FrMaya/archive/master.zip'
     if target_dir is None:
@@ -175,7 +175,7 @@ def download_latest_version(target_name = '', target_dir = None):
         temp_zip.write(urllib2.urlopen(url_address).read())
     zipfile.ZipFile(temp_frmaya_zip).extractall(temp_frmaya_dir)
 
-    return temp_frmaya_zip, temp_frmaya_dir
+    return path.Path(temp_frmaya_zip).abspath(), path.Path(temp_frmaya_dir).abspath()
 
 
 def check_local_package(installed_title):

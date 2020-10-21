@@ -108,6 +108,7 @@ class MainGUI(fmc.MyQtWindow):
         try:
             if result == 'Yes':
                 zip_file, new_frmaya_dir = fmc.download_latest_version(target_name = 'FrMaya')
+                new_frmaya_dir = new_frmaya_dir / 'FrMaya-master'
 
                 # check if its local
                 frmaya_local = fmc.check_local_package('FrMaya')
