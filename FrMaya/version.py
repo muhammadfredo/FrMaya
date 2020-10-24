@@ -10,7 +10,7 @@ Info         :
 import os
 
 
-__versiontuple__ = (1, 0, 2)
+__versiontuple__ = (1, 0, 3)
 __version__ = '.'.join(str(x) for x in __versiontuple__)
 __authors__ = ['Muhammad Fredo']
 __basedir__ = os.path.abspath(os.path.dirname(__file__))
