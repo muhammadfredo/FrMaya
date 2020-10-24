@@ -36,10 +36,16 @@ from .rig import (
 )
 from .scene_cleanup import (
     clean_anim_layer,
+    clean_animation_node,
+    clean_dag_pose,
     clean_display_layer,
     clean_mentalray_nodes,
     clean_namespace,
+    clean_ngskin_node,
+    clean_turtle_node,
+    clean_unknown_node,
     clean_unknown_plugins,
+    clean_unused_node,
     fix_shading_engine_intermediate,
 )
 from .scene_info import (
@@ -60,6 +66,7 @@ from .scene_info import (
 from .shading import (
     get_file_node_path,
     get_texture_pattern_files,
+    set_default_shader,
 )
 from .system import (
     check_local_package,

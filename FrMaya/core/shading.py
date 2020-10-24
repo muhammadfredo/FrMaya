@@ -84,3 +84,14 @@ def get_texture_pattern_files(texture_file_pattern):
     """
     texture_file_glob = _texture_file_pattern_to_glob(texture_file_pattern)
     return texture_file_glob.parent.glob(texture_file_glob.name)
+
+
+def set_default_shader(input_node):
+    """Assign initialShadingGroup to specified node.
+
+    :arg input_node: PyNode need to be assign with initialShadingGroup.
+    :type input_node: pm.PyNode
+    """
+    pm.sets('initialShadingGroup', edit = True, forceElement = input_node)
+
+

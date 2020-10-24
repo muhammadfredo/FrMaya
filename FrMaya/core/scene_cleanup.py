@@ -115,8 +115,54 @@ def fix_shading_engine_intermediate(input_shape_intermediate = None):
         shape_deformed.instObjGroups[0] >> inter_connection[0]
 
 
+def clean_dag_pose():
+    """Remove all dagPose/bindPose nodes in the scene."""
+    pm.delete(pm.ls(type = 'dagPose'))
 
 
+def clean_animation_node():
+    """Remove all animation nodes in the scene, set driven key will not get deleted."""
+    pm.delete(pm.ls(type = ["animCurveTU", "animCurveTL", "animCurveTA"]))
+
+
+def clean_unknown_node(exception_list = None):
+    """Remove all unknown nodes in the scene except the nodes that
+    originated from plugin specified in exception_list.
+
+    :key exception_list: Unknown nodes plugin name that need to keep.
+    :type exception_list: list of str
+    """
+    if exception_list is None:
+        exception_list = []
+    unknown_nodes = []
+    node_list = pm.ls(type = ['unknown', 'unknownDag'], editable = True)
+    for each_node in node_list:
+        if pm.unknownNode(each_node, q = True, plugin = True) not in exception_list:
+            unknown_nodes.append(each_node)
+
+    pm.delete(unknown_nodes)
+
+
+def clean_unused_node():
+    """Remove all unused nodes in the scene."""
+    pm.mel.MLdeleteUnused()
+
+
+def clean_ngskin_node():
+    """Remove all ngskin nodes in the scene."""
+    ngskin_nodes = pm.ls(type = ['ngSkinLayerData', 'ngSkinLayerDisplay'])
+    pm.delete(ngskin_nodes)
+
+
+def clean_turtle_node():
+    """Remove all presistant turtle node from the scene then unload turtle plugin."""
+    turtle_nodes = ['TurtleDefaultBakeLayer', 'TurtleBakeLayerManager', 'TurtleRenderOptions', 'TurtleUIOptions']
+    for each_node in turtle_nodes:
+        if pm.objExists(each_node):
+            turtle_node = pm.PyNode(each_node)
+            turtle_node.unlock()
+            pm.delete(turtle_node)
+    pm.unloadPlugin('Turtle.mll', force = True)
 
 
 
