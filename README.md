@@ -46,6 +46,16 @@ FrMaya package structure description.
 
   3rd party package and module in FrMaya.
 
+## Environtment
+- FR_MYMENUBAR
+
+  Search path for FrMaya menubar,
+  each folders found inside the path will be menubars with each sub folder become sub menu
+  while .mel, .py, and .pyc file become menu item.
+- FR_CONTROLCURVE
+
+  Search path for FrMaya control curve.
+
 ## Authors
 
 * **Muhammad Fredo** - *Initial work* - [muhammadfredo](https://github.com/muhammadfredo)
