@@ -165,4 +165,30 @@ def clean_turtle_node():
     pm.unloadPlugin('Turtle.mll', force = True)
 
 
+def fix_duplicate_name(input_duplicate_name = None):
+    """Rename specified node into unique name.
+
+    :key input_duplicate_name: PyNode needs to make the name unique.
+    :type input_duplicate_name: list of pm.PyNode
+    """
+    if input_duplicate_name is not None:
+        duplicate_name_list = copy.deepcopy(input_duplicate_name)
+    else:
+        duplicate_name_list = scene_info.get_duplicate_name()
+
+    for duplicate_node in duplicate_name_list:
+        duplicate_name = duplicate_node.longName()
+        shortname = duplicate_node.nodeName()
+        newshortname = shortname
+        i = 1
+        while len(pm.ls(newshortname)) > 0:
+            # generate a new name until there is no object with this name
+            newshortname = '{}{}'.format(shortname, i)
+            i += 1
+
+        pm.rename(duplicate_name, newshortname)
+
+
+
+
 

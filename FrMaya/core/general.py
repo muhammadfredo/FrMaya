@@ -18,7 +18,7 @@ def pgroup(pynodes, world = False, re = "", suffix = ""):
     Pgroup name based on the specified PyNodes,
     then modified by 're' and 'suffix' key argument.
 
-    :arg pynodes: Specified pynodes need to be pgrouped.
+    :arg pynodes: Specified pynodes object need to be pgrouped.
     :type pynodes: list of pm.PyNode
     :arg world: Align pgroup to world transform or align to per-PyNode transform.
     :type world: bool
@@ -75,207 +75,6 @@ def pgroup(pynodes, world = False, re = "", suffix = ""):
         pm.parent(pynodes, grp)
 
     return output
-
-
-def split_joint(pynode, split = 2, replace = True):
-    """Split joint into pieces as per split key argument.
-
-    :arg pynode: A single joint PyNode.
-    :type pynode: pm.nt.Joint
-    :arg split: How many pieces the joint will be split.
-    :type split: int
-    :arg replace: Remove old joint (specified joint) or keep it.
-    :type replace: bool
-    :return: All new joint pieces.
-    :rtype: list of pm.nt.Joint
-    """
-    # FIXME: naming not yet implement, wait until we build modular auto rigging
-    output = []
-    # make sure this is joint
-    if not isinstance(pynode, pm.nt.Joint):
-        return output
-    if len(pynode.getChildren(type = 'joint')) > 0 and split > 1:
-        # get first child
-        children = pynode.getChildren(type = 'joint')
-        if children:
-            children = children[0]
-        # get vector
-        vec_a = pynode.getTranslation(space = 'world')
-        vec_b = children.getTranslation(space = 'world')
-
-        parent = pynode
-        if not replace:
-            parent = pm.createNode('joint')
-            transformation.align(parent, pynode)
-            output.append(parent)
-
-        factor = (vec_b - vec_a) / split
-        for i in range(1, split):
-            jnt = pm.createNode('joint')
-            pos = factor * i + vec_a
-
-            # set split joint translate
-            jnt.setTranslation(pos, space = 'world')
-            # set split joint rotation
-            transformation.align(jnt, pynode, mode = 'rotate')
-
-            # set parent split joint
-            jnt.setParent(parent)
-            # clean transformation on joint
-            transformation.freeze_transform(jnt)
-
-            # append newly created split joint to output
-            output.append(jnt)
-            # set new variable parent
-            parent = jnt
-
-        if replace:
-            children.setParent(parent)
-        else:
-            jnt = pm.createNode('joint')
-            transformation.align(jnt, children)
-            jnt.setParent(parent)
-            output.append(jnt)
-
-    return output
-
-
-def comet_joint_orient(pynodes, aim_axis = None, up_axis = None, up_dir = None, do_auto = False):
-    """Complete Joint Orient function for properly setting up joint axis.
-    Translated from cometJointOrient.mel.
-
-    Based on code by Michael B. Comet - comet@comet-cartoons.com
-
-    http://www.comet-cartoons.com
-
-    :arg pynodes: Pynodes joint need to orient.
-    :type pynodes: list of pm.PyNode
-    :key aim_axis: Joint aim axis in xyz list or Vector. Default aim to x axis > pm.dt.Vector(1, 0, 0).
-    :type aim_axis: list or pm.dt.Vector
-    :key up_axis: Joint up axis in xyz list or Vector. Default up to z axis > pm.dt.Vector(0, 0, 1).
-    :type up_axis: list or pm.dt.Vector
-    :key up_dir: Joint up direction in xyz list or Vector. Default up direction to x > pm.dt.Vector(1, 0, 0).
-    :type up_dir: list or pm.dt.Vector
-    :key do_auto: If possible will try to guess the up axis otherwise
-     it will use prev joint up axis or else world up dir.
-    :type do_auto: bool
-    :rtype: bool
-    """
-    if aim_axis is None:
-        aim_axis = [1, 0, 0]
-    if up_axis is None:
-        up_axis = [0, 0, 1]
-    if up_dir is None:
-        up_dir = [1, 0, 0]
-    # convert to Vector
-    aim_axis = pm.dt.Vector(aim_axis)
-    up_axis = pm.dt.Vector(up_axis)
-    up_dir = pm.dt.Vector(up_dir)
-    # Filter supplied pynodes, if equal to 0 then return false
-    if len(pynodes) == 0:
-        return False
-
-    # make sure only joint get passed through here
-    pynodes = pm.ls(pynodes, type = 'joint')
-
-    # init variable prevUp for later use
-    prev_up = pm.dt.Vector()
-
-    for i, o in enumerate(pynodes):
-        parent_point = None
-        # first we need to unparent everything and then store that,
-        children = o.getChildren()
-        for x in children:
-            x.setParent(None)
-
-        # find parent for later in case we need it
-        parent = o.getParent()
-
-        # Now if we have a child joint... aim to that
-        aim_tgt = None
-        for child in children:
-            if child.nodeType() == 'joint':
-                aim_tgt = child
-                break
-
-        if aim_tgt:
-            # init variable upVec using upDir variable
-            up_vec = pm.dt.Vector(up_dir)
-
-            # first off... if doAuto is on, we need to guess the cross axis dir
-            if do_auto:
-                # now since the first joint we want to match the second orientation
-                # we kind of hack the things passed in if it is the first joint
-                # ie: if the joint doesnt have a parent... or if the parent it has
-                # has the 'same' position as itself... then we use the 'next' joints
-                # as the up cross calculations
-                jnt_point = o.getRotatePivot(space = 'world')
-                if parent:
-                    parent_point.setValue(parent.getRotatePivot(space = 'world'))
-                else:
-                    parent_point = jnt_point.copy()
-                aim_tgt_point = aim_tgt.getRotatePivot(space = 'world')
-
-                # how close to we consider 'same'?
-                tol = 0.0001
-
-                point_cond = jnt_point - parent_point
-                pos_cond = [abs(x) for x in point_cond.tolist()]
-                if not parent or pos_cond[0] <= tol and pos_cond[1] <= tol and pos_cond[2] <= tol:
-                    # get aimChild
-                    aim_child = None
-                    aim_children = aim_tgt.getChildren(type = 'joint')
-                    if aim_children:
-                        aim_child = aim_children[0]
-
-                    # get aimChild vector
-                    if aim_child:
-                        aim_child_point = aim_child.getRotatePivot(space = 'world')
-                    else:
-                        aim_child_point = pm.dt.Vector()
-
-                    # find the up vector using child vector of aim target
-                    up_vec = (jnt_point - aim_tgt_point).cross(aim_child_point - aim_tgt_point)
-                else:
-                    # find the up vector using the parent vector
-                    up_vec = (parent_point - jnt_point).cross(aim_tgt_point - jnt_point)
-
-            # reorient the current joint
-            a_cons = pm.aimConstraint(
-                aim_tgt, o, aimVector = aim_axis, upVector = up_axis, worldUpVector = up_vec.tolist(),
-                worldUpType = 'vector', weight = 1
-            )
-            pm.delete(a_cons)
-
-            # now compare the up we used to the prev one
-            current_up = up_vec.normal()
-            # dot product for angle between... store for later
-            dot = current_up.dot(prev_up)
-            prev_up = up_vec
-
-            if i > 0 >= dot:
-                # adjust the rotation axis 180 if it looks like we have flopped the wrong way!
-                # FIXME: some shit need to fix here
-                # pm.xform( o, relative = True, objectSpace = True, rotateAxis = True )
-                o.rotateX.set(o.rotateX.get() + (aim_axis.x * 180))
-                o.rotateY.set(o.rotateY.get() + (aim_axis.y * 180))
-                o.rotateZ.set(o.rotateZ.get() + (aim_axis.z * 180))
-
-                prev_up *= -1
-        elif parent:
-            # otherwise if there is no target, just dup orientation of parent...
-            transformation.align(o, parent, mode = 'rotate')
-
-        # and now finish clearing out joint axis ...
-        pm.joint(o, e = True, zeroScaleOrient = True)
-        transformation.freeze_transform(o)
-
-        # now that we are done ... reparent
-        if len(children) > 0:
-            for x in children:
-                x.setParent(o)
-
-    return True
 
 
 def build_curve(curve_data):
@@ -482,5 +281,22 @@ def get_channelbox_attributes(input_object):
     attr_list = input_object.listAttr(keyable = True, scalar = True, multi = True)
     attr_list.extend(input_object.listAttr(channelBox = True))
     return attr_list
+
+
+def duplicate_original_mesh(source_object):
+    """Duplicate object without any deformer input.
+
+    :arg source_object: PyNode object needs to be duplicated.
+    :type source_object: pm.PyNode
+    :return: Duplicated object.
+    :rtype: pm.PyNode
+    """
+    deformer_list = source_object.listHistory(pruneDagObjects = True, interestLevel = True)
+    for each_deformer in deformer_list:
+        each_deformer.nodeState.set(1)
+    duplicated_object = pm.duplicate(source_object)
+    for each_deformer in deformer_list:
+        each_deformer.nodeState.set(0)
+    return duplicated_object
 
 

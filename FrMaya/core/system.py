@@ -110,6 +110,7 @@ def install(source_path, package_title = '', local_install = False):
         ss.write('scripts+:=startup\n')
         ss.write('PYTHONPATH+:=\n')
         ss.write('PYTHONPATH+:=startup\n')
+        ss.write('MAYA_SCRIPT_PATH+:=startup\n')
         ss.write('FR_MYMENUBAR+:=MayaMenubar\n')
         ss.write('FR_CONTROLCURVE+:=RigData\\ControlCurve\n')
 

@@ -74,7 +74,7 @@ def get_file_node_path(texture_file_node):
     return path.Path(texture_file_node.attr('fileTextureName').get())
 
 
-def get_texture_pattern_files(texture_file_pattern):
+def glob_texture_files(texture_file_pattern):
     """Collect / glob specified image file path.
 
     :arg texture_file_pattern: Image file path need to glob,

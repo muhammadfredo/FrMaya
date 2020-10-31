@@ -12,26 +12,29 @@ from .animation import (
 )
 from .general import (
     build_curve,
-    comet_joint_orient,
+    duplicate_original_mesh,
     get_channelbox_attributes,
     hide_attributes,
     keyable_attributes,
     lock_attributes,
     nonkeyable_attributes,
     pgroup,
-    split_joint,
     transfer_shape,
     unhide_attributes,
     unlock_attributes,
 )
 from .rig import (
+    comet_joint_orient,
     create_control,
+    create_follicle_object_position,
+    create_follicle_uv,
     get_control_files,
     get_skincluster_info,
     get_skincluster_node,
     remove_unused_influence,
     reset_attributes,
     set_attrs_default,
+    split_joint,
     transfer_skincluster,
 )
 from .scene_cleanup import (
@@ -46,6 +49,7 @@ from .scene_cleanup import (
     clean_unknown_node,
     clean_unknown_plugins,
     clean_unused_node,
+    fix_duplicate_name,
     fix_shading_engine_intermediate,
 )
 from .scene_info import (
@@ -65,7 +69,7 @@ from .scene_info import (
 )
 from .shading import (
     get_file_node_path,
-    get_texture_pattern_files,
+    glob_texture_files,
     set_default_shader,
 )
 from .system import (
