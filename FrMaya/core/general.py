@@ -308,8 +308,8 @@ def duplicate_original_mesh(source_object, default_shader = True):
     duplicated_object.getParent().rename(duplicate_name)
     # copy the mesh data
     shape_orig.outMesh.connect(duplicated_object.inMesh)
-    # FIXME: below code causeing the copy mesh data not working
-    duplicated_object.inMesh.disconnect()
+    # done copying, break the connection
+    pm.evalDeferred(duplicated_object.inMesh.disconnect)
 
     if default_shader:
         pm.sets('initialShadingGroup', edit = True, forceElement = duplicated_object.getParent())

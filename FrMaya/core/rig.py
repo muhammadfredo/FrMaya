@@ -80,7 +80,7 @@ def transfer_skincluster(source_object, target_objects):
     :rtype: None
     """
     source_skin_node = get_skincluster_node(source_object)
-    assert source_skin_node, 'Skincluster not found on source object.'
+    assert source_skin_node, 'Skincluster not found in source object.'
     joint_list, skin_method = get_skincluster_info(source_skin_node)
     for tgt_obj in target_objects:
         old_tgt_skin_node = get_skincluster_node(tgt_obj)
