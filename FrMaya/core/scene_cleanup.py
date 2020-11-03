@@ -122,7 +122,7 @@ def clean_dag_pose():
 
 def clean_animation_node():
     """Remove all animation nodes in the scene, set driven key will not get deleted."""
-    pm.delete(pm.ls(type = ["animCurveTU", "animCurveTL", "animCurveTA"]))
+    pm.delete(pm.ls(type = ["animCurveTU", "animCurveTL", "animCurveTA"], editable=True))
 
 
 def clean_unknown_node(exception_list = None):

@@ -283,20 +283,37 @@ def get_channelbox_attributes(input_object):
     return attr_list
 
 
-def duplicate_original_mesh(source_object):
+def duplicate_original_mesh(source_object, default_shader = True):
     """Duplicate object without any deformer input.
 
     :arg source_object: PyNode object needs to be duplicated.
     :type source_object: pm.PyNode
-    :return: Duplicated object.
-    :rtype: pm.PyNode
+    :key default_shader: Assign initialShadingGroup to duplicated object or not, default is True.
+    :type default_shader: bool
+    :return: Duplicated object, None if source object doesnt have shapes.
+    :rtype: pm.PyNode or None
     """
-    deformer_list = source_object.listHistory(pruneDagObjects = True, interestLevel = True)
-    for each_deformer in deformer_list:
-        each_deformer.nodeState.set(1)
-    duplicated_object = pm.duplicate(source_object)
-    for each_deformer in deformer_list:
-        each_deformer.nodeState.set(0)
+    if not source_object.getShapes():
+        return
+    shapes_list = pm.ls(source_object.getShapes(), intermediateObjects = True)
+    shape_orig = None
+    for shape in shapes_list:
+        if not shape.inMesh.isDestination() and (shape.outMesh.isSource() or shape.worldMesh[0].isSource()):
+            shape_orig = shape
+    if not shape_orig:
+        return
+    duplicate_name = '{}_new'.format(shape_orig.getParent().nodeName(stripNamespace = True))
+    duplicated_object = pm.createNode('mesh', skipSelect = True)
+    # rename its transform node
+    duplicated_object.getParent().rename(duplicate_name)
+    # copy the mesh data
+    shape_orig.outMesh.connect(duplicated_object.inMesh)
+    # FIXME: below code causeing the copy mesh data not working
+    duplicated_object.inMesh.disconnect()
+
+    if default_shader:
+        pm.sets('initialShadingGroup', edit = True, forceElement = duplicated_object.getParent())
+
     return duplicated_object
 
 

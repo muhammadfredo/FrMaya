@@ -495,7 +495,7 @@ def create_follicle_object_position(source_object, target_objects):
     """
     results = []
     for each_target in target_objects:
-        vec_pos = each_target.getPosition(space = 'world')
+        vec_pos = each_target.getTranslation(space = 'world')
         follicle_tm = _create_follicle(source_object, vector_position = vec_pos)
         if follicle_tm:
             results.append(follicle_tm)
