@@ -18,7 +18,7 @@ def pgroup(pynodes, world = False, re = "", suffix = ""):
     Pgroup name based on the specified PyNodes,
     then modified by 're' and 'suffix' key argument.
 
-    :arg pynodes: Specified pynodes object need to be pgrouped.
+    :arg pynodes: Specified pynodes object need to be pgroup.
     :type pynodes: list of pm.PyNode
     :arg world: Align pgroup to world transform or align to per-PyNode transform.
     :type world: bool

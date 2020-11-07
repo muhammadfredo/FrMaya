@@ -15,7 +15,7 @@ from . import scene_info
 
 
 def clean_unknown_plugins():
-    """Remove all unknownplugins expect nodes that exist in scene.
+    """Remove all unknown plugins expect nodes that exist in scene.
     http://mayastation.typepad.com/maya-station/2015/04/how-to-prevent-maya-writing-a-requires-command-for-a-plug-in.html
     Some unknown plugins may needed in another environment.
     example: Vray plugin will not available to animator but will available to lighting artist.
@@ -112,7 +112,7 @@ def fix_shading_engine_intermediate(input_shape_intermediate = None):
         if noninter_connection:
             shape_deformed.instObjGroups[0].disconnect(noninter_connection[0])
 
-        shape_deformed.instObjGroups[0] >> inter_connection[0]
+        shape_deformed.instObjGroups[0].connect(inter_connection[0])
 
 
 def clean_dag_pose():
