@@ -17,6 +17,7 @@ except (Exception, ImportError):
     pass
 from .common import (
     flatten,
+    MetaSingleton
 )
 from .decoration import (
     singelton,
