@@ -5,18 +5,19 @@ Created By   : Muhammad Fredo Syahrul Alam
 Email        : muhammadfredo@gmail.com
 Start Date   : 03 Nov 2020
 Info         :
-registered_callbacks:
-  after_open:
-    id_name:
-      func: [(id, func), (id, func), (id, func),...]
 
-data_callbacks:
+alternative_callback_data: header data
+  "id": (callback id)
+    "event_name": "after_open"
+    "callback_tag": fr_maya
+
+maya_event_callbacks:
   after_open:
-    id: event_id,
-    message: om callback function
+    event_id: event_id,
+    add_callback: om callback function
   before_open:
-    id: event_id,
-    message: om callback function
+    event_id: event_id,
+    add_callback: om callback function
 """
 import copy
 import inspect
@@ -28,65 +29,96 @@ import pymel.core as pm
 from FrMaya import utility as util
 
 
-@util.singelton
 class MyCallbackManager(object):
-    def __init__(self, callback_message = None):
-        self._callback_data = {}
-        self._callback_registered = {}
+    __metaclass__ = util.MetaSingleton
 
-        if callback_message:
-            self._callback_data = copy.deepcopy(callback_message)
+    @staticmethod
+    def get_maya_event_callback():
+        # example regex subs -> re.sub(r"(\w)([A-Z])", r"\1 \2", "WordWordWord")
+        callback_events = {}
+        re_pattern = re.compile(r'(?<=\w)([A-Z])')
+        for event_name, event_id in inspect.getmembers(om.MSceneMessage):
+            if event_name.startswith('k') and not event_name.endswith('check'):
+                if not callback_events.get(event_name):
+                    key_name = re_pattern.sub(r'_\1', event_name[1:])
+                    callback_events[key_name.lower()] = {
+                        'event_id': event_id,
+                        'add_callback': om.MSceneMessage.addCallback,
+                    }
 
-    def add_callback(self, event_name, id_name, func):
-        event_callback = self._callback_data.get(event_name)
-        if not event_callback:
-            return False
-        event_id = event_callback['id']
-        event_message = event_callback['message']
+        return callback_events
 
-        callback_id = event_message(event_id, func, id_name)
+    def __init__(self):
+        self._maya_event_callback = {}
+        self._registered_callback = {}
 
-        if self._callback_registered.get(event_name):
-            if self._callback_registered[event_name].get(id_name):
-                self._callback_registered[event_name][id_name].append((callback_id, func))
-            else:
-                self._callback_registered[event_name][id_name] = [(callback_id, func)]
-        else:
-            self._callback_registered[event_name] = {
-                id_name: [(callback_id, func)]
+        self._maya_event_callback = copy.deepcopy(self.get_maya_event_callback())
+
+        assert len(self._maya_event_callback) > 0, ''
+
+    def _collect_registered_callbacks(self):
+        result_data = {'events': {}, 'tags': {}}
+        for cb_id, cb_data in self._registered_callback.items():
+            for each in result_data:
+                if each == 'events':
+                    event_or_tag = cb_data['event_name']
+                elif each == 'tags':
+                    event_or_tag = cb_data['callback_tag']
+                else:
+                    return None
+
+                if result_data[each].get(event_or_tag):
+                    result_data[each][event_or_tag].append(cb_id)
+                else:
+                    result_data[each][event_or_tag] = [cb_id]
+        return result_data
+
+    def add_callback(self, event_name, callback_tag, func):
+        maya_event_callbacks = self._maya_event_callback.get(event_name)
+        my_event_cb = maya_event_callbacks.get(event_name)
+
+        if my_event_cb:
+            callback_id = my_event_cb['add_callback'](my_event_cb['id'], func)
+
+            self._registered_callback[str(callback_id)] = {
+                'event_name': event_name,
+                'callback_tag': callback_tag
             }
 
-        return True
+            return True
+        else:
+            return False
 
-    def remove_callback(self, callback_type = '', id_name = ''):
-        pass
+    def remove_callback(self, event_name = '', callback_tag = ''):
+        callback_collection = self._collect_registered_callbacks()
 
-    def show_registered_callback(self, event_name = '', id_name = ''):
+        cb_id_array = om.MCallbackIdArray()
+        temp_list = []
         if event_name:
-            return self._callback_registered.get(event_name, {})
-        if id_name:
-            pass
+            temp_list.extend(callback_collection['events'].get(event_name, []))
+        if callback_tag:
+            temp_list.extend(callback_collection['tags'].get(callback_tag, []))
 
-    def show_event_callback(self):
-        return self._callback_data.keys()
+        for o in temp_list:
+            cb_id_array.append(o)
+
+        if cb_id_array:
+            om.MMessage.removeCallbacks(cb_id_array)
+
+    def show_registered_callback(self, event_name = '', callback_tag = ''):
+        result = self._collect_registered_callbacks()
+
+        if event_name:
+            return result['events'].get(event_name, [])
+        elif callback_tag:
+            return result['tags'].get(callback_tag, [])
+        else:
+            return copy.deepcopy(result)
+
+    def show_maya_event_name(self):
+        return self._maya_event_callback.keys()
 
 
-def get_maya_callbacks():
-    callback_events = {}
-    re_pattern = re.compile(r'(?<=\w)([A-Z])')
-    re.sub(r"(\w)([A-Z])", r"\1 \2", "WordWordWord")
-    for event_name, event_id in inspect.getmembers(om.MSceneMessage):
-        if event_name.startswith('k') and not event_name.endswith('check'):
-            if not callback_events.get(event_name):
-                key_name = re_pattern.sub(r'_\1', event_name[1:])
-                callback_events[key_name.lower()] = {
-                    'id': event_id,
-                    'message': om.MSceneMessage.addCallback
-                }
-
-    return callback_events
-
-
-callbacks = MyCallbackManager(callback_message = get_maya_callbacks())
+callbacks = MyCallbackManager()
 
 

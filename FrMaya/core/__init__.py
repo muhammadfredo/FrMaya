@@ -23,6 +23,9 @@ from .general import (
     unhide_attributes,
     unlock_attributes,
 )
+from .message import (
+    callbacks
+)
 from .rig import (
     comet_joint_orient,
     create_control,
