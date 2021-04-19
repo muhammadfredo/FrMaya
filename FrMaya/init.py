@@ -7,6 +7,8 @@ Start Date   : 03 Nov 2020
 Info         :
 
 """
+import __main__
+
 import pymel.core as pm
 
 from . import core as fmc
@@ -30,6 +32,12 @@ class GlobalData(object):
 def __setup():
     if not pm.about(batch = True):
         fmc.build_menubar()
+
+    # setup callback
+    callbacks = fmc.MyCallbackManager()
+    callbacks.add_callback('before_save', 'FrMaya', fmc.clean_unknown_plugins)
+
+    __main__.CallbackManager = callbacks
 
 
 def startup():

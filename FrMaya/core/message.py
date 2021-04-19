@@ -49,6 +49,7 @@ class MyCallbackManager(object):
         return callback_events
 
     def __init__(self):
+        print 'initialize callback manager'
         self._maya_event_callback = {}
         self._registered_callback = {}
 
@@ -56,9 +57,9 @@ class MyCallbackManager(object):
 
         assert len(self._maya_event_callback) > 0, ''
 
-    def _collect_registered_callbacks(self):
+    def _group_registered_callbacks(self):
         result_data = {'events': {}, 'tags': {}}
-        for cb_id, cb_data in self._registered_callback.items():
+        for cb_fn_name, cb_data in self._registered_callback.items():
             for each in result_data:
                 if each == 'events':
                     event_or_tag = cb_data['event_name']
@@ -68,21 +69,21 @@ class MyCallbackManager(object):
                     return None
 
                 if result_data[each].get(event_or_tag):
-                    result_data[each][event_or_tag].append(cb_id)
+                    result_data[each][event_or_tag].append(cb_fn_name)
                 else:
-                    result_data[each][event_or_tag] = [cb_id]
+                    result_data[each][event_or_tag] = [cb_fn_name]
         return result_data
 
     def add_callback(self, event_name, callback_tag, func):
-        maya_event_callbacks = self._maya_event_callback.get(event_name)
-        my_event_cb = maya_event_callbacks.get(event_name)
+        my_event_cb = self._maya_event_callback.get(event_name)
 
         if my_event_cb:
-            callback_id = my_event_cb['add_callback'](my_event_cb['id'], func)
+            callback_id = my_event_cb['add_callback'](my_event_cb['event_id'], func)
 
-            self._registered_callback[str(callback_id)] = {
+            self._registered_callback[func.__module__] = {
                 'event_name': event_name,
-                'callback_tag': callback_tag
+                'callback_tag': callback_tag,
+                'callback_id': callback_id
             }
 
             return True
@@ -90,23 +91,23 @@ class MyCallbackManager(object):
             return False
 
     def remove_callback(self, event_name = '', callback_tag = ''):
-        callback_collection = self._collect_registered_callbacks()
+        callback_collection = self._group_registered_callbacks()
 
         cb_id_array = om.MCallbackIdArray()
-        temp_list = []
+        cb_fn_name_list = []
         if event_name:
-            temp_list.extend(callback_collection['events'].get(event_name, []))
+            cb_fn_name_list.extend(callback_collection['events'].get(event_name, []))
         if callback_tag:
-            temp_list.extend(callback_collection['tags'].get(callback_tag, []))
+            cb_fn_name_list.extend(callback_collection['tags'].get(callback_tag, []))
 
-        for o in temp_list:
-            cb_id_array.append(o)
+        for cb_fn_name in cb_fn_name_list:
+            cb_id_array.append(self._registered_callback[cb_fn_name]['callback_id'])
 
         if cb_id_array:
             om.MMessage.removeCallbacks(cb_id_array)
 
     def show_registered_callback(self, event_name = '', callback_tag = ''):
-        result = self._collect_registered_callbacks()
+        result = self._group_registered_callbacks()
 
         if event_name:
             return result['events'].get(event_name, [])
@@ -117,8 +118,5 @@ class MyCallbackManager(object):
 
     def show_maya_event_name(self):
         return self._maya_event_callback.keys()
-
-
-callbacks = MyCallbackManager()
 
 

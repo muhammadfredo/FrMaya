@@ -24,7 +24,7 @@ from .general import (
     unlock_attributes,
 )
 from .message import (
-    callbacks
+    MyCallbackManager
 )
 from .rig import (
     comet_joint_orient,
