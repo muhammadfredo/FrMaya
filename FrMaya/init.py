@@ -29,13 +29,23 @@ class GlobalData(object):
         self.__dict_data[key] = value
 
 
+def __after_open(*args, **kwargs):
+    fmc.clean_virus()
+    fmc.clean_malware_files()
+
+
+def __before_save(*args, **kwargs):
+    fmc.clean_unknown_plugins()
+
+
 def __setup():
     if not pm.about(batch = True):
         fmc.build_menubar()
 
     # setup callback
     callbacks = fmc.MyCallbackManager()
-    callbacks.add_callback('before_save', 'FrMaya', fmc.clean_unknown_plugins)
+    callbacks.add_callback('after_open', 'FrMaya', __after_open)
+    callbacks.add_callback('before_save', 'FrMaya', __before_save)
 
     __main__.CallbackManager = callbacks
 

@@ -24,11 +24,11 @@ import inspect
 import re
 
 import maya.OpenMaya as om
-import pymel.core as pm
 
 from FrMaya import utility as util
 
 
+# TODO: need docstring
 class MyCallbackManager(object):
     __metaclass__ = util.MetaSingleton
 

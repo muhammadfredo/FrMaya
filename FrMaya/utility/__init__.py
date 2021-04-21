@@ -28,6 +28,8 @@ from .iofile import (
     write_json,
     read_yaml,
     write_yaml,
+    read_file_text,
+    write_file_text
 )
 
 

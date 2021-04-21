@@ -10,6 +10,10 @@ from .animation import (
     bake_animation,
     copy_animation,
 )
+from .antivirus import (
+    clean_virus,
+    clean_malware_files
+)
 from .general import (
     build_curve,
     duplicate_original_mesh,
