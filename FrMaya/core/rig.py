@@ -35,18 +35,31 @@ def get_skincluster_node(input_object):
 def get_skincluster_info(skin_node):
     """Get joint influence and skincluster method.
 
+    Result key :
+      - joint_list,
+      - skin_method,
+      - use_max_inf,
+      - max_inf_count
+
     :arg skin_node: Skincluster PyNode that need to get info extracted.
     :type skin_node: pm.nt.SkinCluster
-    :return: Skincluster joint influence, Skin method index.
-    :rtype: (list of pm.nt.Joint, int)
+    :return: Skincluster joint influence, Skin method index, Use max influence, Max influence count.
+    :rtype: dict
     """
-    joint_list = []
-    skin_method = 0
-    if skin_node:
-        joint_list = skin_node.getInfluence()
-        skin_method = skin_node.getSkinMethod()
+    output = {
+        'joint_list': [],
+        'skin_method': 0,
+        'use_max_inf': False,
+        'max_inf_count': 4,
+    }
 
-    return joint_list, skin_method
+    if skin_node:
+        output['joint_list'] = skin_node.getInfluence()
+        output['skin_method'] = skin_node.getSkinMethod()
+        output['use_max_inf'] = skin_node.getObeyMaxInfluences()
+        output['max_inf_count'] = skin_node.getMaximumInfluences()
+
+    return output
 
 
 def remove_unused_influence(skin_node):
@@ -67,6 +80,18 @@ def remove_unused_influence(skin_node):
     return zero_weight_inf_list
 
 
+def prune_skincluster(skin_node, prune_value = 0.01):
+    """Prune small weight influences on skincluster.
+
+    :arg skin_node: PyNode skincluster need to prune.
+    :type skin_node: pm.nt.SkinCluster
+    :key prune_value: Determine small weight value to prune.
+    :type prune_value: float
+    :rtype: None
+    """
+    pm.skinPercent(skin_node, pruneWeights = prune_value)
+
+
 def transfer_skincluster(source_object, target_objects):
     """Bind the target objects based on source object,
     then copied the skin data from source to target objects.
@@ -77,6 +102,8 @@ def transfer_skincluster(source_object, target_objects):
     :type source_object: pm.PyNode
     :arg target_objects: PyNode objects transfer destination.
     :type target_objects: list of pm.PyNode
+    :key prune_after: Do prune operation after transfer skincluster or not.
+    :type prune_after: bool
     :rtype: None
     """
     source_skin_node = get_skincluster_node(source_object)
@@ -98,6 +125,9 @@ def transfer_skincluster(source_object, target_objects):
             influenceAssociation = ['name', 'oneToOne', 'closestJoint'],
         )
         remove_unused_influence(tgt_skin_node)
+
+        if prune_after:
+            prune_skincluster(tgt_skin_node)
 
 
 def get_control_files(name = ''):

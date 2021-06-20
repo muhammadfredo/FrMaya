@@ -38,6 +38,7 @@ from .rig import (
     get_control_files,
     get_skincluster_info,
     get_skincluster_node,
+    prune_skincluster,
     remove_unused_influence,
     reset_attributes,
     set_attrs_default,

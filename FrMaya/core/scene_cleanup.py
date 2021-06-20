@@ -67,8 +67,18 @@ def clean_anim_layer(exception_list = None):
     if exception_list is None:
         exception_list = []
     layer_node = pm.ls(type = ['animLayer'])
-    dirty_layer = [o for o in layer_node if o not in exception_list]
+
+    delete_later = []
+    dirty_layer = []
+    for o in layer_node:
+        if o.getParent() is None:
+            delete_later.append(o)
+            continue
+        if o not in exception_list:
+            dirty_layer.append(o)
+
     pm.delete(dirty_layer)
+    pm.delete(delete_later)
 
 
 def clean_display_layer(exception_list = None):
