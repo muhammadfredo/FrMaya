@@ -3,8 +3,8 @@
           FrMaya
 *******************************
 
-Created By            : Muhammad Fredo Syahrul Alam
-Copyright             : Muhammad Fredo Syahrul Alam
+Created By            : Muhammad Fredo
+Copyright             : Muhammad Fredo
 Email                 : muhammadfredo@gmail.com
 Start Date            : 10 May, 2017
 Purpose               :

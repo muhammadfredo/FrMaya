@@ -1,3 +1,18 @@
+"""
+Module hierarchy
++ antivirus
++ mesage
++ naming
++ scene_info
++ shading
++ system
++ transformation
+    + general
+    + scene_cleanup
+    + uimaya
+        + animation
+        + rig
+"""
 try:
     import sys
     _fmc_modules = [o for o in sys.modules.keys() if o.startswith('FrMaya.core.') and sys.modules[o]]
@@ -29,6 +44,9 @@ from .general import (
 )
 from .message import (
     MyCallbackManager
+)
+from .naming import (
+    get_unique_name
 )
 from .rig import (
     comet_joint_orient,

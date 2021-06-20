@@ -1,7 +1,7 @@
 """
 ## SCRIPT HEADER ##
 
-Created By   : Muhammad Fredo Syahrul Alam
+Created By   : Muhammad Fredo
 Email        : muhammadfredo@gmail.com
 Start Date   : 16 Sep 2020
 Info         :
@@ -11,7 +11,7 @@ import copy
 
 import pymel.core as pm
 
-from . import scene_info
+from . import scene_info, naming
 
 
 def clean_unknown_plugins():
@@ -189,12 +189,7 @@ def fix_duplicate_name(input_duplicate_name = None):
     for duplicate_node in duplicate_name_list:
         duplicate_name = duplicate_node.longName()
         shortname = duplicate_node.nodeName()
-        newshortname = shortname
-        i = 1
-        while len(pm.ls(newshortname)) > 0:
-            # generate a new name until there is no object with this name
-            newshortname = '{}{}'.format(shortname, i)
-            i += 1
+        newshortname = naming.get_unique_name(shortname)
 
         pm.rename(duplicate_name, newshortname)
 

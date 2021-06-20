@@ -1,7 +1,7 @@
 """
 ## SCRIPT HEADER ##
 
-Created By   : Muhammad Fredo Syahrul Alam
+Created By   : Muhammad Fredo
 Email        : muhammadfredo@gmail.com
 Start Date   : 11 Sep 2020
 Info         :
@@ -9,7 +9,7 @@ Info         :
 """
 import pymel.core as pm
 
-from . import transformation
+from . import transformation, naming
 
 
 def pgroup(pynodes, world = False, re = "", suffix = ""):
@@ -77,7 +77,7 @@ def pgroup(pynodes, world = False, re = "", suffix = ""):
     return output
 
 
-def build_curve(curve_data):
+def build_curve(curve_data, parent_type = 'transform'):
     """Build curve shape from dictionary curve data.
 
     :arg curve_data: Dictionary curve data.
@@ -88,23 +88,29 @@ def build_curve(curve_data):
        'knot': list of float
      } }
     :type curve_data: dict
+    :key parent_type: Sets parent type of newly-created curve shape.
+    :type parent_type: str
     :return: Curve PyNode object.
-    :rtype: pm.nt.Transform
+    :rtype: pm.nt.Transform or pm.nt.Joint
     """
-    result = []
+    parent_curve = pm.createNode(parent_type, name = naming.get_unique_name('fr_curve'))
+
     for key, value in curve_data.items():
-        degree = value.get('degree')
-        periodic = value.get('periodic')
-        point = value.get('point')
-        knot = value.get('knot')
+        new_curve = pm.curve(
+            d = value.get('degree', 3),
+            per = value.get('periodic', False),
+            p = [tuple(o) for o in value.get('point', [[0, 0, 0]])],
+            k = value.get('knot', [1.0, 0.0])
+        )
+        curve_shapes = new_curve.getShapes()
+        pm.parent(curve_shapes, parent_curve, addObject = True, shape = True)
+        pm.delete(new_curve)
 
-        # convert list to tuple
-        point = [tuple(o) for o in point]
+        # rename each curve
+        for each_crv in curve_shapes:
+            each_crv.rename('{0}Shape{1}'.format(parent_curve.nodeName(), key.replace('curve', '')))
 
-        curve = pm.curve(d = degree, per = periodic, p = point, k = knot)
-        result.append(curve)
-    # FIXME: multi shape not supported
-    return result[0]
+    return parent_curve
 
 
 def transfer_shape(source_object, target_objects, replace = True):

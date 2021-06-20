@@ -1,7 +1,7 @@
 """
 ## SCRIPT HEADER ##
 
-Created By   : Muhammad Fredo Syahrul Alam
+Created By   : Muhammad Fredo
 Email        : muhammadfredo@gmail.com
 Start Date   : 13 Sep 2020
 Info         :
@@ -92,7 +92,7 @@ def prune_skincluster(skin_node, prune_value = 0.01):
     pm.skinPercent(skin_node, pruneWeights = prune_value)
 
 
-def transfer_skincluster(source_object, target_objects):
+def transfer_skincluster(source_object, target_objects, prune_after = False):
     """Bind the target objects based on source object,
     then copied the skin data from source to target objects.
     If target object have skincluster,
@@ -143,7 +143,7 @@ def get_control_files(name = ''):
     control_files = [control_dir.glob('*.json') for control_dir in control_dir_list]
     control_files = util.flatten(control_files)
     if name:
-        control_files = [o for o in control_files if o.filename == name]
+        control_files = [o for o in control_files if o.stem == name]
 
     return control_files
 
@@ -167,7 +167,7 @@ def create_control(control_file, transform = None, name = 'FrControl', suffix = 
     if transform is None:
         transform = pm.dt.Matrix()
     if group is None:
-        group = ['Grp']
+        group = []
     # if control_file is file name of control grab it from get_control_files
     control_file_path = path.Path(control_file)
     if not control_file_path.exists():
