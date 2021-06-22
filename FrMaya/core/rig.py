@@ -548,5 +548,17 @@ def create_follicle_uv(source_object, u_pos, v_pos):
     return result
 
 
+def create_soft_cluster():
+    # TODO: docstring here
+    # node, index_component, inf_val = general.get_soft_selection()
+    soft_element_data = general.get_soft_selection()
+    selection = [vtx_component for vtx_component, inf_val in soft_element_data]
 
+    pm.select(selection, r=True)
+    cluster = pm.cluster(relative=True)
+
+    # for i in range(len(soft_element_data)):
+    for vtx_component, inf_val in soft_element_data:
+        pm.percent(cluster[0], vtx_component, v=inf_val)
+    pm.select(cluster[1], r=True)
 

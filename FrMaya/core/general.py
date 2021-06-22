@@ -7,6 +7,7 @@ Start Date   : 11 Sep 2020
 Info         :
 
 """
+import maya.api.OpenMaya as om
 import pymel.core as pm
 
 from . import transformation, naming
@@ -323,3 +324,21 @@ def duplicate_original_mesh(source_object, default_shader = True):
     return duplicated_object
 
 
+def get_soft_selection():
+    # TODO: docstring here
+    soft_selection = om.MGlobal.getRichSelection(True)
+    selection = soft_selection.getSelection()
+
+    selection_iter = om.MItSelectionList(selection, om.MFn.kMeshVertComponent)
+    elements = []
+    while not selection_iter.isDone():
+        dag_path, component = selection_iter.getComponent()
+        node = pm.PyNode(dag_path.fullPathName())
+        fn_component = om.MFnSingleIndexedComponent(component)
+        for i in range(fn_component.getCompleteData()):
+            index_component = fn_component.element(i)
+            inf_val = fn_component.weight(i).influence
+
+            elements.append([node.vtx[index_component], inf_val])
+        selection_iter.next()
+    return elements
