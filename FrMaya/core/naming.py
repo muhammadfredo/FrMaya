@@ -11,7 +11,13 @@ import pymel.core as pm
 
 
 def get_unique_name(init_name):
-    # TODO: docstring here
+    """
+    Return unique name in the scene from specified argument.
+
+    :arg init_name: Name that need to be unique.
+    :type init_name: str
+    :rtype: str
+    """
     new_name = init_name
     i = 1
     while len(pm.ls(new_name)) > 0:

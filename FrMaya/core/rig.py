@@ -549,7 +549,8 @@ def create_follicle_uv(source_object, u_pos, v_pos):
 
 
 def create_soft_cluster():
-    # TODO: docstring here
+    """Create cluster from current soft selection.
+    Code based on https://gist.github.com/jhoolmans/9195634, modify to use pymel and new Maya api."""
     # node, index_component, inf_val = general.get_soft_selection()
     soft_element_data = general.get_soft_selection()
     selection = [vtx_component for vtx_component, inf_val in soft_element_data]

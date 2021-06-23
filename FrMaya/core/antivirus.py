@@ -10,13 +10,19 @@ Info         :
 import os
 import re
 
+import FrMaya.vendor.path as path
 import pymel.core as pm
 
 import FrMaya.utility as util
 
 
-# TODO: write docstring
 def find_self_duplicate_script_nodes():
+    """
+    Collect harmful self duplicate script nodes in the scene.
+    All script node that create/write files consider to be harmful by this function.
+
+    :rtype: list of pm.nt.Script
+    """
     regexp_py_write_files = re.compile(r'(with open\().*(\.write)', re.DOTALL)
     regexp_mel_write_files = re.compile(r'(fopen (\(|)\$\w+(\)|) (\(|)\"[wa]\"(\)|))', re.DOTALL)
     script_nodes = pm.ls(type = 'script')
@@ -37,6 +43,12 @@ def find_self_duplicate_script_nodes():
 
 
 def find_malware_script_job():
+    """
+    Collect all harmful script job ids in the scene.
+    The Script job which consider to be harmful based on Autodesk scurity fix.
+
+    :rtype: list of int
+    """
     script_jobs = pm.scriptJob(listJobs = True)
 
     a = -1
@@ -54,6 +66,7 @@ def find_malware_script_job():
 
 
 def clean_virus():
+    """Delete all harmful script node and kill all harmful script job."""
     self_duplicator_nodes = find_self_duplicate_script_nodes()
     malware_script_job_ids = find_malware_script_job()
 
@@ -77,13 +90,18 @@ def clean_virus():
 
 
 def find_malware_files():
-    maya_user_dir = pm.internalVar(userAppDir = True)
-    user_setup_mel = os.path.join(maya_user_dir, 'scripts', 'userSetup.mel')
-    user_setup_py = os.path.join(maya_user_dir, 'scripts', 'userSetup.py')
-    user_setup_mel_data = util.read_file_text(user_setup_mel) if os.path.exists(user_setup_mel) else ''
-    user_setup_py_data = util.read_file_text(user_setup_py) if os.path.exists(user_setup_py) else ''
-    vaccine_py = os.path.join(maya_user_dir, 'scripts', 'vaccine.py')
-    vaccine_pyc = os.path.join(maya_user_dir, 'scripts', 'vaccine.pyc')
+    """
+    Collect all  script files that breed the malware.
+
+    :rtype: list of path.Path
+    """
+    maya_user_dir = path.Path(pm.internalVar(userAppDir = True))
+    user_setup_mel = maya_user_dir / 'scripts' / 'userSetup.mel'
+    user_setup_py = maya_user_dir / 'scripts' / 'userSetup.py'
+    user_setup_mel_data = util.read_file_text(user_setup_mel) if user_setup_mel.exists() else ''
+    user_setup_py_data = util.read_file_text(user_setup_py) if user_setup_py.exists() else ''
+    vaccine_py = maya_user_dir / 'scripts' / 'vaccine.py'
+    vaccine_pyc = maya_user_dir / 'scripts' / 'vaccine.pyc'
 
     malware_files = []
     if 'fuck_All_U' in user_setup_mel_data:
@@ -99,6 +117,7 @@ def find_malware_files():
 
 
 def clean_malware_files():
+    """Delete all harmful malware script files."""
     malware_files = find_malware_files()
 
     for each_file in malware_files:

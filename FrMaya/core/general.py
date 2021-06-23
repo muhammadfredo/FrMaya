@@ -325,7 +325,11 @@ def duplicate_original_mesh(source_object, default_shader = True):
 
 
 def get_soft_selection():
-    # TODO: docstring here
+    """
+    Return list of [vertex index, vertex soft selection influence].
+
+    :rtype: list of list
+    """
     soft_selection = om.MGlobal.getRichSelection(True)
     selection = soft_selection.getSelection()
 
