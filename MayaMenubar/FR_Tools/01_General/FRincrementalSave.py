@@ -2,7 +2,7 @@
 ####################################################################################
 ####################################################################################
 ## SCRIPT HEADER ##
-# Created By            : Muhammad Fredo Syahrul Alam
+# Created By            : Muhammad Fredo
 # Email                 : muhammadfredo@gmail.com
 # Start Date            : February, 2016
 # Credit                : Martin Breidt

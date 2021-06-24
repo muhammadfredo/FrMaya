@@ -1,7 +1,7 @@
 """
 ## SCRIPT HEADER ##
 
-Created By   : Muhammad Fredo Syahrul Alam
+Created By   : Muhammad Fredo
 Email        : muhammadfredo@gmail.com
 Start Date   : 31 Agt 2020
 Info         :
@@ -110,6 +110,7 @@ def install(source_path, package_title = '', local_install = False):
         ss.write('scripts+:=startup\n')
         ss.write('PYTHONPATH+:=\n')
         ss.write('PYTHONPATH+:=startup\n')
+        ss.write('MAYA_SCRIPT_PATH+:=startup\n')
         ss.write('FR_MYMENUBAR+:=MayaMenubar\n')
         ss.write('FR_CONTROLCURVE+:=RigData\\ControlCurve\n')
 

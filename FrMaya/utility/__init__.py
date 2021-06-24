@@ -1,7 +1,7 @@
 """
 ## SCRIPT HEADER ##
 
-Created By   : Muhammad Fredo Syahrul Alam
+Created By   : Muhammad Fredo
 Email        : muhammadfredo@gmail.com
 Start Date   : 03 Sep 2020
 Info         :
@@ -17,6 +17,7 @@ except (Exception, ImportError):
     pass
 from .common import (
     flatten,
+    MetaSingleton
 )
 from .decoration import (
     singelton,
@@ -27,6 +28,8 @@ from .iofile import (
     write_json,
     read_yaml,
     write_yaml,
+    read_file_text,
+    write_file_text
 )
 
 

@@ -1,7 +1,7 @@
 """
 ## SCRIPT HEADER ##
 
-Created By   : Muhammad Fredo Syahrul Alam
+Created By   : Muhammad Fredo
 Email        : muhammadfredo@gmail.com
 Start Date   : 16 Sep 2020
 Info         :
@@ -11,11 +11,11 @@ import copy
 
 import pymel.core as pm
 
-from . import scene_info
+from . import scene_info, naming
 
 
 def clean_unknown_plugins():
-    """Remove all unknownplugins expect nodes that exist in scene.
+    """Remove all unknown plugins expect nodes that exist in scene.
     http://mayastation.typepad.com/maya-station/2015/04/how-to-prevent-maya-writing-a-requires-command-for-a-plug-in.html
     Some unknown plugins may needed in another environment.
     example: Vray plugin will not available to animator but will available to lighting artist.
@@ -67,8 +67,18 @@ def clean_anim_layer(exception_list = None):
     if exception_list is None:
         exception_list = []
     layer_node = pm.ls(type = ['animLayer'])
-    dirty_layer = [o for o in layer_node if o not in exception_list]
+
+    delete_later = []
+    dirty_layer = []
+    for o in layer_node:
+        if o.getParent() is None:
+            delete_later.append(o)
+            continue
+        if o not in exception_list:
+            dirty_layer.append(o)
+
     pm.delete(dirty_layer)
+    pm.delete(delete_later)
 
 
 def clean_display_layer(exception_list = None):
@@ -112,7 +122,7 @@ def fix_shading_engine_intermediate(input_shape_intermediate = None):
         if noninter_connection:
             shape_deformed.instObjGroups[0].disconnect(noninter_connection[0])
 
-        shape_deformed.instObjGroups[0] >> inter_connection[0]
+        shape_deformed.instObjGroups[0].connect(inter_connection[0])
 
 
 def clean_dag_pose():
@@ -122,7 +132,7 @@ def clean_dag_pose():
 
 def clean_animation_node():
     """Remove all animation nodes in the scene, set driven key will not get deleted."""
-    pm.delete(pm.ls(type = ["animCurveTU", "animCurveTL", "animCurveTA"]))
+    pm.delete(pm.ls(type = ["animCurveTU", "animCurveTL", "animCurveTA"], editable=True))
 
 
 def clean_unknown_node(exception_list = None):
@@ -163,6 +173,27 @@ def clean_turtle_node():
             turtle_node.unlock()
             pm.delete(turtle_node)
     pm.unloadPlugin('Turtle.mll', force = True)
+
+
+def fix_duplicate_name(input_duplicate_name = None):
+    """Rename specified node into unique name.
+
+    :key input_duplicate_name: PyNode needs to make the name unique.
+    :type input_duplicate_name: list of pm.PyNode
+    """
+    if input_duplicate_name is not None:
+        duplicate_name_list = copy.deepcopy(input_duplicate_name)
+    else:
+        duplicate_name_list = scene_info.get_duplicate_name()
+
+    for duplicate_node in duplicate_name_list:
+        duplicate_name = duplicate_node.longName()
+        shortname = duplicate_node.nodeName()
+        newshortname = naming.get_unique_name(shortname)
+
+        pm.rename(duplicate_name, newshortname)
+
+
 
 
 

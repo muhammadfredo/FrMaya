@@ -1,7 +1,7 @@
 """
 ## SCRIPT HEADER ##
 
-Created By   : Muhammad Fredo Syahrul Alam
+Created By   : Muhammad Fredo
 Email        : muhammadfredo@gmail.com
 Start Date   : 23 Feb 2016
 Purpose      :
@@ -404,6 +404,7 @@ class MainGUI(fmc.MyQtWindow):
         if sender == self.ui.jc_split_btn:
             sel = pm.ls(os = True, type = 'joint')
             if len(sel) > 0:
+                # FIXME: naming not yet implement, wait until we build modular auto rigging
                 fmc.split_joint(sel[0], option['splitCount'].value(), option['replace'].isChecked())
         # Created joint on selected
         if sender == self.ui.jc_createonsel_btn:

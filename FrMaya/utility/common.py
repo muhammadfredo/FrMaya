@@ -1,7 +1,7 @@
 """
 ## SCRIPT HEADER ##
 
-Created By   : Muhammad Fredo Syahrul Alam
+Created By   : Muhammad Fredo
 Email        : muhammadfredo@gmail.com
 Start Date   : 14 Sep 2020
 Info         :
@@ -27,6 +27,18 @@ def flatten(input_list):
     :rtype: list
     """
     return list(__flatten(input_list))
+
+
+class MetaSingleton(type):
+    """Singleton metaclass.
+    This should be preferred instead of singleton decorator.
+    Using singleton metaclass the singleton class can be inheritance."""
+    _instance = {}
+
+    def __call__(cls, *args, **kwargs):
+        if cls not in cls._instance:
+            cls._instance[cls] = super(MetaSingleton, cls).__call__(*args, **kwargs)
+        return cls._instance[cls]
 
 
 
