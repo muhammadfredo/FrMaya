@@ -282,3 +282,7 @@ def get_icon_file(full_file_path):
             return icon_file
     return ''
 
+
+def get_maya_window():
+    maya_window = next(o for o in QtWidgets.QApplication.instance().topLevelWidgets() if o.objectName() == "MayaWindow")
+    return maya_window

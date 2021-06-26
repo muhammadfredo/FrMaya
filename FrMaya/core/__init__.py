@@ -117,6 +117,8 @@ from .transformation import (
 )
 from .uimaya import (
     build_menubar,
+    get_icon_file,
+    get_maya_window,
     MyQtWindow,
 )
 
