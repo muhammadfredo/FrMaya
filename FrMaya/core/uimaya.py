@@ -106,6 +106,7 @@ class Menubar(pmui.SubMenuItem):
             the_path = os.path.join(fullpath, dir_name).replace("\\", "/")
             # separated filename and extension
             file_name, ext = os.path.splitext(dir_name)
+            icon_file = get_icon_file(the_path)
 
             # remove number and underline
             # number and underline in folder for sorting purpose :))
@@ -120,21 +121,31 @@ class Menubar(pmui.SubMenuItem):
             # check if the path is file or folder
             if os.path.isdir(the_path):
                 # create submenu
-                submenu = pywin.subMenuItem(label = menu_name, subMenu = True, p = parent, tearOff = True,
-                                            postMenuCommandOnce = 1)
+                submenu = pywin.subMenuItem(
+                    label = menu_name,
+                    subMenu = True,
+                    p = parent,
+                    tearOff = True,
+                    postMenuCommandOnce = 1,
+                    image = icon_file
+                )
                 # recursive buildSubMenu
                 self.build_sub_menu(the_path, submenu)
             # if file is python
-            elif ext == '.py':
+            elif ext == '.py' or ext == '.mel':
                 # command of menuitem
                 command_script = 'execfile("{0}")'.format(the_path)
+                if ext == '.mel':
+                    command_script = 'import maya.mel as mel\nmel.eval( "source \\"{0}\\"" )'.format(the_path)
+
                 # create menuitem
-                pywin.menuItem(label = menu_name, p = parent, tearOff = True, command = command_script)
-            elif ext == '.mel':
-                # command of menuitem
-                command_script = 'import maya.mel as mel\nmel.eval( "source \\"{0}\\"" )'.format(the_path)
-                # create menuitem
-                pywin.menuItem(label = menu_name, p = parent, tearOff = True, command = command_script)
+                pywin.menuItem(
+                    label = menu_name,
+                    p = parent,
+                    tearOff = True,
+                    command = command_script,
+                    image = icon_file
+                )
 
 
 def build_menubar():
@@ -260,4 +271,14 @@ class MyQtWindow(QtWidgets.QWidget):
             width = width_tool,
             allowedArea = ['right', 'left']
         )
+
+
+def get_icon_file(full_file_path):
+    file_path, ext = os.path.splitext(full_file_path)
+    icon_type_list = ['svg', 'ico', 'png']
+    for each in icon_type_list:
+        icon_file = '{}.{}'.format(file_path, each)
+        if os.path.exists(icon_file):
+            return icon_file
+    return ''
 
