@@ -115,7 +115,9 @@ try:
     import pkg_resources
     __version__ = pkg_resources.require('path.py')[0].version
 except Exception:
-    __version__ = 'unknown'
+    # __version__ = 'unknown'
+    __versiontuple__ = (11, 0, 0)
+    __version__ = '.'.join(str(x) for x in __versiontuple__)
 
 
 class TreeWalkWarning(Warning):
