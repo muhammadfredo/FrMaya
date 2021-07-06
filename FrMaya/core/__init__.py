@@ -26,8 +26,9 @@ from .animation import (
     copy_animation,
 )
 from .antivirus import (
+    clean_malware_files,
+    clean_outliner_command_script,
     clean_virus,
-    clean_malware_files
 )
 from .general import (
     build_curve,

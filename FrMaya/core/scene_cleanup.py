@@ -172,6 +172,8 @@ def clean_turtle_node():
             turtle_node = pm.PyNode(each_node)
             turtle_node.unlock()
             pm.delete(turtle_node)
+            pm.mel.ilrDynamicAttributes(0)
+    pm.pluginInfo('Turtle.mll', edit = True, autoload = False)
     pm.unloadPlugin('Turtle.mll', force = True)
 
 

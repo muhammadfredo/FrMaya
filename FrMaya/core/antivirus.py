@@ -125,3 +125,11 @@ def clean_malware_files():
             os.remove(each_file)
         except:
             print 'Failed to remove ~> {}'.format(each_file)
+
+
+def clean_outliner_command_script():
+    outliner_panels = pm.getPanel(typ='outlinerPanel')
+    dirty_commands = ['look']
+    for each in outliner_panels:
+        if pm.outlinerEditor(each.name(), q = True, selectCommand = True) in dirty_commands:
+            pm.outlinerEditor(each.name(), e = True, selectCommand = '')
