@@ -371,12 +371,12 @@ def backup_file(file_path):
         backup_dir.makedirs()
 
     backup_file_glob = backup_dir.glob('{}.v*{}'.format(file_name, file_ext))
-    if not backup_file_glob:
-        return None
-    backup_file_glob.sort()
-    latest_file = backup_file_glob[-1]
-    version_count = int(latest_file.stem.replace('{}.v'.format(file_name), ''))
-    version_count += 1
+    version_count = 1
+    if backup_file_glob:
+        backup_file_glob.sort()
+        latest_file = backup_file_glob[-1]
+        version_count = int(latest_file.stem.replace('{}.v'.format(file_name), ''))
+        version_count += 1
 
     # new version file
     backup_file_path = backup_dir / '{}.v{:03d}{}'.format(file_name, version_count, file_ext)

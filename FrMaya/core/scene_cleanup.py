@@ -173,8 +173,11 @@ def clean_turtle_node():
             turtle_node.unlock()
             pm.delete(turtle_node)
             pm.mel.ilrDynamicAttributes(0)
-    pm.pluginInfo('Turtle.mll', edit = True, autoload = False)
-    pm.unloadPlugin('Turtle.mll', force = True)
+    try:
+        pm.pluginInfo('Turtle.mll', edit = True, autoload = False)
+        pm.unloadPlugin('Turtle.mll', force = True)
+    except Exception as e:
+        pass
 
 
 def fix_duplicate_name(input_duplicate_name = None):
