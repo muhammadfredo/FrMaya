@@ -9,6 +9,7 @@ Info         :
 """
 import maya.api.OpenMaya as om
 import pymel.core as pm
+from FrMaya.vendor import path
 
 from . import transformation, naming
 
@@ -346,3 +347,40 @@ def get_soft_selection():
             elements.append([node.vtx[index_component], inf_val])
         selection_iter.next()
     return elements
+
+
+def backup_file(file_path):
+    """
+    Backup supplied file into file.versions folder and add version number on their file name.
+
+    :arg file_path: Source file (absolute path) which need to get backup.
+    :type file_path: str or path.Path
+    :return: Latest backup file (absolute path).
+    :rtype: path.Path
+    """
+    file_path = path.Path(file_path)
+    dir_path = file_path.parent
+    file_name = file_path.stem
+    file_ext = file_path.ext
+
+    # backup directory
+    backup_dir = dir_path / '{}.versions'.format(file_name)
+
+    # detect if backup directory exist
+    if not backup_dir.exists():
+        backup_dir.makedirs()
+
+    backup_file_glob = backup_dir.glob('{}.v*{}'.format(file_name, file_ext))
+    if not backup_file_glob:
+        return None
+    backup_file_glob.sort()
+    latest_file = backup_file_glob[-1]
+    version_count = int(latest_file.stem.replace('{}.v'.format(file_name), ''))
+    version_count += 1
+
+    # new version file
+    backup_file_path = backup_dir / '{}.v{:03d}{}'.format(file_name, version_count, file_ext)
+
+    # copy the file / backup the file
+    file_path.copyfile(backup_file_path)
+    return backup_file_path.abspath()

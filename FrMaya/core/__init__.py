@@ -31,6 +31,7 @@ from .antivirus import (
     clean_virus,
 )
 from .general import (
+    backup_file,
     build_curve,
     duplicate_original_mesh,
     get_channelbox_attributes,

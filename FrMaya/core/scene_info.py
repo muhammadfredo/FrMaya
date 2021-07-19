@@ -26,6 +26,8 @@ def get_pasted_node():
 
     :rtype: list of pm.PyNode
     """
+    # example to search pasted node inside hierarchy
+    # regex = '\|All\|.*pasted__.*'
     return [o for o in pm.ls('pasted__*', editable = True)]
 
 
