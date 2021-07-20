@@ -132,9 +132,19 @@ def get_bad_shape_name():
         transform = shape.getParent()
         tm_name = transform.nodeName(stripNamespace = True)
         shape_name = shape.nodeName(stripNamespace = True)
+
+        num_split = re.search(r'(.+?)(\d*)$', tm_name)
+        name_split, number_split = num_split.groups()
+
+        result_num = False
+        regex_num = r"({0})(ShapeDeformed|Shape)({1})".format(name_split, number_split)
+        if num_split:
+            result_num = re.match(regex_num, shape_name)
+
         regex = r"({0})(ShapeDeformed|Shape)".format(tm_name)
-        m = re.match(regex, shape_name)
-        if not m:
+        result = re.match(regex, shape_name)
+
+        if not result and not result_num:
             bad_shape_name.append(shape)
 
     return bad_shape_name
