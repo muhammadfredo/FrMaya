@@ -95,6 +95,7 @@ from .scene_info import (
     get_scene_unit,
     get_shading_engine_intermediate,
     get_start_frame,
+    get_unfreeze_transform,
     get_zero_scale,
 )
 from .shading import (

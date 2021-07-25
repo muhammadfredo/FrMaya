@@ -186,4 +186,42 @@ def get_shading_engine_intermediate():
     return [o for o in shape_inter_list if o.shadingGroups()]
 
 
+def get_unfreeze_transform(translate = True, rotate = True, scale = True):
+    """
+    Collect all unfreeze transform objects except camera.
 
+    :key translate: If True, enable check on translate attribute.
+    :type translate: bool
+    :key rotate: If True, enable check on rotation attribute.
+    :type rotate: bool
+    :key scale: If True, enable check on scale attribute.
+    :type scale: bool
+    :rtype: list of pm.nt.Transform
+    """
+    exclude_list = ['camera']
+    result = []
+    rst_list = pm.ls(type = 'transform')
+    for each_rst in rst_list:
+        shp = each_rst.getShape()
+        if shp and type(shp).__name__.lower() in exclude_list:
+            continue
+
+        attrs = []
+        if translate:
+            trans_attr = ['translateX', 'translateY', 'translateZ']
+            attrs.extend([each_rst.attr(o) for o in trans_attr])
+        if rotate:
+            rot_attr = ['rotateX', 'rotateY', 'rotateZ']
+            attrs.extend([each_rst.attr(o) for o in rot_attr])
+        if scale:
+            scl_attr = ['scaleX', 'scaleY', 'scaleZ']
+            attrs.extend([each_rst.attr(o) for o in scl_attr])
+
+        for attr in attrs:
+            val = attr.get()
+            def_val = pm.attributeQuery(attr.plugAttr(), node = attr.node(), listDefault = True)[0]
+            if '{:.3f}'.format(val) != '{:.3f}'.format(def_val):
+                result.append(each_rst)
+                break
+
+    return result
