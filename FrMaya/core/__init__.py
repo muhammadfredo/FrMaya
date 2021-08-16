@@ -41,6 +41,7 @@ from .general import (
     lock_attributes,
     nonkeyable_attributes,
     pgroup,
+    serialize_curve,
     transfer_shape,
     unhide_attributes,
     unlock_attributes,

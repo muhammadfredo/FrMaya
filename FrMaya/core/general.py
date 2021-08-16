@@ -7,6 +7,8 @@ Start Date   : 11 Sep 2020
 Info         :
 
 """
+from collections import OrderedDict
+
 import maya.api.OpenMaya as om
 import pymel.core as pm
 from FrMaya.vendor import path
@@ -113,6 +115,36 @@ def build_curve(curve_data, parent_type = 'transform'):
             each_crv.rename('{0}Shape{1}'.format(parent_curve.nodeName(), key.replace('curve', '')))
 
     return parent_curve
+
+
+def serialize_curve(pynode):
+    """Serialize curve shape node into dictionary data.
+
+    :arg pynode: Specified pynode object need to be serialized.
+    :type pynode: pm.PyNode
+    :rtype: dict
+    """
+    curves = pynode.getShapes()
+    if not curves:
+        return
+
+    curve_data = OrderedDict()
+    for i, each_crv in enumerate(curves):
+        if each_crv.nodeType() != 'nurbsCurve':
+            continue
+
+        curve_name = 'curve{:02d}'.format(i)
+        curve_data[curve_name] = OrderedDict()
+        curve_data[curve_name]['degree'] = each_crv.degree()
+        if each_crv.f.get() == 0:
+            periodic = False
+        else:
+            periodic = True
+        curve_data[curve_name]['periodic'] = periodic
+        curve_data[curve_name]['point'] = [o.tolist() for o in each_crv.getCVs()]
+        curve_data[curve_name]['knot'] = each_crv.getKnots()
+
+    return curve_data
 
 
 def transfer_shape(source_object, target_objects, replace = True):
