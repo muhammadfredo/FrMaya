@@ -102,3 +102,16 @@ class AbstractPlugin:
 
     def __init__(self):
         pass
+
+
+class AbstractGuide:
+    __metaclass__ = abc.ABCMeta
+
+    def __init__(self):
+        pass
+
+
+class RootComponent(AbstractComponent):
+
+    def __init__(self):
+        super(RootComponent, self).__init__()

@@ -39,4 +39,13 @@ leg_cmp.create()
 # build the rig
 root_cmp.build()
 
+
+# Initialize rig in the scene
+all_root = ppt.api.ls()
+print(all_root)
+
+> [RootComponent(u'All'), Component(u'Arm'), Component(u'Leg')]
+
+ppt.api.
+
 """
