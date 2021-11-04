@@ -110,8 +110,17 @@ def build_curve(curve_data, parent_type = 'transform'):
         pm.parent(curve_shapes, parent_curve, addObject = True, shape = True)
         pm.delete(new_curve)
 
-        # rename each curve
+        curve_color = value.get('color', 17)
         for each_crv in curve_shapes:
+            # colorize curve
+            color_attr = 'overrideColor'
+            if isinstance(curve_color, list):
+                each_crv.overrideRGBColors.set(True)
+                color_attr = 'overrideColorRGB'
+            each_crv.attr(color_attr).set(curve_color)
+            each_crv.overrideEnabled.set(True)
+
+            # rename each curve
             each_crv.rename('{0}Shape{1}'.format(parent_curve.nodeName(), key.replace('curve', '')))
 
     return parent_curve
@@ -143,6 +152,11 @@ def serialize_curve(pynode):
         curve_data[curve_name]['periodic'] = periodic
         curve_data[curve_name]['point'] = [o.tolist() for o in each_crv.getCVs()]
         curve_data[curve_name]['knot'] = each_crv.getKnots()
+        if each_crv.overrideRGBColors.get():
+            color_val = list(each_crv.overrideColorRGB.get())
+        else:
+            color_val = each_crv.overrideColor.get()
+        curve_data[curve_name]['color'] = color_val
 
     return curve_data
 
