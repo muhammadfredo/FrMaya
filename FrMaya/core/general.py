@@ -81,7 +81,7 @@ def pgroup(pynodes, world = False, re = "", suffix = ""):
     return output
 
 
-def build_curve(curve_data, parent_type = 'transform'):
+def build_curve(curve_data, parent_curve = None, parent_type = 'transform'):
     """Build curve shape from dictionary curve data.
 
     :arg curve_data: Dictionary curve data.
@@ -92,12 +92,19 @@ def build_curve(curve_data, parent_type = 'transform'):
        'knot': list of float
      } }
     :type curve_data: dict
+    :key parent_curve: If supplied, the curve shape will be parented to it instead.
+    :type parent_curve: pm.nt.Transform or pm.nt.Joint
     :key parent_type: Sets parent type of newly-created curve shape.
     :type parent_type: str
     :return: Curve PyNode object.
     :rtype: pm.nt.Transform or pm.nt.Joint
     """
-    parent_curve = pm.createNode(parent_type, name = naming.get_unique_name('fr_curve'))
+    if parent_curve is None:
+        parent_curve = pm.createNode(parent_type, name = naming.get_unique_name('fr_curve'))
+    else:
+        # clean shapes
+        shapes = parent_curve.getShapes()
+        pm.delete(shapes)
 
     for key, value in curve_data.items():
         new_curve = pm.curve(
