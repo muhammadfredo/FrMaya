@@ -118,6 +118,7 @@ from .transformation import (
     align,
     freeze_transform,
     reset_transform,
+    xform_mirror
 )
 from .uimaya import (
     build_menubar,

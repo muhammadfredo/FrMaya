@@ -99,4 +99,53 @@ def reset_transform(pynode, mode = ''):
     return True
 
 
+def xform_mirror(source, across = 'YZ', behaviour = True):
+    """Mirrors transform across hyperplane.
+    Code based on https://gist.github.com/rondreas/1c6d4e5fc6535649780d5b65fc5a9283
 
+    :arg source: PyNode object need to mirror.
+    :type source: pm.nt.Transform
+    :key across: Plane which to mirror across('XY', 'YZ', 'XZ').
+    :type across: str
+    :key behaviour: If False it use Orientation mode.
+    :type behaviour: bool
+    """
+    # Validate plane which to mirror across,
+    if across not in ['XY', 'YZ', 'XZ']:
+        raise ValueError("Keyword Argument: 'across' not of accepted value ('XY', 'YZ', 'XZ').")
+
+    # Get the worldspace matrix, as a list of 16 float values
+    mtx = pm.xform(source, q = True, ws = True, m = True)
+
+    # Invert rotation columns,
+    rx = [n * -1 for n in mtx[0:9:4]]
+    ry = [n * -1 for n in mtx[1:10:4]]
+    rz = [n * -1 for n in mtx[2:11:4]]
+
+    # Invert translation row,
+    t = [n * -1 for n in mtx[12:15]]
+
+    # Set matrix based on given plane, and whether to include behaviour or not.
+    if across is 'XY':
+        mtx[14] = t[2]  # set inverse of the Z translation
+
+        # Set inverse of all rotation columns but for the one we've set translate to.
+        if behaviour:
+            mtx[0:9:4] = rx
+            mtx[1:10:4] = ry
+
+    elif across is 'YZ':
+        mtx[12] = t[0]  # set inverse of the X translation
+
+        if behaviour:
+            mtx[1:10:4] = ry
+            mtx[2:11:4] = rz
+    else:
+        mtx[13] = t[1]  # set inverse of the Y translation
+
+        if behaviour:
+            mtx[0:9:4] = rx
+            mtx[2:11:4] = rz
+
+    # Finally set matrix for source,
+    pm.xform(source, ws = True, m = mtx)
