@@ -10,16 +10,20 @@ Info         :
 import pymel.core as pm
 
 
-def align(source, target, mode = 'transform'):
+def align(source, target, mode = 'transform', align_trans = None):
     """Align source PyNode to target PyNode.
 
     :arg source: PyNode object need to align.
     :type source: pm.nt.Transform
     :arg target: Destination of align operation.
     :type target: pm.nt.Transform
-    :key mode: Transform, translate, rotate.
+    :key mode: transform, translate, rotate.
     :type mode: str
+    :key align_trans: Align axis target. Default value is [1, 1, 1].
+    :type align_trans: list of int
     """
+    if align_trans is None:
+        align_trans = [1, 1, 1]
     # Align translate from Red9 SnapRuntime plugin
     if mode == 'translate' or mode == 'transform':
         if type(target) == pm.MeshVertex:
@@ -28,6 +32,10 @@ def align(source, target, mode = 'transform'):
             rot_piv_a = target.getRotatePivot(space = 'world')
             rot_piv_b = source.getRotatePivot(space = 'world')
             orig_trans = source.getTranslation(space = 'world')
+
+            for i, o in enumerate(align_trans):
+                rot_piv_a[i] = rot_piv_a[i] * o
+
             # We subtract the destinations translation from it's rotPivot, before adding it
             # to the source rotPiv. This compensates for offsets in the 2 nodes pivots
             target_trans = rot_piv_a + (orig_trans - rot_piv_b)
@@ -149,3 +157,24 @@ def xform_mirror(source, across = 'YZ', behaviour = True):
 
     # Finally set matrix for source,
     pm.xform(source, ws = True, m = mtx)
+
+
+def world_space_translate(source, offset_values, absolute = False):
+    """Translate source PyNode in world space.
+
+    :arg source: PyNode object need to offset.
+    :type source: pm.nt.Transform
+    :arg offset_values: Translation value offset.
+    :type offset_values: list of float or list of int
+    :key absolute: If False it translate relative to current position.
+    :type absolute: bool
+    """
+    if len(offset_values) != 3:
+        raise ValueError('Need list with length of 3')
+    orig_trans = source.getTranslation(space = 'world')
+
+    target_trans = offset_values
+    if not absolute:
+        target_trans += orig_trans
+    # Translate align operation
+    source.setTranslation(target_trans, space = 'world')
