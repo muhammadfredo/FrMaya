@@ -116,7 +116,7 @@ def transfer_skincluster(source_object, target_objects, prune_after = False):
         if old_tgt_skin_node:
             old_tgt_skin_node.unbind()
         try:
-            tgt_skin_node = pm.skinCluster(joint_list, tgt_obj, bindMethod = skin_method)
+            tgt_skin_node = pm.skinCluster(joint_list, tgt_obj, skinMethod = skin_method)
         except:
             tgt_skin_node = pm.skinCluster(joint_list, tgt_obj)
         pm.copySkinWeights(
