@@ -118,6 +118,8 @@ from .transformation import (
     align,
     freeze_transform,
     reset_transform,
+    world_space_translate,
+    xform_mirror
 )
 from .uimaya import (
     build_menubar,

@@ -75,7 +75,7 @@ def get_namespaces(exclude_ref = False):
     # filter reference namespace, pm.ls(editable = True) will not work
     if exclude_ref:
         ref_list = get_references()
-        exclude_list += [o.referenceFile().namespace for o in ref_list]
+        exclude_list += [o.referenceFile().namespace for o in ref_list if o.referenceFile()]
     return [o for o in namespace_list if o not in exclude_list]
 
 

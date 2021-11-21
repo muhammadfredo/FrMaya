@@ -49,6 +49,9 @@ def __setup():
     if not pm.about(batch = True):
         fmc.build_menubar()
 
+        import pymel.tools.loggingControl as loggingControl
+        loggingControl.initMenu()
+
     # setup callback
     callbacks = fmc.MyCallbackManager()
     callbacks.add_callback('after_new', 'FrMaya', __after_new)
