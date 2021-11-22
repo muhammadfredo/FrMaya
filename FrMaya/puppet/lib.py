@@ -100,7 +100,7 @@ def create_expose_rotation(source_object, aim_axis = 'X', up = 'Y', mult = 1):
     # EXPRESSION
     expression_script = ''
     expression_script += 'vector $vecB = <<{},{},{}>>;\n'.format(*[o * mult for o in [x, y, z]])
-    expression_script += 'vector $vecJ = <<{},{},{}>>;\n'.format(*pmm_node.output.get())
+    expression_script += 'vector $vecJ = <<{},{},{}>>;\n'.format(*pmm_node.output.children())
     expression_script += 'float $bendAngle = acos(clamp(-1.0, 1.0, dot($vecB, $vecJ)));\n'
     expression_script += 'float $yaw = asin(clamp(-1.0, 1.0, {}.yawLinear));\n'.format(expose_rot.nodeName())
     expression_script += 'float $pitch = asin({}.pitchLinear);\n'.format(expose_rot.nodeName())
