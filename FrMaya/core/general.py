@@ -340,6 +340,7 @@ def get_channelbox_attributes(input_object):
     :rtype: list of pm.general.Attribute
     """
     attr_list = input_object.listAttr(keyable = True, scalar = True, multi = True)
+    # extend to include non keyable attribue
     attr_list.extend(input_object.listAttr(channelBox = True))
     return attr_list
 
