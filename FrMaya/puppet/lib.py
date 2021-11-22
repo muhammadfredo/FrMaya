@@ -12,7 +12,7 @@ import pymel.core as pm
 import FrMaya.core as fmc
 
 
-def create_expose_rotation(source_object, aim_axis= 'X', up= 'Y', mult=1):
+def create_expose_rotation(source_object, aim_axis = 'X', up = 'Y', mult = 1):
     axis_list = ['X', 'Y', 'Z']
     if aim_axis not in axis_list or up not in axis_list:
         ValueError('Axis(aim and up) keyword argument accepted value "X", "Y", "Z".')
@@ -43,19 +43,19 @@ def create_expose_rotation(source_object, aim_axis= 'X', up= 'Y', mult=1):
         z = 1
 
     for attr_name in ['yaw', 'pitch', 'roll']:
-        source_object.addAttr(ln = attr_name, at = 'doubleAngle', k = True)
+        source_object.addAttr(attr_name, at = 'doubleAngle', k = True)
 
     expose_rot_name = '{}_exposeRot'.format(source_object.nodeName())
     expose_rot = pm.createNode('transform', n = expose_rot_name, ss = True)
     for attr_name in ['yawLinear', 'pitchLinear', 'yaw', 'pitch', 'roll']:
         attr_type = 'doubleAngle' if attr_name == 'roll' else 'double'
-        expose_rot.addAttr(ln = attr_name, at = attr_type, k = True, h = True)
+        expose_rot.addAttr(attr_name, at = attr_type, k = True, h = True)
 
     source_object.attr('rotateX') >> expose_rot.attr('rotateX')
     source_object.attr('rotateY') >> expose_rot.attr('rotateY')
     source_object.attr('rotateZ') >> expose_rot.attr('rotateZ')
     source_object.attr('rotateOrder') >> expose_rot.attr('rotateOrder')
-    expose_rot.attr('roll') >> expose_rot.attr('roll')
+    expose_rot.attr('roll') >> source_object.attr('roll')
 
     pmm_node = pm.createNode('pointMatrixMult', n = '{}_pmm'.format(source_object), ss = True)
     pmm_node.attr('inPoint{}'.format(aim_axis)).set(1 * mult)
@@ -64,12 +64,12 @@ def create_expose_rotation(source_object, aim_axis= 'X', up= 'Y', mult=1):
     pmm_node.attr('output{}'.format(pitch_linear_axis)) >> expose_rot.attr('pitchLinear')
 
     bw_node = pm.createNode('blendWeighted', n = '{}_bw'.format(source_object), ss = True)
-    bw_node.attr('weight[0]').set(-1)
+    bw_node.setAttr('weight[0]', -1)
     pmm_node.attr('output{}'.format(yaw_linear_axis)) >> bw_node.attr('input[0]')
     bw_node.attr('output') >> expose_rot.attr('yawLinear')
 
     ac_node = pm.createNode('aimConstraint', n = '{}_AC'.format(source_object), ss = True)
-    ac_node.attr('target[0].targetTranslate{}'.format(aim_axis)).set(1 * mult)
+    ac_node.attr('target[0].{0}.{0}{1}'.format('targetTranslate', aim_axis)).set(1 * mult)
     ac_node.attr('worldUpType').set(4)
     ac_node.attr('aimVector').set([x * mult, y * mult, z * mult])
     ac_node.attr('upVector').set([y * mult, z * mult, x * mult])
@@ -80,9 +80,9 @@ def create_expose_rotation(source_object, aim_axis= 'X', up= 'Y', mult=1):
     oc_node = pm.createNode('orientConstraint', n = '{}_OC'.format(source_object), ss = True)
     oc_node.attr('interpType').set(0)
 
-    expose_rot.attr('rotateX') >> oc_node.attr('target[0].targetRotateX')
-    expose_rot.attr('rotateY') >> oc_node.attr('target[0].targetRotateY')
-    expose_rot.attr('rotateZ') >> oc_node.attr('target[0].targetRotateZ')
+    expose_rot.attr('rotateX') >> oc_node.attr('target[0].{0}.{0}X'.format('targetRotate'))
+    expose_rot.attr('rotateY') >> oc_node.attr('target[0].{0}.{0}Y'.format('targetRotate'))
+    expose_rot.attr('rotateZ') >> oc_node.attr('target[0].{0}.{0}Z'.format('targetRotate'))
     expose_rot.attr('rotateOrder') >> oc_node.attr('constraintRotateOrder')
     expose_rot.attr('rotateOrder') >> oc_node.attr('target[0].targetRotateOrder')
     ac_node.attr('constraintRotateX') >> oc_node.attr('constraintJointOrientX')
@@ -107,13 +107,13 @@ def create_expose_rotation(source_object, aim_axis= 'X', up= 'Y', mult=1):
     expression_script += 'float $sumAngle = abs($yaw) + abs($pitch);\n\n'
     expression_script += 'if($sumAngle > 1.0e-07)\n'
     expression_script += '{\n'
-    expression_script += '\t{}.yaw = $bendAngle * $yaw / $sumAngle;\n'
-    expression_script += '\t{}.pitch = $bendAngle * $pitch / $sumAngle;\n'
+    expression_script += '\t{}.yaw = $bendAngle * $yaw / $sumAngle;\n'.format(expose_rot)
+    expression_script += '\t{}.pitch = $bendAngle * $pitch / $sumAngle;\n'.format(expose_rot)
     expression_script += '}\n'
     expression_script += 'else\n'
     expression_script += '{\n'
-    expression_script += '\t{}.yaw = $bendAngle;\n'
-    expression_script += '\t{}.pitch = 0.0;\n'
+    expression_script += '\t{}.yaw = $bendAngle;\n'.format(expose_rot)
+    expression_script += '\t{}.pitch = 0.0;\n'.format(expose_rot)
     expression_script += '}'
     expression_node = pm.expression(
         s = expression_script, o = '', uc = 'all', n = '{}_EXP'.format(source_object), ae = 1
