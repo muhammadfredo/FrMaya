@@ -10,5 +10,6 @@ from .constant import (
     MayaColorOverride
 )
 from .lib import (
-    create_expose_rotation
+    create_expose_rotation,
+    create_spline_ik_rig,
 )

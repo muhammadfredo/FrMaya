@@ -137,3 +137,26 @@ def create_expose_rotation(source_object, aim_axis = 'X', up = 'Y', mult = 1):
     oc_node.setParent(expose_rot, r = True)
 
     return expose_rot
+
+
+def create_spline_ik_rig(joint_guides):
+    # wip
+    if not isinstance(joint_guides, list):
+        raise ValueError('joint_guides argument should be list of joint')
+
+    test_data = {
+        'curve': {
+            'degree': 1,
+            'point': [],
+            'knot': []
+        }
+    }
+    for i, each in enumerate(joint_guides):
+        curve_point = each.getTranslation(space = 'world').tolist()
+        test_data['curve']['point'].append(curve_point)
+        # test_data['curve']['knot'].append(float(i+1))
+    # test_data['curve']['knot'].extend([0.0, 0.0, 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 8.0, 8.0])
+    test_data['curve']['knot'].extend([0.0, 8.0])
+
+    print test_data
+    fmc.build_curve(test_data)
