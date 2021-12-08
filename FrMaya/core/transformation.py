@@ -178,3 +178,15 @@ def world_space_translate(source, offset_values, absolute = False):
         target_trans += orig_trans
     # Translate align operation
     source.setTranslation(target_trans, space = 'world')
+
+
+def get_offset_matrix(source, parent_offset):
+    """Return offset matrix value from given nodes.
+
+    :arg source: Offset matrix value will get extracted from this PyNode object.
+    :type source: pm.PyNode
+    :arg parent_offset: Parent space for calculating offset matrix.
+    :type parent_offset: pm.PyNode
+    :rtype: pm.dt.Matrix
+    """
+    return source.worldMatrix[0].get() * parent_offset.worldInverseMatrix[0].get()
