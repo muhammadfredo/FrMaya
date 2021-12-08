@@ -9,7 +9,7 @@ except (Exception, ImportError):
 from .constant import (
     MayaColorOverride
 )
-from .lib import (
+from .utility import (
     create_expose_rotation,
     create_spline_ik_rig,
 )
