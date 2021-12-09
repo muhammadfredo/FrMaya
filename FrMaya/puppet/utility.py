@@ -160,3 +160,42 @@ def create_spline_ik_rig(joint_guides):
 
     print test_data
     fmc.build_curve(test_data)
+
+
+def create_matrix_cons(source, target, space = 'world', maintain_offset = True):
+    """Create matrix based constraint.
+
+    :arg source:
+    :type source:
+    :arg target:
+    :type target:
+    :key space:
+    :type space: str
+    :key maintain_offset:
+    :type maintain_offset: bool
+    :return:
+    """
+    idx = 0
+    multi_mtx = pm.createNode('multMatrix', ss = True)
+    decom_mtx = pm.createNode('decomposeMatrix', ss = True)
+    multi_mtx.attr('matrixSum') >> decom_mtx.attr('inputMatrix')
+
+    if space == 'local':
+        offset_val = fmc.get_offset_matrix(target, target.getParent())
+        parent_space_node = source
+    else:
+        offset_val = fmc.get_offset_matrix(target, source)
+        parent_space_node = target
+
+    if maintain_offset:
+        multi_mtx.attr('matrixIn')[idx].set(offset_val)
+        idx += 1
+
+    source.attr('worldMatrix[0]') >> multi_mtx.attr('matrixIn')[idx]
+    parent_space_node.attr('parentInverseMatrix') >> multi_mtx.attr('matrixIn')[idx + 1]
+
+    decom_mtx.attr('outputTranslate') >> target.attr('translate')
+    decom_mtx.attr('outputRotate') >> target.attr('rotate')
+    decom_mtx.attr('outputScale') >> target.attr('scale')
+
+    return multi_mtx, decom_mtx

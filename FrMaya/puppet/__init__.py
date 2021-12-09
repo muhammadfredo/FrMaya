@@ -12,4 +12,5 @@ from .constant import (
 from .utility import (
     create_expose_rotation,
     create_spline_ik_rig,
+    create_matrix_cons,
 )
