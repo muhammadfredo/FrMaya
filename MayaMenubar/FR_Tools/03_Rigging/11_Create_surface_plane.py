@@ -11,4 +11,4 @@ import pymel.core as pm
 import FrMaya.core as fmc
 reload(fmc)
 
-print type(fmc.create_surface_plane())
+[fmc.create_surface_plane(align_to = o)for o in pm.selected()]

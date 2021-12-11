@@ -438,13 +438,17 @@ def backup_file(file_path):
     return backup_file_path.abspath()
 
 
-def create_surface_plane(axis = 'x', width = 0.5):
+def create_surface_plane(align_to = None, axis = 'x', width = 0.5, freeze_tm = True):
     """Create surface plane and return transform pynode of the surface plane.
 
+    :key align_to: Target align of the newly created surface.
+    :type align_to: pm.nt.Transform
     :key axis: Surface normal direction in 'x', 'y', 'z'. Default 'x'
     :type axis: str
     :key width: The width of the plane. Default: 0.5
     :type width: float
+    :key freeze_tm: If True, freeze_transform operation will be applied to the newly created surface.
+    :type freeze_tm: bool
     :rtype: pm.nt.Transform
     """
     axis_dict = {'x': (1, 0, 0), 'y': (0, 1, 0), 'z': (0, 0, 1)}
@@ -454,5 +458,9 @@ def create_surface_plane(axis = 'x', width = 0.5):
         degree = 1,
         constructionHistory = False
     )[0]
+    if align_to is not None:
+        transformation.align(res, align_to)
+    if freeze_tm:
+        transformation.freeze_transform(res)
     return res
 
