@@ -379,8 +379,7 @@ def duplicate_original_mesh(source_object, default_shader = True):
 
 
 def get_soft_selection():
-    """
-    Return list of [vertex index, vertex soft selection influence].
+    """Return list of [vertex index, vertex soft selection influence].
 
     :rtype: list of list
     """
@@ -403,8 +402,7 @@ def get_soft_selection():
 
 
 def backup_file(file_path):
-    """
-    Backup supplied file into file.versions folder and add version number on their file name.
+    """Backup supplied file into file.versions folder and add version number on their file name.
 
     :arg file_path: Source file (absolute path) which need to get backup.
     :type file_path: str or path.Path
@@ -437,3 +435,23 @@ def backup_file(file_path):
     # copy the file / backup the file
     file_path.copyfile(backup_file_path)
     return backup_file_path.abspath()
+
+
+def create_surface_plane(axis = 'x', width = 0.5):
+    """Create surface plane and return transform pynode of the surface plane.
+
+    :key axis: Surface normal direction in 'x', 'y', 'z'. Default 'x'
+    :type axis: str
+    :key width: The width of the plane. Default: 0.5
+    :type width: float
+    :rtype: pm.nt.Transform
+    """
+    axis_dict = {'x': (1, 0, 0), 'y': (0, 1, 0), 'z': (0, 0, 1)}
+    res = pm.nurbsPlane(
+        axis = axis_dict[axis],
+        width = width,
+        degree = 1,
+        constructionHistory = False
+    )[0]
+    return res
+

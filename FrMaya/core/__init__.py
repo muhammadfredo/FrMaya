@@ -33,6 +33,7 @@ from .antivirus import (
 from .general import (
     backup_file,
     build_curve,
+    create_surface_plane,
     duplicate_original_mesh,
     get_channelbox_attributes,
     get_soft_selection,
