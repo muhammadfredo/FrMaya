@@ -9,6 +9,7 @@ Info         :
 
 """
 import os
+import re
 
 try:
     import shiboken
@@ -23,6 +24,8 @@ from FrMaya.vendor.Qt import QtCore, QtCompat, QtWidgets
 
 from FrMaya.core import system
 
+SEPARATOR = '__separator__'
+
 
 def get_menu_name(name):
     """Make any supplied string suitable/nice for menubar name.
@@ -32,14 +35,14 @@ def get_menu_name(name):
     :return: Nice menu name for menubar.
     :rtype: str
     """
-
     # get menu name and use it for menu identifier
-    menu_name = ""
-    for char in name:
-        if char == '_' or char == '-':
-            char = ' '
-        if char.isalpha() or char.isdigit() or char.isspace():
-            menu_name += char
+    regex = r"^(?:\d{2,3}_|)(\w+)"
+    result = re.match(regex, name)
+    menu_name = result.group(0)
+    if SEPARATOR in menu_name:
+        menu_name = menu_name.replace(SEPARATOR, '{}')
+    menu_name = menu_name.replace('_', ' ')
+    menu_name = menu_name.format(SEPARATOR)
     return menu_name
 
 
@@ -131,6 +134,12 @@ class Menubar(pmui.SubMenuItem):
                 )
                 # recursive buildSubMenu
                 self.build_sub_menu(the_path, submenu)
+            elif SEPARATOR in menu_name:
+                pywin.menuItem(
+                    label = menu_name.replace(SEPARATOR, ''),
+                    p = parent,
+                    divider = True,
+                )
             # if file is python
             elif ext == '.py' or ext == '.mel':
                 # command of menuitem
