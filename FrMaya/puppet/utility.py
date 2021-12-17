@@ -175,7 +175,6 @@ def create_matrix_cons(source, target, space = 'world', maintain_offset = True):
     :type maintain_offset: bool
     :return:
     """
-    idx = 0
     multi_mtx = pm.createNode('multMatrix', ss = True)
     decom_mtx = pm.createNode('decomposeMatrix', ss = True)
     multi_mtx.attr('matrixSum') >> decom_mtx.attr('inputMatrix')
@@ -183,16 +182,17 @@ def create_matrix_cons(source, target, space = 'world', maintain_offset = True):
     if space == 'local':
         offset_val = fmc.get_offset_matrix(target, target.getParent())
         parent_space_node = source
+        idx_order = [2, 0, 1]
     else:
         offset_val = fmc.get_offset_matrix(target, source)
         parent_space_node = target
+        idx_order = [0, 1, 2]
 
     if maintain_offset:
-        multi_mtx.attr('matrixIn')[idx].set(offset_val)
-        idx += 1
+        multi_mtx.attr('matrixIn')[idx_order[0]].set(offset_val)
 
-    source.attr('worldMatrix[0]') >> multi_mtx.attr('matrixIn')[idx]
-    parent_space_node.attr('parentInverseMatrix') >> multi_mtx.attr('matrixIn')[idx + 1]
+    source.attr('worldMatrix[0]') >> multi_mtx.attr('matrixIn')[idx_order[1]]
+    parent_space_node.attr('parentInverseMatrix') >> multi_mtx.attr('matrixIn')[idx_order[2]]
 
     decom_mtx.attr('outputTranslate') >> target.attr('translate')
     if target.nodeType() == 'joint':
