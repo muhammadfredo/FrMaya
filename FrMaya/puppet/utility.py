@@ -165,18 +165,20 @@ def create_spline_ik_rig(joint_guides):
 def create_matrix_cons(source, target, space = 'world', maintain_offset = True):
     """Create matrix based constraint.
 
-    :arg source:
-    :type source:
-    :arg target:
-    :type target:
-    :key space:
+    :arg source: PyNode object source of the matrix constraint transformation.
+    :type source: pm.nt.Transform or pm.nt.Joint
+    :arg target: PyNode object that will get constrainted.
+    :type target: pm.nt.Transform or pm.nt.Joint
+    :key space: 'world' calculate based on source world space. 'local' calculate on source local space.
     :type space: str
-    :key maintain_offset:
+    :key maintain_offset: If True, target will keep the transformation as is. False, will match source transformation.
     :type maintain_offset: bool
-    :return:
+    :return: All node that used in matrix constraint.
+    :rtype: list
     """
     multi_mtx = pm.createNode('multMatrix', ss = True)
     decom_mtx = pm.createNode('decomposeMatrix', ss = True)
+    result = [multi_mtx, decom_mtx]
     multi_mtx.attr('matrixSum') >> decom_mtx.attr('inputMatrix')
 
     if space == 'local':
@@ -200,6 +202,7 @@ def create_matrix_cons(source, target, space = 'world', maintain_offset = True):
         quat_inv = pm.createNode('quatInvert', ss = True)
         quat_prod = pm.createNode('quatProd', ss = True)
         quat_eul = pm.createNode('quatToEuler', ss = True)
+        result.extend([eul_quat, quat_inv, quat_prod, quat_eul])
 
         target.attr('jointOrient') >> eul_quat.attr('inputRotate')
         eul_quat.attr('outputQuat') >> quat_inv.attr('inputQuat')
@@ -211,4 +214,4 @@ def create_matrix_cons(source, target, space = 'world', maintain_offset = True):
         decom_mtx.attr('outputRotate') >> target.attr('rotate')
     decom_mtx.attr('outputScale') >> target.attr('scale')
 
-    return multi_mtx, decom_mtx
+    return result
