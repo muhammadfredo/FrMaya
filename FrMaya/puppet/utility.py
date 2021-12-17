@@ -195,7 +195,20 @@ def create_matrix_cons(source, target, space = 'world', maintain_offset = True):
     parent_space_node.attr('parentInverseMatrix') >> multi_mtx.attr('matrixIn')[idx + 1]
 
     decom_mtx.attr('outputTranslate') >> target.attr('translate')
-    decom_mtx.attr('outputRotate') >> target.attr('rotate')
+    if target.nodeType() == 'joint':
+        eul_quat = pm.createNode('eulerToQuat', ss = True)
+        quat_inv = pm.createNode('quatInvert', ss = True)
+        quat_prod = pm.createNode('quatProd', ss = True)
+        quat_eul = pm.createNode('quatToEuler', ss = True)
+
+        target.attr('jointOrient') >> eul_quat.attr('inputRotate')
+        eul_quat.attr('outputQuat') >> quat_inv.attr('inputQuat')
+        decom_mtx.attr('outputQuat') >> quat_prod.attr('input1Quat')
+        quat_inv.attr('outputQuat') >> quat_prod.attr('input2Quat')
+        quat_prod.attr('outputQuat') >> quat_eul.attr('inputQuat')
+        quat_eul.attr('outputRotate') >> target.attr('rotate')
+    else:
+        decom_mtx.attr('outputRotate') >> target.attr('rotate')
     decom_mtx.attr('outputScale') >> target.attr('scale')
 
     return multi_mtx, decom_mtx
