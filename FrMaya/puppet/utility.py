@@ -12,10 +12,24 @@ import pymel.core as pm
 import FrMaya.core as fmc
 
 
-def create_expose_rotation(source_object, aim_axis = 'X', up = 'Y', mult = 1):
+def create_expose_rotation(source_object, aim_axis = 'X', up_axis = 'Y', flip = False):
+    """Create yaw, pitch, roll attributes to expose given object rotation.
+
+    :arg source_object: PyNode object that need to extract its rotation.
+    :type source_object: pm.nt.Transform
+    :key aim_axis: Aim rotation axis, X, Y, or Z.
+    :type aim_axis: str
+    :key up_axis: Up rotation axis, X, Y, or Z.
+    :type up_axis: str
+    :key flip: If True the aim axis will be flipped.
+    :type flip: bool
+    :return: PyNode object with expose rotation attributes(yaw, pitch, roll).
+    :rtype: pm.nt.Transform
+    """
     axis_list = ['X', 'Y', 'Z']
-    if aim_axis not in axis_list or up not in axis_list:
+    if aim_axis.upper() not in axis_list or up_axis not in axis_list:
         ValueError('Axis(aim and up) keyword argument accepted value "X", "Y", "Z".')
+    multiply = -1 if flip else 1
 
     pitch_linear_axis = ''
     yaw_linear_axis = ''
@@ -24,20 +38,20 @@ def create_expose_rotation(source_object, aim_axis = 'X', up = 'Y', mult = 1):
     z = 0
 
     if aim_axis == 'X':
-        pitch_linear_axis = up
-        yaw_linear_axis = 'Z' if up == 'Y' else 'Y'
+        pitch_linear_axis = up_axis
+        yaw_linear_axis = 'Z' if up_axis == 'Y' else 'Y'
         x = 1
         y = 0
         z = 0
     elif aim_axis == 'Y':
-        pitch_linear_axis = up
-        yaw_linear_axis = 'X' if up == 'Z' else 'Z'
+        pitch_linear_axis = up_axis
+        yaw_linear_axis = 'X' if up_axis == 'Z' else 'Z'
         x = 0
         y = 1
         z = 0
     elif aim_axis == 'Z':
-        pitch_linear_axis = up
-        yaw_linear_axis = 'Y' if up == 'X' else 'X'
+        pitch_linear_axis = up_axis
+        yaw_linear_axis = 'Y' if up_axis == 'X' else 'X'
         x = 0
         y = 0
         z = 1
@@ -58,7 +72,7 @@ def create_expose_rotation(source_object, aim_axis = 'X', up = 'Y', mult = 1):
     expose_rot.attr('roll') >> source_object.attr('roll')
 
     pmm_node = pm.createNode('pointMatrixMult', n = '{}_pmm'.format(source_object), ss = True)
-    pmm_node.attr('inPoint{}'.format(aim_axis)).set(1 * mult)
+    pmm_node.attr('inPoint{}'.format(aim_axis)).set(1 * multiply)
 
     expose_rot.attr('matrix') >> pmm_node.attr('inMatrix')
     pmm_node.attr('output{}'.format(pitch_linear_axis)) >> expose_rot.attr('pitchLinear')
@@ -69,10 +83,10 @@ def create_expose_rotation(source_object, aim_axis = 'X', up = 'Y', mult = 1):
     bw_node.attr('output') >> expose_rot.attr('yawLinear')
 
     ac_node = pm.createNode('aimConstraint', n = '{}_AC'.format(source_object), ss = True)
-    ac_node.attr('target[0].{0}.{0}{1}'.format('targetTranslate', aim_axis)).set(1 * mult)
+    ac_node.attr('target[0].{0}.{0}{1}'.format('targetTranslate', aim_axis)).set(1 * multiply)
     ac_node.attr('worldUpType').set(4)
-    ac_node.attr('aimVector').set([x * mult, y * mult, z * mult])
-    ac_node.attr('upVector').set([y * mult, z * mult, x * mult])
+    ac_node.attr('aimVector').set([x * multiply, y * multiply, z * multiply])
+    ac_node.attr('upVector').set([y * multiply, z * multiply, x * multiply])
 
     expose_rot.attr('matrix') >> ac_node.attr('target[0].targetParentMatrix')
     expose_rot.attr('rotateOrder') >> ac_node.attr('constraintRotateOrder')
@@ -99,7 +113,7 @@ def create_expose_rotation(source_object, aim_axis = 'X', up = 'Y', mult = 1):
 
     # EXPRESSION
     expression_script = ''
-    expression_script += 'vector $vecB = <<{},{},{}>>;\n'.format(*[o * mult for o in [x, y, z]])
+    expression_script += 'vector $vecB = <<{},{},{}>>;\n'.format(*[o * multiply for o in [x, y, z]])
     expression_script += 'vector $vecJ = <<{},{},{}>>;\n'.format(*pmm_node.output.children())
     expression_script += 'float $bendAngle = acos(clamp(-1.0, 1.0, dot($vecB, $vecJ)));\n'
     expression_script += 'float $yaw = asin(clamp(-1.0, 1.0, {}.yawLinear));\n'.format(expose_rot.nodeName())
