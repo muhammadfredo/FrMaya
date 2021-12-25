@@ -29,6 +29,16 @@ def flatten(input_list):
     return list(__flatten(input_list))
 
 
+def unique_list(input_list):
+    """Make list unique by getting rid duplicated value inside the list.
+
+    :arg input_list: List need to be made unique.
+    :type input_list: list
+    :rtype: list
+    """
+    return list(set(input_list))
+
+
 class MetaSingleton(type):
     """Singleton metaclass.
     This should be preferred instead of singleton decorator.
