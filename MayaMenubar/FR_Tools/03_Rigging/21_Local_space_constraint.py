@@ -9,6 +9,6 @@ Info         :
 """
 import pymel.core as pm
 import FrMaya.puppet as fpt
-
+reload(fpt)
 sel = pm.selected()
 fpt.create_matrix_cons(sel[0], sel[1], space = 'local')

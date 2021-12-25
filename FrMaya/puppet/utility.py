@@ -185,7 +185,8 @@ def create_matrix_cons(source, target, space = 'world', maintain_offset = True):
     :arg target: PyNode object that will get constrainted.
     :type target: pm.nt.Transform or pm.nt.Joint
     :key space: 'world' calculate based on source world space. 'local' calculate on source local space.
-    :type space: str
+        If supplied with PyNode(as long as its subclass of Transform) then it will use the node worldInverseMatrix.
+    :type space: str or pm.nt.Transform
     :key maintain_offset: If True, target will keep the transformation as is. False, will match source transformation.
     :type maintain_offset: bool
     :return: All node that used in matrix constraint.
@@ -198,18 +199,22 @@ def create_matrix_cons(source, target, space = 'world', maintain_offset = True):
 
     if space == 'local':
         offset_val = fmc.get_offset_matrix(target, target.getParent())
-        parent_space_node = source
+        inverse_matrix_attr = source.attr('parentInverseMatrix')
+        idx_order = [2, 0, 1]
+    elif issubclass(space.__class__, pm.nt.Transform):
+        offset_val = pm.dt.Matrix()
+        inverse_matrix_attr = space.attr('worldInverseMatrix')
         idx_order = [2, 0, 1]
     else:
         offset_val = fmc.get_offset_matrix(target, source)
-        parent_space_node = target
+        inverse_matrix_attr = target.attr('parentInverseMatrix')
         idx_order = [0, 1, 2]
 
     if maintain_offset:
         multi_mtx.attr('matrixIn')[idx_order[0]].set(offset_val)
 
     source.attr('worldMatrix[0]') >> multi_mtx.attr('matrixIn')[idx_order[1]]
-    parent_space_node.attr('parentInverseMatrix') >> multi_mtx.attr('matrixIn')[idx_order[2]]
+    inverse_matrix_attr >> multi_mtx.attr('matrixIn')[idx_order[2]]
 
     decom_mtx.attr('outputTranslate') >> target.attr('translate')
     if target.nodeType() == 'joint':
