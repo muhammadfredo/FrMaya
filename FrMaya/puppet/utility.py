@@ -10,6 +10,7 @@ Info         :
 import pymel.core as pm
 
 import FrMaya.core as fmc
+import FrMaya.utility as futil
 
 
 def create_expose_rotation(source_object, aim_axis = 'X', up_axis = 'Y', flip = False):
@@ -229,3 +230,21 @@ def create_matrix_cons(source, target, space = 'world', maintain_offset = True):
     decom_mtx.attr('outputScale') >> target.attr('scale')
 
     return result
+
+
+def remove_matrix_cons(pynode):
+    mtx_node_list = []
+    attr_list = ['translate', 'rotate', 'rotate']
+    for attr in attr_list:
+        mtx_node_list.extend(pynode.attr(attr).inputs())
+    mtx_node_list = futil.unique_list(mtx_node_list)
+
+    def traverse_mtx_nodes(the_node):
+        if not the_node.inputs(type='dagNode'):
+            for each in the_node.inputs():
+                yield traverse_mtx_nodes(each)
+        yield the_node
+
+    for mtx_node in mtx_node_list[:]:
+        mtx_node_list.extend(traverse_mtx_nodes(mtx_node))
+    pm.delete(futil.unique_list(futil.flatten(mtx_node_list)))
