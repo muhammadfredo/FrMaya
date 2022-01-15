@@ -74,6 +74,7 @@ from .scene_cleanup import (
     clean_animation_node,
     clean_dag_pose,
     clean_display_layer,
+    clean_empty_mesh,
     clean_mentalray_nodes,
     clean_namespace,
     clean_ngskin_node,
