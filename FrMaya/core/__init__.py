@@ -26,11 +26,14 @@ from .animation import (
     copy_animation,
 )
 from .antivirus import (
+    clean_malware_files,
+    clean_outliner_command_script,
     clean_virus,
-    clean_malware_files
 )
 from .general import (
+    backup_file,
     build_curve,
+    create_surface_plane,
     duplicate_original_mesh,
     get_channelbox_attributes,
     get_soft_selection,
@@ -39,6 +42,7 @@ from .general import (
     lock_attributes,
     nonkeyable_attributes,
     pgroup,
+    serialize_curve,
     transfer_shape,
     unhide_attributes,
     unlock_attributes,
@@ -70,6 +74,7 @@ from .scene_cleanup import (
     clean_animation_node,
     clean_dag_pose,
     clean_display_layer,
+    clean_empty_mesh,
     clean_mentalray_nodes,
     clean_namespace,
     clean_ngskin_node,
@@ -93,6 +98,7 @@ from .scene_info import (
     get_scene_unit,
     get_shading_engine_intermediate,
     get_start_frame,
+    get_unfreeze_transform,
     get_zero_scale,
 )
 from .shading import (
@@ -113,10 +119,15 @@ from .system import (
 from .transformation import (
     align,
     freeze_transform,
+    get_offset_matrix,
     reset_transform,
+    world_space_translate,
+    xform_mirror
 )
 from .uimaya import (
     build_menubar,
+    get_icon_file,
+    get_maya_window,
     MyQtWindow,
 )
 

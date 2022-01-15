@@ -108,13 +108,15 @@ def transfer_skincluster(source_object, target_objects, prune_after = False):
     """
     source_skin_node = get_skincluster_node(source_object)
     assert source_skin_node, 'Skincluster not found in source object.'
-    joint_list, skin_method = get_skincluster_info(source_skin_node)
+    skin_info = get_skincluster_info(source_skin_node)
+    joint_list = skin_info['joint_list']
+    skin_method = skin_info['skin_method']
     for tgt_obj in target_objects:
         old_tgt_skin_node = get_skincluster_node(tgt_obj)
         if old_tgt_skin_node:
             old_tgt_skin_node.unbind()
         try:
-            tgt_skin_node = pm.skinCluster(joint_list, tgt_obj, bindMethod = skin_method)
+            tgt_skin_node = pm.skinCluster(joint_list, tgt_obj, skinMethod = skin_method)
         except:
             tgt_skin_node = pm.skinCluster(joint_list, tgt_obj)
         pm.copySkinWeights(
@@ -550,7 +552,11 @@ def create_follicle_uv(source_object, u_pos, v_pos):
 
 def create_soft_cluster():
     """Create cluster from current soft selection.
-    Code based on https://gist.github.com/jhoolmans/9195634, modify to use pymel and new Maya api."""
+    Code based on https://gist.github.com/jhoolmans/9195634, modify to use pymel and new Maya api.
+
+    :return: Cluster transform node.
+    :rtype: pm.PyNode
+    """
     # node, index_component, inf_val = general.get_soft_selection()
     soft_element_data = general.get_soft_selection()
     selection = [vtx_component for vtx_component, inf_val in soft_element_data]
@@ -558,8 +564,9 @@ def create_soft_cluster():
     pm.select(selection, r=True)
     cluster = pm.cluster(relative=True)
 
-    # for i in range(len(soft_element_data)):
     for vtx_component, inf_val in soft_element_data:
         pm.percent(cluster[0], vtx_component, v=inf_val)
     pm.select(cluster[1], r=True)
+
+    return cluster
 

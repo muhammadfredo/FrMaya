@@ -9,6 +9,7 @@ Info         :
 
 """
 import os
+import re
 
 try:
     import shiboken
@@ -23,6 +24,8 @@ from FrMaya.vendor.Qt import QtCore, QtCompat, QtWidgets
 
 from FrMaya.core import system
 
+SEPARATOR = '__separator__'
+
 
 def get_menu_name(name):
     """Make any supplied string suitable/nice for menubar name.
@@ -32,14 +35,14 @@ def get_menu_name(name):
     :return: Nice menu name for menubar.
     :rtype: str
     """
-
     # get menu name and use it for menu identifier
-    menu_name = ""
-    for char in name:
-        if char == '_' or char == '-':
-            char = ' '
-        if char.isalpha() or char.isdigit() or char.isspace():
-            menu_name += char
+    regex = r"^(?:\d{2,3}_|)(\w+)"
+    result = re.match(regex, name)
+    menu_name = result.group(0)
+    if SEPARATOR in menu_name:
+        menu_name = menu_name.replace(SEPARATOR, '{}')
+    menu_name = menu_name.replace('_', ' ')
+    menu_name = menu_name.format(SEPARATOR)
     return menu_name
 
 
@@ -106,6 +109,7 @@ class Menubar(pmui.SubMenuItem):
             the_path = os.path.join(fullpath, dir_name).replace("\\", "/")
             # separated filename and extension
             file_name, ext = os.path.splitext(dir_name)
+            icon_file = get_icon_file(the_path)
 
             # remove number and underline
             # number and underline in folder for sorting purpose :))
@@ -120,21 +124,37 @@ class Menubar(pmui.SubMenuItem):
             # check if the path is file or folder
             if os.path.isdir(the_path):
                 # create submenu
-                submenu = pywin.subMenuItem(label = menu_name, subMenu = True, p = parent, tearOff = True,
-                                            postMenuCommandOnce = 1)
+                submenu = pywin.subMenuItem(
+                    label = menu_name,
+                    subMenu = True,
+                    p = parent,
+                    tearOff = True,
+                    postMenuCommandOnce = 1,
+                    image = icon_file
+                )
                 # recursive buildSubMenu
                 self.build_sub_menu(the_path, submenu)
+            elif SEPARATOR in menu_name:
+                pywin.menuItem(
+                    label = menu_name.replace(SEPARATOR, ''),
+                    p = parent,
+                    divider = True,
+                )
             # if file is python
-            elif ext == '.py':
+            elif ext == '.py' or ext == '.mel':
                 # command of menuitem
                 command_script = 'execfile("{0}")'.format(the_path)
+                if ext == '.mel':
+                    command_script = 'import maya.mel as mel\nmel.eval( "source \\"{0}\\"" )'.format(the_path)
+
                 # create menuitem
-                pywin.menuItem(label = menu_name, p = parent, tearOff = True, command = command_script)
-            elif ext == '.mel':
-                # command of menuitem
-                command_script = 'import maya.mel as mel\nmel.eval( "source \\"{0}\\"" )'.format(the_path)
-                # create menuitem
-                pywin.menuItem(label = menu_name, p = parent, tearOff = True, command = command_script)
+                pywin.menuItem(
+                    label = menu_name,
+                    p = parent,
+                    tearOff = True,
+                    command = command_script,
+                    image = icon_file
+                )
 
 
 def build_menubar():
@@ -261,3 +281,17 @@ class MyQtWindow(QtWidgets.QWidget):
             allowedArea = ['right', 'left']
         )
 
+
+def get_icon_file(full_file_path):
+    file_path, ext = os.path.splitext(full_file_path)
+    icon_type_list = ['svg', 'ico', 'png']
+    for each in icon_type_list:
+        icon_file = '{}.{}'.format(file_path, each)
+        if os.path.exists(icon_file):
+            return icon_file
+    return ''
+
+
+def get_maya_window():
+    maya_window = next(o for o in QtWidgets.QApplication.instance().topLevelWidgets() if o.objectName() == "MayaWindow")
+    return maya_window

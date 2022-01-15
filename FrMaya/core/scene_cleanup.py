@@ -104,7 +104,14 @@ def fix_shading_engine_intermediate(input_shape_intermediate = None):
     :type input_shape_intermediate: list of pm.PyNode
     """
     if input_shape_intermediate is not None:
-        shape_inter_list = copy.deepcopy(input_shape_intermediate)
+        # shape_inter_list = copy.deepcopy(input_shape_intermediate)
+        shape_inter_list = []
+        # if there is non shape, get the shape intermediate
+        for each_obj in input_shape_intermediate:
+            if issubclass(each_obj.__class__, pm.nt.Transform):
+                shape_inter_list.extend([o for o in pm.ls(each_obj.getShapes(), io = True) if o.shadingGroups()])
+            elif issubclass(each_obj.__class__, pm.nt.Shape) and each_obj.shadingGroups():
+                shape_inter_list.append(each_obj)
     else:
         shape_inter_list = scene_info.get_shading_engine_intermediate()
 
@@ -172,7 +179,12 @@ def clean_turtle_node():
             turtle_node = pm.PyNode(each_node)
             turtle_node.unlock()
             pm.delete(turtle_node)
-    pm.unloadPlugin('Turtle.mll', force = True)
+            pm.mel.ilrDynamicAttributes(0)
+    try:
+        pm.pluginInfo('Turtle.mll', edit = True, autoload = False)
+        pm.unloadPlugin('Turtle.mll', force = True)
+    except Exception as e:
+        pass
 
 
 def fix_duplicate_name(input_duplicate_name = None):
@@ -194,6 +206,8 @@ def fix_duplicate_name(input_duplicate_name = None):
         pm.rename(duplicate_name, newshortname)
 
 
-
+def clean_empty_mesh():
+    """Remove all mesh object which don't have face or vertex data"""
+    pm.delete(scene_info.get_empty_mesh())
 
 

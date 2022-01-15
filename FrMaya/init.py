@@ -29,9 +29,16 @@ class GlobalData(object):
         self.__dict_data[key] = value
 
 
+def __after_new(*args, **kwargs):
+    pass
+
+
 def __after_open(*args, **kwargs):
     fmc.clean_virus()
     fmc.clean_malware_files()
+    fmc.clean_outliner_command_script()
+    fmc.clean_turtle_node()
+    fmc.clean_mentalray_nodes()
 
 
 def __before_save(*args, **kwargs):
@@ -42,8 +49,12 @@ def __setup():
     if not pm.about(batch = True):
         fmc.build_menubar()
 
+        import pymel.tools.loggingControl as loggingControl
+        loggingControl.initMenu()
+
     # setup callback
     callbacks = fmc.MyCallbackManager()
+    callbacks.add_callback('after_new', 'FrMaya', __after_new)
     callbacks.add_callback('after_open', 'FrMaya', __after_open)
     callbacks.add_callback('before_save', 'FrMaya', __before_save)
 

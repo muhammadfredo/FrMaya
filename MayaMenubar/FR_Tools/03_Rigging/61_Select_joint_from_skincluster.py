@@ -15,7 +15,7 @@ def select_joint_from_skincluster():
     sel = pm.ls(os = True)
     skin_nodes = []
     for o in sel:
-        skin_nodes.extend(fmc.get_skincluster_nodes(o))
+        skin_nodes.append(fmc.get_skincluster_node(o))
     print skin_nodes
     joint_list = []
     for o in skin_nodes:

@@ -26,6 +26,8 @@ def get_pasted_node():
 
     :rtype: list of pm.PyNode
     """
+    # example to search pasted node inside hierarchy
+    # regex = '\|All\|.*pasted__.*'
     return [o for o in pm.ls('pasted__*', editable = True)]
 
 
@@ -73,7 +75,7 @@ def get_namespaces(exclude_ref = False):
     # filter reference namespace, pm.ls(editable = True) will not work
     if exclude_ref:
         ref_list = get_references()
-        exclude_list += [o.referenceFile().namespace for o in ref_list]
+        exclude_list += [o.referenceFile().namespace for o in ref_list if o.referenceFile()]
     return [o for o in namespace_list if o not in exclude_list]
 
 
@@ -130,9 +132,19 @@ def get_bad_shape_name():
         transform = shape.getParent()
         tm_name = transform.nodeName(stripNamespace = True)
         shape_name = shape.nodeName(stripNamespace = True)
+
+        num_split = re.search(r'(.+?)(\d*)$', tm_name)
+        name_split, number_split = num_split.groups()
+
+        result_num = False
+        regex_num = r"({0})(ShapeDeformed|Shape)({1})".format(name_split, number_split)
+        if num_split:
+            result_num = re.match(regex_num, shape_name)
+
         regex = r"({0})(ShapeDeformed|Shape)".format(tm_name)
-        m = re.match(regex, shape_name)
-        if not m:
+        result = re.match(regex, shape_name)
+
+        if not result and not result_num:
             bad_shape_name.append(shape)
 
     return bad_shape_name
@@ -174,4 +186,42 @@ def get_shading_engine_intermediate():
     return [o for o in shape_inter_list if o.shadingGroups()]
 
 
+def get_unfreeze_transform(translate = True, rotate = True, scale = True):
+    """
+    Collect all unfreeze transform objects except camera.
 
+    :key translate: If True, enable check on translate attribute.
+    :type translate: bool
+    :key rotate: If True, enable check on rotation attribute.
+    :type rotate: bool
+    :key scale: If True, enable check on scale attribute.
+    :type scale: bool
+    :rtype: list of pm.nt.Transform
+    """
+    exclude_list = ['camera']
+    result = []
+    rst_list = pm.ls(type = 'transform')
+    for each_rst in rst_list:
+        shp = each_rst.getShape()
+        if shp and type(shp).__name__.lower() in exclude_list:
+            continue
+
+        attrs = []
+        if translate:
+            trans_attr = ['translateX', 'translateY', 'translateZ']
+            attrs.extend([each_rst.attr(o) for o in trans_attr])
+        if rotate:
+            rot_attr = ['rotateX', 'rotateY', 'rotateZ']
+            attrs.extend([each_rst.attr(o) for o in rot_attr])
+        if scale:
+            scl_attr = ['scaleX', 'scaleY', 'scaleZ']
+            attrs.extend([each_rst.attr(o) for o in scl_attr])
+
+        for attr in attrs:
+            val = attr.get()
+            def_val = pm.attributeQuery(attr.plugAttr(), node = attr.node(), listDefault = True)[0]
+            if '{:.3f}'.format(val) != '{:.3f}'.format(def_val):
+                result.append(each_rst)
+                break
+
+    return result

@@ -21,12 +21,25 @@ from FrMaya.vendor import path
 def __get_environ_path(environ_key):
     """Collect path from given environment key."""
     environ_value = os.environ.get(environ_key)
+    result = []
 
     if not environ_value:
-        return []
+        return result
 
     environ_path_list = environ_value.split(';')
-    return [path.Path(o) for o in environ_path_list if os.path.exists(o)]
+    for each_path in environ_path_list:
+        each_path = path.Path(each_path)
+
+        if not each_path.exists():
+            continue
+
+        # make sure default directory first in the order
+        if 'FrMaya' in each_path:
+            result.insert(0, each_path)
+        else:
+            result.append(each_path)
+
+    return result
 
 
 def get_menubar_path():

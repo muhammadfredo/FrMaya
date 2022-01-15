@@ -17,7 +17,8 @@ except (Exception, ImportError):
     pass
 from .common import (
     flatten,
-    MetaSingleton
+    MetaSingleton,
+    unique_list,
 )
 from .decoration import (
     singelton,

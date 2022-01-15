@@ -7,8 +7,11 @@ Start Date   : 11 Sep 2020
 Info         :
 
 """
+from collections import OrderedDict
+
 import maya.api.OpenMaya as om
 import pymel.core as pm
+from FrMaya.vendor import path
 
 from . import transformation, naming
 
@@ -78,7 +81,7 @@ def pgroup(pynodes, world = False, re = "", suffix = ""):
     return output
 
 
-def build_curve(curve_data, parent_type = 'transform'):
+def build_curve(curve_data, parent_curve = None, parent_type = 'transform'):
     """Build curve shape from dictionary curve data.
 
     :arg curve_data: Dictionary curve data.
@@ -89,12 +92,19 @@ def build_curve(curve_data, parent_type = 'transform'):
        'knot': list of float
      } }
     :type curve_data: dict
+    :key parent_curve: If supplied, the curve shape will be parented to it instead.
+    :type parent_curve: pm.nt.Transform or pm.nt.Joint
     :key parent_type: Sets parent type of newly-created curve shape.
     :type parent_type: str
     :return: Curve PyNode object.
     :rtype: pm.nt.Transform or pm.nt.Joint
     """
-    parent_curve = pm.createNode(parent_type, name = naming.get_unique_name('fr_curve'))
+    if parent_curve is None:
+        parent_curve = pm.createNode(parent_type, name = naming.get_unique_name('fr_curve'))
+    else:
+        # clean shapes
+        shapes = parent_curve.getShapes()
+        pm.delete(shapes)
 
     for key, value in curve_data.items():
         new_curve = pm.curve(
@@ -107,11 +117,55 @@ def build_curve(curve_data, parent_type = 'transform'):
         pm.parent(curve_shapes, parent_curve, addObject = True, shape = True)
         pm.delete(new_curve)
 
-        # rename each curve
+        curve_color = value.get('color', 17)
         for each_crv in curve_shapes:
+            # colorize curve
+            color_attr = 'overrideColor'
+            if isinstance(curve_color, list):
+                each_crv.overrideRGBColors.set(True)
+                color_attr = 'overrideColorRGB'
+            each_crv.attr(color_attr).set(curve_color)
+            each_crv.overrideEnabled.set(True)
+
+            # rename each curve
             each_crv.rename('{0}Shape{1}'.format(parent_curve.nodeName(), key.replace('curve', '')))
 
     return parent_curve
+
+
+def serialize_curve(pynode):
+    """Serialize curve shape node into dictionary data.
+
+    :arg pynode: Specified pynode object need to be serialized.
+    :type pynode: pm.PyNode
+    :rtype: dict
+    """
+    curves = pynode.getShapes()
+    if not curves:
+        return
+
+    curve_data = OrderedDict()
+    for i, each_crv in enumerate(curves):
+        if each_crv.nodeType() != 'nurbsCurve':
+            continue
+
+        curve_name = 'curve{:02d}'.format(i)
+        curve_data[curve_name] = OrderedDict()
+        curve_data[curve_name]['degree'] = each_crv.degree()
+        if each_crv.f.get() == 0:
+            periodic = False
+        else:
+            periodic = True
+        curve_data[curve_name]['periodic'] = periodic
+        curve_data[curve_name]['point'] = [o.tolist() for o in each_crv.getCVs()]
+        curve_data[curve_name]['knot'] = each_crv.getKnots()
+        if each_crv.overrideRGBColors.get():
+            color_val = list(each_crv.overrideColorRGB.get())
+        else:
+            color_val = each_crv.overrideColor.get()
+        curve_data[curve_name]['color'] = color_val
+
+    return curve_data
 
 
 def transfer_shape(source_object, target_objects, replace = True):
@@ -325,8 +379,7 @@ def duplicate_original_mesh(source_object, default_shader = True):
 
 
 def get_soft_selection():
-    """
-    Return list of [vertex index, vertex soft selection influence].
+    """Return list of [vertex index, vertex soft selection influence].
 
     :rtype: list of list
     """
@@ -346,3 +399,67 @@ def get_soft_selection():
             elements.append([node.vtx[index_component], inf_val])
         selection_iter.next()
     return elements
+
+
+def backup_file(file_path):
+    """Backup supplied file into file.versions folder and add version number on their file name.
+
+    :arg file_path: Source file (absolute path) which need to get backup.
+    :type file_path: str or path.Path
+    :return: Latest backup file (absolute path).
+    :rtype: path.Path
+    """
+    file_path = path.Path(file_path)
+    dir_path = file_path.parent
+    file_name = file_path.stem
+    file_ext = file_path.ext
+
+    # backup directory
+    backup_dir = dir_path / '{}.versions'.format(file_name)
+
+    # detect if backup directory exist
+    if not backup_dir.exists():
+        backup_dir.makedirs()
+
+    backup_file_glob = backup_dir.glob('{}.v*{}'.format(file_name, file_ext))
+    version_count = 1
+    if backup_file_glob:
+        backup_file_glob.sort()
+        latest_file = backup_file_glob[-1]
+        version_count = int(latest_file.stem.replace('{}.v'.format(file_name), ''))
+        version_count += 1
+
+    # new version file
+    backup_file_path = backup_dir / '{}.v{:03d}{}'.format(file_name, version_count, file_ext)
+
+    # copy the file / backup the file
+    file_path.copyfile(backup_file_path)
+    return backup_file_path.abspath()
+
+
+def create_surface_plane(align_to = None, axis = 'x', width = 0.5, freeze_tm = True):
+    """Create surface plane and return transform pynode of the surface plane.
+
+    :key align_to: Target align of the newly created surface.
+    :type align_to: pm.nt.Transform
+    :key axis: Surface normal direction in 'x', 'y', 'z'. Default 'x'
+    :type axis: str
+    :key width: The width of the plane. Default: 0.5
+    :type width: float
+    :key freeze_tm: If True, freeze_transform operation will be applied to the newly created surface.
+    :type freeze_tm: bool
+    :rtype: pm.nt.Transform
+    """
+    axis_dict = {'x': (1, 0, 0), 'y': (0, 1, 0), 'z': (0, 0, 1)}
+    res = pm.nurbsPlane(
+        axis = axis_dict[axis],
+        width = width,
+        degree = 1,
+        constructionHistory = False
+    )[0]
+    if align_to is not None:
+        transformation.align(res, align_to)
+    if freeze_tm:
+        transformation.freeze_transform(res)
+    return res
+
