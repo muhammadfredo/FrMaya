@@ -17,6 +17,7 @@ from pymel import core as pm
 from FrMaya.core import naming
 
 
+# region Get
 def get_duplicate_name():
     """Collect duplicated name in the scene.
 
@@ -229,8 +230,10 @@ def get_unfreeze_transform(translate = True, rotate = True, scale = True):
                 break
 
     return result
+# endregion
 
 
+# region Clean
 def clean_unknown_plugins():
     """Remove all unknown plugins expect nodes that exist in scene.
     http://mayastation.typepad.com/maya-station/2015/04/how-to-prevent-maya-writing-a-requires-command-for-a-plug-in.html
@@ -266,7 +269,7 @@ def clean_namespace(namespace_list = None):
     :type namespace_list: list of str
     """
     if namespace_list is None:
-        namespace_list = scene_info.get_namespaces(exclude_ref = True)
+        namespace_list = get_namespaces(exclude_ref = True)
 
     for o in namespace_list:
         try:
@@ -311,42 +314,6 @@ def clean_display_layer(exception_list = None):
     dirty_layer = [o for o in layer_node if o not in exception_list]
 
     pm.delete(dirty_layer)
-
-
-def fix_shading_engine_intermediate(input_shape_intermediate = None):
-    """Re-wire shading engine connection that connect to
-    intermediate shape to non intermediate shape.
-
-    :key input_shape_intermediate: Intermediate shape that have shading engine connection and need re-wire.
-    :type input_shape_intermediate: list of pm.PyNode
-    """
-    if input_shape_intermediate is not None:
-        # shape_inter_list = copy.deepcopy(input_shape_intermediate)
-        shape_inter_list = []
-        # if there is non shape, get the shape intermediate
-        for each_obj in input_shape_intermediate:
-            if issubclass(each_obj.__class__, pm.nt.Transform):
-                shape_inter_list.extend([o for o in pm.ls(each_obj.getShapes(), io = True) if o.shadingGroups()])
-            elif issubclass(each_obj.__class__, pm.nt.Shape) and each_obj.shadingGroups():
-                shape_inter_list.append(each_obj)
-    else:
-        shape_inter_list = scene_info.get_shading_engine_intermediate()
-
-    for shape_intermediate in shape_inter_list:
-        inter_shd_engine_list = shape_intermediate.shadingGroups()
-        inter_connection = shape_intermediate.outputs(type = 'shadingEngine', plugs = True)
-        if inter_shd_engine_list[0].name() == 'initialShadingGroup':
-            shape_intermediate.instObjGroups[0].disconnect(inter_connection[0])
-            continue
-
-        # find shape deformed
-        shape_deformed = shape_intermediate.getParent().getShape(noIntermediate = True)
-        # noninter_shd_engine_list = shape_deformed.shadingGroups()
-        noninter_connection = shape_deformed.outputs(type = 'shadingEngine', plugs = True)
-        if noninter_connection:
-            shape_deformed.instObjGroups[0].disconnect(noninter_connection[0])
-
-        shape_deformed.instObjGroups[0].connect(inter_connection[0])
 
 
 def clean_dag_pose():
@@ -404,6 +371,49 @@ def clean_turtle_node():
         pass
 
 
+def clean_empty_mesh():
+    """Remove all mesh object which don't have face or vertex data"""
+    pm.delete(get_empty_mesh())
+# endregion
+
+
+# region Fix
+def fix_shading_engine_intermediate(input_shape_intermediate = None):
+    """Re-wire shading engine connection that connect to
+    intermediate shape to non intermediate shape.
+
+    :key input_shape_intermediate: Intermediate shape that have shading engine connection and need re-wire.
+    :type input_shape_intermediate: list of pm.PyNode
+    """
+    if input_shape_intermediate is not None:
+        # shape_inter_list = copy.deepcopy(input_shape_intermediate)
+        shape_inter_list = []
+        # if there is non shape, get the shape intermediate
+        for each_obj in input_shape_intermediate:
+            if issubclass(each_obj.__class__, pm.nt.Transform):
+                shape_inter_list.extend([o for o in pm.ls(each_obj.getShapes(), io = True) if o.shadingGroups()])
+            elif issubclass(each_obj.__class__, pm.nt.Shape) and each_obj.shadingGroups():
+                shape_inter_list.append(each_obj)
+    else:
+        shape_inter_list = get_shading_engine_intermediate()
+
+    for shape_intermediate in shape_inter_list:
+        inter_shd_engine_list = shape_intermediate.shadingGroups()
+        inter_connection = shape_intermediate.outputs(type = 'shadingEngine', plugs = True)
+        if inter_shd_engine_list[0].name() == 'initialShadingGroup':
+            shape_intermediate.instObjGroups[0].disconnect(inter_connection[0])
+            continue
+
+        # find shape deformed
+        shape_deformed = shape_intermediate.getParent().getShape(noIntermediate = True)
+        # noninter_shd_engine_list = shape_deformed.shadingGroups()
+        noninter_connection = shape_deformed.outputs(type = 'shadingEngine', plugs = True)
+        if noninter_connection:
+            shape_deformed.instObjGroups[0].disconnect(noninter_connection[0])
+
+        shape_deformed.instObjGroups[0].connect(inter_connection[0])
+
+
 def fix_duplicate_name(input_duplicate_name = None):
     """Rename specified node into unique name.
 
@@ -413,7 +423,7 @@ def fix_duplicate_name(input_duplicate_name = None):
     if input_duplicate_name is not None:
         duplicate_name_list = copy.deepcopy(input_duplicate_name)
     else:
-        duplicate_name_list = scene_info.get_duplicate_name()
+        duplicate_name_list = get_duplicate_name()
 
     for duplicate_node in duplicate_name_list:
         duplicate_name = duplicate_node.longName()
@@ -421,8 +431,4 @@ def fix_duplicate_name(input_duplicate_name = None):
         newshortname = naming.get_unique_name(shortname)
 
         pm.rename(duplicate_name, newshortname)
-
-
-def clean_empty_mesh():
-    """Remove all mesh object which don't have face or vertex data"""
-    pm.delete(scene_info.get_empty_mesh())
+# endregion
