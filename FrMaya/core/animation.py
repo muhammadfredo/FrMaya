@@ -9,7 +9,7 @@ Info         :
 """
 import pymel.core as pm
 
-from . import general, scene_info
+from . import general, scene
 
 
 def bake_animation(input_object, translate = True, rotate = True, scale = False, time_range = None, hierarchy = True):
@@ -30,7 +30,7 @@ def bake_animation(input_object, translate = True, rotate = True, scale = False,
     :type hierarchy: bool
     """
     if time_range is None:
-        time_range = [scene_info.get_start_frame(), scene_info.get_end_frame()]
+        time_range = [scene.get_start_frame(), scene.get_end_frame()]
     if hierarchy:
         hi_format = 'below'
     else:

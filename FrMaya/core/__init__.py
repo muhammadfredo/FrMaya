@@ -1,7 +1,7 @@
 """
 Module hierarchy
 + antivirus
-+ mesage
++ message
 + naming
 + scene_info
 + shading
@@ -12,6 +12,16 @@ Module hierarchy
     + uimaya
         + animation
         + rig
+
+the plan
++ antivirus >> standalone
++ message >> standalone
++ naming >> standalone
++ scene_info >> scene
++ shading >> general
++ transformation >> standalone
++ general >> standalone
++ scene_cleanup >> scene
 """
 try:
     import sys
@@ -69,7 +79,7 @@ from .rig import (
     split_joint,
     transfer_skincluster,
 )
-from .scene_cleanup import (
+from .scene import (
     clean_anim_layer,
     clean_animation_node,
     clean_dag_pose,
@@ -84,8 +94,6 @@ from .scene_cleanup import (
     clean_unused_node,
     fix_duplicate_name,
     fix_shading_engine_intermediate,
-)
-from .scene_info import (
     get_bad_shape_name,
     get_duplicate_name,
     get_empty_mesh,
