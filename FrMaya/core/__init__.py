@@ -35,11 +35,6 @@ from .animation import (
     bake_animation,
     copy_animation,
 )
-from .antivirus import (
-    clean_malware_files,
-    clean_outliner_command_script,
-    clean_virus,
-)
 from .general import (
     backup_file,
     build_curve,
@@ -56,9 +51,6 @@ from .general import (
     transfer_shape,
     unhide_attributes,
     unlock_attributes,
-)
-from .message import (
-    MyCallbackManager
 )
 from .naming import (
     get_unique_name
@@ -116,12 +108,16 @@ from .shading import (
 )
 from .system import (
     check_local_package,
+    clean_malware_files,
+    clean_outliner_command_script,
+    clean_virus,
     download_latest_version,
     get_control_curve_path,
     get_menubar_path,
     get_server_version,
     install,
     maya_version_as_float,
+    MyCallbackManager,
     uninstall,
 )
 from .transformation import (
