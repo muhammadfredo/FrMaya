@@ -7,15 +7,19 @@ Start Date   : 11 Sep 2020
 Info         :
 
 """
+import re
 from collections import OrderedDict
 
 import maya.api.OpenMaya as om
 import pymel.core as pm
+from pymel import core as pm
+
 from FrMaya.vendor import path
 
 from . import transformation, naming
 
 
+# region General
 def pgroup(pynodes, world = False, re = "", suffix = ""):
     """Pgroup the specified PyNodes,
     either per-PyNode or all PyNodes under the same pgroup.
@@ -81,6 +85,40 @@ def pgroup(pynodes, world = False, re = "", suffix = ""):
     return output
 
 
+def get_soft_selection():
+    """Return list of [vertex index, vertex soft selection influence].
+
+    :rtype: list of list
+    """
+    soft_selection = om.MGlobal.getRichSelection(True)
+    selection = soft_selection.getSelection()
+
+    selection_iter = om.MItSelectionList(selection, om.MFn.kMeshVertComponent)
+    elements = []
+    while not selection_iter.isDone():
+        dag_path, component = selection_iter.getComponent()
+        node = pm.PyNode(dag_path.fullPathName())
+        fn_component = om.MFnSingleIndexedComponent(component)
+        for i in range(fn_component.getCompleteData()):
+            index_component = fn_component.element(i)
+            inf_val = fn_component.weight(i).influence
+
+            elements.append([node.vtx[index_component], inf_val])
+        selection_iter.next()
+    return elements
+
+
+def set_default_shader(input_node):
+    """Assign initialShadingGroup to specified node.
+
+    :arg input_node: PyNode need to be assign with initialShadingGroup.
+    :type input_node: pm.PyNode
+    """
+    pm.sets('initialShadingGroup', edit = True, forceElement = input_node)
+# endregion
+
+
+# region Curve and shape
 def build_curve(curve_data, parent_curve = None, parent_type = 'transform'):
     """Build curve shape from dictionary curve data.
 
@@ -199,6 +237,69 @@ def transfer_shape(source_object, target_objects, replace = True):
     return True
 
 
+def duplicate_original_mesh(source_object, default_shader = True):
+    """Duplicate object without any deformer input.
+
+    :arg source_object: PyNode object needs to be duplicated.
+    :type source_object: pm.PyNode
+    :key default_shader: Assign initialShadingGroup to duplicated object or not, default is True.
+    :type default_shader: bool
+    :return: Duplicated object, None if source object doesnt have shapes.
+    :rtype: pm.PyNode or None
+    """
+    if not source_object.getShapes():
+        return
+    shapes_list = pm.ls(source_object.getShapes(), intermediateObjects = True)
+    shape_orig = None
+    for shape in shapes_list:
+        if not shape.inMesh.isDestination() and (shape.outMesh.isSource() or shape.worldMesh[0].isSource()):
+            shape_orig = shape
+    if not shape_orig:
+        return
+    duplicate_name = '{}_new'.format(shape_orig.getParent().nodeName(stripNamespace = True))
+    duplicated_object = pm.createNode('mesh', skipSelect = True)
+    # rename its transform node
+    duplicated_object.getParent().rename(duplicate_name)
+    # copy the mesh data
+    shape_orig.outMesh.connect(duplicated_object.inMesh)
+    # done copying, break the connection
+    pm.evalDeferred(duplicated_object.inMesh.disconnect)
+
+    if default_shader:
+        pm.sets('initialShadingGroup', edit = True, forceElement = duplicated_object.getParent())
+
+    return duplicated_object
+
+
+def create_surface_plane(align_to = None, axis = 'x', width = 0.5, freeze_tm = True):
+    """Create surface plane and return transform pynode of the surface plane.
+
+    :key align_to: Target align of the newly created surface.
+    :type align_to: pm.nt.Transform
+    :key axis: Surface normal direction in 'x', 'y', 'z'. Default 'x'
+    :type axis: str
+    :key width: The width of the plane. Default: 0.5
+    :type width: float
+    :key freeze_tm: If True, freeze_transform operation will be applied to the newly created surface.
+    :type freeze_tm: bool
+    :rtype: pm.nt.Transform
+    """
+    axis_dict = {'x': (1, 0, 0), 'y': (0, 1, 0), 'z': (0, 0, 1)}
+    res = pm.nurbsPlane(
+        axis = axis_dict[axis],
+        width = width,
+        degree = 1,
+        constructionHistory = False
+    )[0]
+    if align_to is not None:
+        transformation.align(res, align_to)
+    if freeze_tm:
+        transformation.freeze_transform(res)
+    return res
+# endregion
+
+
+# region Attributes and channel box
 def _do_attributes_key_lock_hide(pynode, attr_name_list, keyable = None, lock = None, hide = None):
     """Make attribute keyable or nonkeyable, lock or unlock, and hide or unhide.
 
@@ -342,65 +443,10 @@ def get_channelbox_attributes(input_object):
     attr_list = input_object.listAttr(keyable = True, scalar = True, multi = True)
     attr_list.extend(input_object.listAttr(channelBox = True))
     return attr_list
+# endregion
 
 
-def duplicate_original_mesh(source_object, default_shader = True):
-    """Duplicate object without any deformer input.
-
-    :arg source_object: PyNode object needs to be duplicated.
-    :type source_object: pm.PyNode
-    :key default_shader: Assign initialShadingGroup to duplicated object or not, default is True.
-    :type default_shader: bool
-    :return: Duplicated object, None if source object doesnt have shapes.
-    :rtype: pm.PyNode or None
-    """
-    if not source_object.getShapes():
-        return
-    shapes_list = pm.ls(source_object.getShapes(), intermediateObjects = True)
-    shape_orig = None
-    for shape in shapes_list:
-        if not shape.inMesh.isDestination() and (shape.outMesh.isSource() or shape.worldMesh[0].isSource()):
-            shape_orig = shape
-    if not shape_orig:
-        return
-    duplicate_name = '{}_new'.format(shape_orig.getParent().nodeName(stripNamespace = True))
-    duplicated_object = pm.createNode('mesh', skipSelect = True)
-    # rename its transform node
-    duplicated_object.getParent().rename(duplicate_name)
-    # copy the mesh data
-    shape_orig.outMesh.connect(duplicated_object.inMesh)
-    # done copying, break the connection
-    pm.evalDeferred(duplicated_object.inMesh.disconnect)
-
-    if default_shader:
-        pm.sets('initialShadingGroup', edit = True, forceElement = duplicated_object.getParent())
-
-    return duplicated_object
-
-
-def get_soft_selection():
-    """Return list of [vertex index, vertex soft selection influence].
-
-    :rtype: list of list
-    """
-    soft_selection = om.MGlobal.getRichSelection(True)
-    selection = soft_selection.getSelection()
-
-    selection_iter = om.MItSelectionList(selection, om.MFn.kMeshVertComponent)
-    elements = []
-    while not selection_iter.isDone():
-        dag_path, component = selection_iter.getComponent()
-        node = pm.PyNode(dag_path.fullPathName())
-        fn_component = om.MFnSingleIndexedComponent(component)
-        for i in range(fn_component.getCompleteData()):
-            index_component = fn_component.element(i)
-            inf_val = fn_component.weight(i).influence
-
-            elements.append([node.vtx[index_component], inf_val])
-        selection_iter.next()
-    return elements
-
-
+# region Files
 def backup_file(file_path):
     """Backup supplied file into file.versions folder and add version number on their file name.
 
@@ -437,29 +483,75 @@ def backup_file(file_path):
     return backup_file_path.abspath()
 
 
-def create_surface_plane(align_to = None, axis = 'x', width = 0.5, freeze_tm = True):
-    """Create surface plane and return transform pynode of the surface plane.
+def _texture_file_pattern_to_glob(input_path):
+    """Takes an image file path and returns it in glob format if the file path has pattern,
+    with the pattern replaced by a '*'.
+    Image file path may be numerical sequences, e.g. /path/to/file.1001.exr
+    will return as /path/to/file.*.exr.
+    Image file path may also use tokens to denote sequences, e.g.
+    /path/to/texture.<UDIM>.tif will return as /path/to/texture.*.tif.
 
-    :key align_to: Target align of the newly created surface.
-    :type align_to: pm.nt.Transform
-    :key axis: Surface normal direction in 'x', 'y', 'z'. Default 'x'
-    :type axis: str
-    :key width: The width of the plane. Default: 0.5
-    :type width: float
-    :key freeze_tm: If True, freeze_transform operation will be applied to the newly created surface.
-    :type freeze_tm: bool
-    :rtype: pm.nt.Transform
+    Based from Big roy github gist
+
+    https://gist.github.com/BigRoy/d027323b27bf9de8f92a7c2ea972122a
+
+    :arg input_path: Image file path need to process.
+    :type input_path: str or path.Path
+    :rtype: path.Path
     """
-    axis_dict = {'x': (1, 0, 0), 'y': (0, 1, 0), 'z': (0, 0, 1)}
-    res = pm.nurbsPlane(
-        axis = axis_dict[axis],
-        width = width,
-        degree = 1,
-        constructionHistory = False
-    )[0]
-    if align_to is not None:
-        transformation.align(res, align_to)
-    if freeze_tm:
-        transformation.freeze_transform(res)
-    return res
+    input_path = path.Path(input_path)
 
+    # If any of the patterns, convert the pattern
+    patterns = {
+        "<udim>": "<udim>",
+        "<tile>": "<tile>",
+        "<uvtile>": "<uvtile>",
+        "#": "#",
+        "u<u>_v<v>": "<u>|<v>",
+        "<frame0": "<frame0\\d+>",
+        "<f>": "<f>"
+    }
+    lower = input_path.lower()
+    has_pattern = False
+    for pattern, regex_pattern in patterns.items():
+        if pattern in lower:
+            input_path = re.sub(regex_pattern, "*", input_path, flags = re.IGNORECASE)
+            has_pattern = True
+    if has_pattern:
+        return path.Path(input_path)
+    else:
+        # pattern not found
+        return input_path
+
+
+def get_file_node_path(texture_file_node):
+    """Get file path from file node, preserve pattern format such as <udim> or <f>.
+
+    :arg texture_file_node: File pynode that need to get file path extracted.
+    :type texture_file_node: pm.PyNode
+    :rtype: path.Path
+    """
+    # use computedFileTextureNamePattern attr instead fileTextureName,
+    # this preserves the <> tag / format pattern
+    if texture_file_node.hasAttr('computedFileTextureNamePattern'):
+        texture_pattern = texture_file_node.attr('computedFileTextureNamePattern').get()
+
+        patterns = ["<udim>", "<tile>", "u<u>_v<v>", "<f>", "<frame0", "<uvtile>"]
+        lower = texture_pattern.lower()
+        if any(pattern in lower for pattern in patterns):
+            return path.Path(texture_pattern)
+    # otherwise use fileTextureName
+    return path.Path(texture_file_node.attr('fileTextureName').get())
+
+
+def glob_texture_files(texture_file_pattern):
+    """Collect / glob specified image file path.
+
+    :arg texture_file_pattern: Image file path need to glob,
+     file name must have glob pattern '*' (asterix).
+    :type texture_file_pattern: str or path.Path
+    :rtype: list of path.Path
+    """
+    texture_file_glob = _texture_file_pattern_to_glob(texture_file_pattern)
+    return texture_file_glob.parent.glob(texture_file_glob.name)
+# endregion

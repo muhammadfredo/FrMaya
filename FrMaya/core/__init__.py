@@ -41,13 +41,16 @@ from .general import (
     create_surface_plane,
     duplicate_original_mesh,
     get_channelbox_attributes,
+    get_file_node_path,
     get_soft_selection,
+    glob_texture_files,
     hide_attributes,
     keyable_attributes,
     lock_attributes,
     nonkeyable_attributes,
     pgroup,
     serialize_curve,
+    set_default_shader,
     transfer_shape,
     unhide_attributes,
     unlock_attributes,
@@ -100,11 +103,6 @@ from .scene import (
     get_start_frame,
     get_unfreeze_transform,
     get_zero_scale,
-)
-from .shading import (
-    get_file_node_path,
-    glob_texture_files,
-    set_default_shader,
 )
 from .system import (
     check_local_package,
