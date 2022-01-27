@@ -451,6 +451,32 @@ def comet_joint_orient(pynodes, aim_axis = None, up_axis = None, up_dir = None, 
                 x.setParent(o)
 
     return True
+
+
+def create_joint_along_curve(input_curve, joint_count = 0):
+    """Return list of new joint created along the curve.
+
+    :arg input_curve: Curve object as joint creation guide.
+    :key joint_count: Number of joint want to be created.
+    :type joint_count: int
+    :rtype: list of pm.nt.Joint
+    """
+    result = []
+    num = 1.0 / joint_count
+    for i in range(0, joint_count):
+        tm_node = pm.createNode('transform', ss = True)
+        path_node = pm.pathAnimation(tm_node, curve = input_curve, follow = True, fractionMode = True)
+        path_node = pm.PyNode(path_node)
+        pm.delete(path_node.uValue.inputs())
+        path_node.uValue.set(num * i)
+
+        new_joint = pm.createNode('joint', ss = True)
+        transformation.align(new_joint, tm_node)
+
+        pm.delete(tm_node)
+        result.append(new_joint)
+
+    return result
 # endregion
 
 
