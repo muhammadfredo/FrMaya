@@ -18,6 +18,7 @@ except (Exception, ImportError):
 from .common import (
     flatten,
     MetaSingleton,
+    stopwatch,
     unique_list,
 )
 from .decoration import (

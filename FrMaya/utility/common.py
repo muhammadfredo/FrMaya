@@ -8,6 +8,8 @@ Info         :
 
 """
 from collections import Iterable
+from contextlib import contextmanager
+from datetime import datetime
 
 
 def __flatten(input_iter):
@@ -51,4 +53,12 @@ class MetaSingleton(type):
         return cls._instance[cls]
 
 
+@contextmanager
+def stopwatch(timer_mssg = ''):
+    start_timer = datetime.now()
 
+    yield True
+
+    if timer_mssg:
+        timer_mssg = ' - {}'.format(timer_mssg)
+    print('{}{}'.format(datetime.now() - start_timer, timer_mssg))

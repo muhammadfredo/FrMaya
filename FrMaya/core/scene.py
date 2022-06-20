@@ -230,6 +230,44 @@ def get_unfreeze_transform(translate = True, rotate = True, scale = True):
                 break
 
     return result
+
+
+def get_vertex_count(top_node = None):
+    """Get the number of vertices in a scene.
+
+    :key top_node: The top node of the hierarchy you want to check.
+    :type top_node: pm.PyNode
+    :return: Single, visible, and total mesh instances of vertex count in the scene.
+     ['single_mesh', 'total_mesh', 'total_visible']
+    :rtype: dict
+    """
+    if top_node is None:
+        mesh_list = [o for o in pm.ls(type = 'mesh', ni = True)]
+    else:
+        mesh_list = top_node.getChildren(ad = True, type = 'mesh', ni = True)
+
+    vertex_count = {
+        'single_mesh': 0,
+        'total_mesh': 0,
+        'total_visible': 0
+    }
+    for each_mesh in mesh_list:
+        all_instances = each_mesh.getInstances()
+        ins_count = 0
+
+        for inst in all_instances:
+            if not inst.isVisible():
+                continue
+            if top_node is None:
+                ins_count += 1
+            else:
+                if inst.hasParent(top_node):
+                    ins_count += 1
+        vertex_count['single_mesh'] += each_mesh.numVertices()
+        vertex_count['total_mesh'] += each_mesh.numVertices() * len(all_instances)
+        vertex_count['total_visible'] += each_mesh.numVertices() * ins_count
+
+    return vertex_count
 # endregion
 
 

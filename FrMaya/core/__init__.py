@@ -63,6 +63,7 @@ from .rig import (
     create_control,
     create_follicle_object_position,
     create_follicle_uv,
+    create_joint_along_curve,
     create_soft_cluster,
     get_control_files,
     get_skincluster_info,
@@ -102,6 +103,7 @@ from .scene import (
     get_shading_engine_intermediate,
     get_start_frame,
     get_unfreeze_transform,
+    get_vertex_count,
     get_zero_scale,
 )
 from .system import (
