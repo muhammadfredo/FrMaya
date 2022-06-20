@@ -16,6 +16,7 @@ from FrMaya import utility as util
 from . import system, general, transformation
 
 
+# region Skincluster
 def get_skincluster_node(input_object):
     """Get skincluster node from specified PyNode object.
 
@@ -130,8 +131,10 @@ def transfer_skincluster(source_object, target_objects, prune_after = False):
 
         if prune_after:
             prune_skincluster(tgt_skin_node)
+# endregion
 
 
+# region Control
 def get_control_files(name = ''):
     """Collect all control files from all path in FR_CONTROLCURVE.
 
@@ -197,8 +200,10 @@ def create_control(control_file, transform = None, name = 'FrControl', suffix = 
     result = ControlTuple(control = curve_control, group_data = resgrp)
 
     return result
+# endregion
 
 
+# region Attributes
 def reset_attributes(input_object, attr_name_list = None):
     """Reset all attributes visible in channel box or supplied attributes
     to their respective attributes default value.
@@ -244,8 +249,10 @@ def set_attrs_default(input_object, attr_name_list = None):
         current_val = attr.get()
         if hasattr(attr, 'addAttr'):
             attr.addAttr(e = True, defaultValue = current_val)
+# endregion
 
 
+# region Joint
 def split_joint(pynode, split = 2, replace = True):
     """Split joint into pieces as per split key argument.
 
@@ -446,6 +453,34 @@ def comet_joint_orient(pynodes, aim_axis = None, up_axis = None, up_dir = None, 
     return True
 
 
+def create_joint_along_curve(input_curve, joint_count = 0):
+    """Return list of new joint created along the curve.
+
+    :arg input_curve: Curve object as joint creation guide.
+    :key joint_count: Number of joint want to be created.
+    :type joint_count: int
+    :rtype: list of pm.nt.Joint
+    """
+    result = []
+    num = 1.0 / joint_count
+    for i in range(0, joint_count):
+        tm_node = pm.createNode('transform', ss = True)
+        path_node = pm.pathAnimation(tm_node, curve = input_curve, follow = True, fractionMode = True)
+        path_node = pm.PyNode(path_node)
+        pm.delete(path_node.uValue.inputs())
+        path_node.uValue.set(num * i)
+
+        new_joint = pm.createNode('joint', ss = True)
+        transformation.align(new_joint, tm_node)
+
+        pm.delete(tm_node)
+        result.append(new_joint)
+
+    return result
+# endregion
+
+
+# region Follicle
 def _create_follicle(source_object, vector_position = None, uv_position = None):
     """Create follicle based on closest vector position or uv position,
     if both empty then use default uv position which is [0.5, 0.5].
@@ -548,8 +583,10 @@ def create_follicle_uv(source_object, u_pos, v_pos):
     """
     result = _create_follicle(source_object, uv_position = [u_pos, v_pos])
     return result
+# endregion
 
 
+# region Cluster
 def create_soft_cluster():
     """Create cluster from current soft selection.
     Code based on https://gist.github.com/jhoolmans/9195634, modify to use pymel and new Maya api.
@@ -569,4 +606,4 @@ def create_soft_cluster():
     pm.select(cluster[1], r=True)
 
     return cluster
-
+# endregion

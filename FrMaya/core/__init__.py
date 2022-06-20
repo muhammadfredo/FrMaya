@@ -1,7 +1,7 @@
 """
 Module hierarchy
 + antivirus
-+ mesage
++ message
 + naming
 + scene_info
 + shading
@@ -12,6 +12,16 @@ Module hierarchy
     + uimaya
         + animation
         + rig
+
+the plan
++ antivirus >> standalone
++ message >> standalone
++ naming >> standalone
++ scene_info >> scene
++ shading >> general
++ transformation >> standalone
++ general >> standalone
++ scene_cleanup >> scene
 """
 try:
     import sys
@@ -25,30 +35,25 @@ from .animation import (
     bake_animation,
     copy_animation,
 )
-from .antivirus import (
-    clean_malware_files,
-    clean_outliner_command_script,
-    clean_virus,
-)
 from .general import (
     backup_file,
     build_curve,
     create_surface_plane,
     duplicate_original_mesh,
     get_channelbox_attributes,
+    get_file_node_path,
     get_soft_selection,
+    glob_texture_files,
     hide_attributes,
     keyable_attributes,
     lock_attributes,
     nonkeyable_attributes,
     pgroup,
     serialize_curve,
+    set_default_shader,
     transfer_shape,
     unhide_attributes,
     unlock_attributes,
-)
-from .message import (
-    MyCallbackManager
 )
 from .naming import (
     get_unique_name
@@ -58,6 +63,7 @@ from .rig import (
     create_control,
     create_follicle_object_position,
     create_follicle_uv,
+    create_joint_along_curve,
     create_soft_cluster,
     get_control_files,
     get_skincluster_info,
@@ -69,7 +75,7 @@ from .rig import (
     split_joint,
     transfer_skincluster,
 )
-from .scene_cleanup import (
+from .scene import (
     clean_anim_layer,
     clean_animation_node,
     clean_dag_pose,
@@ -84,8 +90,6 @@ from .scene_cleanup import (
     clean_unused_node,
     fix_duplicate_name,
     fix_shading_engine_intermediate,
-)
-from .scene_info import (
     get_bad_shape_name,
     get_duplicate_name,
     get_empty_mesh,
@@ -99,21 +103,21 @@ from .scene_info import (
     get_shading_engine_intermediate,
     get_start_frame,
     get_unfreeze_transform,
+    get_vertex_count,
     get_zero_scale,
-)
-from .shading import (
-    get_file_node_path,
-    glob_texture_files,
-    set_default_shader,
 )
 from .system import (
     check_local_package,
+    clean_malware_files,
+    clean_outliner_command_script,
+    clean_virus,
     download_latest_version,
     get_control_curve_path,
     get_menubar_path,
     get_server_version,
     install,
     maya_version_as_float,
+    MyCallbackManager,
     uninstall,
 )
 from .transformation import (
