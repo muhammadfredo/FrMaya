@@ -10,6 +10,7 @@ from .constant import (
     MayaColorOverride
 )
 from .utility import (
+    create_corrective_joint,
     create_expose_rotation,
     create_spline_ik_rig,
     create_matrix_cons,

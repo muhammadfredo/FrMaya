@@ -13,7 +13,7 @@ import FrMaya.core as fmc
 import FrMaya.utility as futil
 
 
-def create_expose_rotation(source_object, aim_axis = 'X', up_axis = 'Y', flip = False):
+def create_expose_rotation(source_object, aim_axis = 'X', up_axis = 'Y', flip = False, hide_dag = True):
     """Create yaw, pitch, roll attributes to expose given object rotation.
 
     :arg source_object: PyNode object that need to extract its rotation.
@@ -24,6 +24,8 @@ def create_expose_rotation(source_object, aim_axis = 'X', up_axis = 'Y', flip = 
     :type up_axis: str
     :key flip: If True the aim axis will be flipped.
     :type flip: bool
+    :key hide_dag: If True expose rotation dag node will be hidden.
+    :type hide_dag: bool
     :return: PyNode object with expose rotation attributes(yaw, pitch, roll).
     :rtype: pm.nt.Transform
     """
@@ -137,7 +139,7 @@ def create_expose_rotation(source_object, aim_axis = 'X', up_axis = 'Y', flip = 
     for n in [expose_rot, pmm_node, bw_node, oc_node, ac_node, expression_node]:
         if n.hasAttr('ihi'):
             n.attr('ihi').set(0)
-        if n.hasAttr('intermediateObject'):
+        if n.hasAttr('intermediateObject') and hide_dag:
             n.attr('intermediateObject').set(True)
 
         attr_list = ['intermediateObject']
@@ -150,6 +152,14 @@ def create_expose_rotation(source_object, aim_axis = 'X', up_axis = 'Y', flip = 
     expose_rot.setParent(source_object, r = True)
     ac_node.setParent(expose_rot, r = True)
     oc_node.setParent(expose_rot, r = True)
+
+    if pm.versions.current() > 2020:
+        try:
+            exrot_sys = pm.PyNode('ExposeRotationSystem')
+            expose_rot.setParent(exrot_sys)
+            source_object.attr('worldMatrix[0]') >> expose_rot.attr('offsetParentMatrix')
+        except pm.MayaNodeError as err:
+            print(err)
 
     return expose_rot
 
@@ -253,3 +263,14 @@ def remove_matrix_cons(pynode):
     for mtx_node in mtx_node_list[:]:
         mtx_node_list.extend(traverse_mtx_nodes(mtx_node))
     pm.delete(futil.unique_list(futil.flatten(mtx_node_list)))
+
+
+def create_corrective_joint(inf_joint):
+    # create corrective joint, with standarized name, detect previous corrective joint
+    # possible with offset as well? and sequence name
+    inf_name = inf_joint.nodeName()
+    corr_name = '{}Corrective'.format(inf_name if inf_name[-1] == '_' else '{}_'.format(inf_name))
+    corrective_joint = pm.createNode('joint', n = corr_name, ss = True)
+    fmc.align(corrective_joint, inf_joint)
+    corrective_joint.setParent(inf_joint)
+    fmc.freeze_transform(corrective_joint)

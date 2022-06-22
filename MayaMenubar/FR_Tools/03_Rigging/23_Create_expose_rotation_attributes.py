@@ -10,4 +10,11 @@ Info         :
 import pymel.core as pm
 import FrMaya.puppet as fpt
 reload(fpt)
-fpt.create_expose_rotation(pm.selected()[0])
+
+try:
+    pm.PyNode('ExposeRotationSystem')
+except pm.MayaNodeError:
+    pm.createNode('transform', n = 'ExposeRotationSystem', ss = True)
+last_selection = pm.selected()
+fpt.create_expose_rotation(pm.selected()[0], hide_dag = False)
+pm.select(last_selection)
