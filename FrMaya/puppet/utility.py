@@ -41,19 +41,19 @@ def create_expose_rotation(source_object, aim_axis = 'X', up_axis = 'Y', flip = 
     z = 0
 
     if aim_axis == 'X':
-        pitch_linear_axis = up_axis
+        pitch_linear_axis = up_axis.upper()
         yaw_linear_axis = 'Z' if up_axis == 'Y' else 'Y'
         x = 1
         y = 0
         z = 0
     elif aim_axis == 'Y':
-        pitch_linear_axis = up_axis
+        pitch_linear_axis = up_axis.upper()
         yaw_linear_axis = 'X' if up_axis == 'Z' else 'Z'
         x = 0
         y = 1
         z = 0
     elif aim_axis == 'Z':
-        pitch_linear_axis = up_axis
+        pitch_linear_axis = up_axis.upper()
         yaw_linear_axis = 'Y' if up_axis == 'X' else 'X'
         x = 0
         y = 0
@@ -115,12 +115,13 @@ def create_expose_rotation(source_object, aim_axis = 'X', up_axis = 'Y', flip = 
     pitch_uc_node.attr('output') >> source_object.attr('pitch')
 
     # EXPRESSION
+    # asin double -1.0 from attr (pitch) will throw exp error, solutions > clamp it
     expression_script = ''
     expression_script += 'vector $vecB = <<{},{},{}>>;\n'.format(*[o * multiply for o in [x, y, z]])
     expression_script += 'vector $vecJ = <<{},{},{}>>;\n'.format(*pmm_node.output.children())
     expression_script += 'float $bendAngle = acos(clamp(-1.0, 1.0, dot($vecB, $vecJ)));\n'
     expression_script += 'float $yaw = asin(clamp(-1.0, 1.0, {}.yawLinear));\n'.format(expose_rot.nodeName())
-    expression_script += 'float $pitch = asin({}.pitchLinear);\n'.format(expose_rot.nodeName())
+    expression_script += 'float $pitch = asin(clamp(-1.0, 1.0, {}.pitchLinear));\n'.format(expose_rot.nodeName())
     expression_script += 'float $sumAngle = abs($yaw) + abs($pitch);\n\n'
     expression_script += 'if($sumAngle > 1.0e-07)\n'
     expression_script += '{\n'
