@@ -279,6 +279,7 @@ def create_corrective_joint(inf_joint):
 def duplicate_joint_hierarchy(joint_node, suffix, parent_jnt = None, search_name = '', replace_name = ''):
     # duplicate the whole joint hierarchy
     # skip if name exist in the scene, should we update the transform to original joint?
+    # TODO: add skip feature
     jnt_name = joint_node.nodeName()
     jnt_name = jnt_name.replace(search_name, replace_name)
     if jnt_name[len(jnt_name) - 1] == '_':
@@ -291,8 +292,10 @@ def duplicate_joint_hierarchy(joint_node, suffix, parent_jnt = None, search_name
         new_jnt = pm.createNode('joint', n = new_name, ss = True)
         new_jnt.setParent(parent_jnt)
 
-    fmc.align(new_jnt, joint_node)
-    fmc.freeze_transform(new_jnt)
+    # joint which has attached to skin cannot be freezed transform
+    if not new_jnt.outputs(type = 'skinCluster'):
+        fmc.align(new_jnt, joint_node)
+        fmc.freeze_transform(new_jnt)
 
     for child_jnt in joint_node.getChildren(type='joint'):
         duplicate_joint_hierarchy(child_jnt, suffix, parent_jnt = new_jnt, search_name = search_name, replace_name = replace_name)
