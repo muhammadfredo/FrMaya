@@ -438,16 +438,18 @@ def fix_shading_engine_intermediate(input_shape_intermediate = None):
     for shape_intermediate in shape_inter_list:
         inter_shd_engine_list = shape_intermediate.shadingGroups()
         inter_connection = shape_intermediate.outputs(type = 'shadingEngine', plugs = True)
-        if inter_shd_engine_list[0].name() == 'initialShadingGroup':
+        if inter_connection:
             shape_intermediate.instObjGroups[0].disconnect(inter_connection[0])
-            continue
+            if inter_shd_engine_list[0].name() == 'initialShadingGroup':
+                continue
 
         # find shape deformed
         shape_deformed = shape_intermediate.getParent().getShape(noIntermediate = True)
         # noninter_shd_engine_list = shape_deformed.shadingGroups()
-        noninter_connection = shape_deformed.outputs(type = 'shadingEngine', plugs = True)
+        noninter_connection = shape_deformed.outputs(type = 'shadingEngine', plugs = True, connections = True)
         if noninter_connection:
-            shape_deformed.instObjGroups[0].disconnect(noninter_connection[0])
+            # [(shape deformed attr source, shading engine attr dest)]
+            noninter_connection[0][0].disconnect(noninter_connection[0][1])
 
         shape_deformed.instObjGroups[0].connect(inter_connection[0])
 
