@@ -131,6 +131,32 @@ def transfer_skincluster(source_object, target_objects, prune_after = False):
 
         if prune_after:
             prune_skincluster(tgt_skin_node)
+
+
+def transfer_vertex_weight(source_vtx, target_vtxs):
+    """Copy the weight of source vertex to target vertices.
+
+    :arg source_vtx: PyNode MeshVertex object transfer source.
+    :type source_vtx: pm.MeshVertex
+    :arg target_vtxs: PyNode MeshVertex objects transfer target.
+    :type target_vtxs: list of pm.MeshVertex
+    :rtype: None
+    """
+    # NOTE: selection on vertex is weird, careful!
+    # NOTE: its backward, I select vertex [2565, 2285], but it comes out as [2285, 2565]
+    src_object = source_vtx.node()
+    skin_node = get_skincluster_node(src_object)
+
+    inf_list = skin_node.getInfluence()
+    val_list = pm.skinPercent(skin_node, source_vtx, q=1, v=1)
+
+    pm.skinPercent(
+        skin_node,
+        target_vtxs,
+        normalize = False,
+        zeroRemainingInfluences = True,
+        transformValue = zip(inf_list, val_list)
+    )
 # endregion
 
 
