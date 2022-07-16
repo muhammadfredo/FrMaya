@@ -74,6 +74,7 @@ from .rig import (
     set_attrs_default,
     split_joint,
     transfer_skincluster,
+    transfer_vertex_weight,
 )
 from .scene import (
     clean_anim_layer,
